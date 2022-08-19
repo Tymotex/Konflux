@@ -1,5 +1,6 @@
 # Konflux
 
+[View the Figma prototype](https://www.figma.com/file/E6o0Sv89AQKycuUQGApd7L/Konflux?node-id=0%3A1)
 
 Firebase realtime database data model:
 ```json

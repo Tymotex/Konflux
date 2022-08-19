@@ -1,0 +1,36 @@
+@import "../styles/variables.scss";
+
+.heading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: $spacing-lg;
+    height: 100px;
+
+    .appName {
+        display: block;
+        height: fit-content;
+        font-size: $font-size-lg;
+        font-weight: lighter;
+    }
+
+    .logo {
+        height: $font-size-lg;
+        width: auto;
+    }
+}
+
+.slogan {
+    text-align: center;
+    color: $grey-500;
+    font-size: $font-size-md;
+    font-weight: lighter;
+}
+
+.featureRequest {
+    color: $primary-500;
+    margin: $spacing-lg auto;
+    width: fit-content;
+    text-align: center;
+    border-bottom: 2px dotted $primary-500;
+}
