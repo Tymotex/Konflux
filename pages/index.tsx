@@ -1,9 +1,11 @@
+import { Button } from "components/button";
 import { PageTransition } from "components/page-transition";
 import { motion } from "framer-motion";
 import type { NextPage } from "next";
 import Link from "next/link";
 import Logo from "public/logo.svg";
 import styles from "./index.module.scss";
+import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
 
 const Home: NextPage = () => {
     return (
@@ -20,12 +22,24 @@ const Home: NextPage = () => {
                     Request a feature.
                 </Link>
             </aside>
-            <Link scroll={false} href="/new">
-                <button>Start planning</button>
-            </Link>
-            <Link scroll={false} href="/events">
-                <button>See your events</button>
-            </Link>
+            <div className={styles.callToAction}>
+                <Button
+                    text="Start Planning"
+                    internalUrl="/new"
+                    shape="pill"
+                    size="lg"
+                    icon={<ArrowRight />}
+                    iconInset
+                />
+                <Button
+                    text="See Your Events"
+                    internalUrl="/events"
+                    colour="secondary"
+                    shape="pill"
+                >
+                    See your events
+                </Button>
+            </div>
         </PageTransition>
     );
 };

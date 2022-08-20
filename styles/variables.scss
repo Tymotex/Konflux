@@ -21,6 +21,9 @@ $margin-lg: 24px;
 $margin-xl: 32px;
 $margin-2xl: 48px;
 $margin-3xl: 64px;
+$margin-4xl: 96px;
+$margin-5xl: 120px;
+$margin-6xl: 196px;
 
 $line-height-xs: 8px;
 $line-height-sm: 16px;
@@ -131,3 +134,18 @@ $secondary-600: $green-600;
 $secondary-700: $green-700;
 $secondary-800: $green-800;
 $secondary-900: $green-900;
+
+// ━━━━━ Text ━━━━━
+$text-black: rgb(0 0 0);
+$text-white: rgb(255 255 255);
+
+$text-50: rgb(248 250 252);
+$text-100: rgb(241 245 249);
+$text-200: rgb(226 232 240);
+$text-300: rgb(203 213 225);
+$text-400: rgb(148 163 184);
+$text-500: rgb(100 116 139);
+$text-600: rgb(71 85 105);
+$text-700: rgb(51 65 85);
+$text-800: rgb(30 41 59);
+$text-900: rgb(15 23 42);

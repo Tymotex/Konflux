@@ -28,9 +28,19 @@
 }
 
 .featureRequest {
-    color: $secondary-500;
+    color: $primary-400;
     margin: $spacing-lg auto;
     width: fit-content;
     text-align: center;
-    border-bottom: 1px dotted $secondary-500;
+    border-bottom: 1px dotted $primary-300;
+}
+
+.callToAction {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    row-gap: $spacing-md;
+
+    margin-top: $margin-6xl;
 }
