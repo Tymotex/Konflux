@@ -67,12 +67,12 @@ const Home: NextPage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             // TODO: remove or move:
-                            style={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translateX(-50%) translateY(-50%)",
-                            }}
+                            // style={{
+                            //     position: "absolute",
+                            //     top: "50%",
+                            //     left: "50%",
+                            //     transform: "translateX(-50%) translateY(-50%)",
+                            // }}
                         >
                             <label htmlFor="event-name">Event Name</label>
                             <input
