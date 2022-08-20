@@ -36,9 +36,7 @@ const Home: NextPage = () => {
                     internalUrl="/events"
                     colour="secondary"
                     shape="pill"
-                >
-                    See your events
-                </Button>
+                />
             </div>
         </PageTransition>
     );

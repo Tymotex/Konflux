@@ -1,4 +1,5 @@
 import "../styles/globals.scss";
+import "components/day-selector/DaySelector.scss";
 import type { AppProps } from "next/app";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/router";

@@ -10,10 +10,13 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@types/react-calendar": "^3.5.2",
+    "date-fns": "^2.29.2",
     "firebase": "^9.9.3",
     "framer-motion": "^7.2.0",
     "next": "12.2.5",
     "react": "18.2.0",
+    "react-calendar": "^3.7.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
     "sass": "^1.54.4"
