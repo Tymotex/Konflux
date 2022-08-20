@@ -1,10 +1,11 @@
+import { PageTransition } from "components/page-transition";
 import type { NextPage } from "next";
 
 const Home: NextPage = () => {
     return (
-        <div>
+        <PageTransition>
             <h1>Events</h1>
-        </div>
+        </PageTransition>
     );
 };
 
