@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 import styles from "./DaySelector.module.scss";
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
@@ -6,8 +12,6 @@ import weekday from "dayjs/plugin/weekday";
 // Make the Weekday plugin available through `dayjs`.
 // See: https://day.js.org/docs/en/plugin/weekday.
 dayjs.extend(weekday);
-
-interface Props {}
 
 // TODO: in .scss, clear out magic numbers as much as possible.
 // TODO: write some Jest unit tests for these utilities.
@@ -152,21 +156,27 @@ const getCalendarDays = (
     ];
 };
 
-const DaySelector: React.FC<Props> = () => {
+interface Props {
+    selectedDays: Set<string>;
+    setSelectedDays: Dispatch<SetStateAction<Set<string>>>;
+}
+
+const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
+    // The days to be displayed on the calendar. By default, we start by showing
+    // the days of the current month.
     const [days, setDays] = useState<Day[]>(
         getCalendarDays(INITIAL_YEAR, INITIAL_MONTH),
     );
     const [displayYear, setDisplayYear] = useState<string>(INITIAL_YEAR);
     const [displayMonth, setDislayMonth] = useState<string>(INITIAL_MONTH);
 
-    // TODO: idea: maintain an unordered set of selected days. Let the timetabler be responsible for taking in this set and creating an array of contiguous time intervals.
-
-    console.log(days);
-
+    // When the user sets a different month in the calendar, rerender the day
+    // grid.
     useEffect(() => {
         setDays(getCalendarDays(displayYear, displayMonth));
     }, [displayMonth, displayYear]);
 
+    // Show the days of the previous month.
     const renderPrevMonth = useCallback(() => {
         setDislayMonth((m) => {
             if (Number(m) === 1) {
@@ -178,6 +188,7 @@ const DaySelector: React.FC<Props> = () => {
         });
     }, []);
 
+    // Show the days of the next month.
     const renderNextMonth = useCallback(() => {
         setDislayMonth((m) => {
             if (Number(m) === 12) {
@@ -188,6 +199,21 @@ const DaySelector: React.FC<Props> = () => {
             }
         });
     }, []);
+
+    // Toggles whether the given date is selected.
+    // Expects the string to be of the universal ISO format: "YYYY-MM-DD".
+    const toggleDaySelection = useCallback(
+        (date: string) => {
+            const newSelectedDays = new Set(selectedDays);
+            if (newSelectedDays.has(date)) {
+                newSelectedDays.delete(date);
+            } else {
+                newSelectedDays.add(date);
+            }
+            setSelectedDays(newSelectedDays);
+        },
+        [selectedDays, setSelectedDays],
+    );
 
     return (
         <div className={styles.calendarMonth}>
@@ -214,18 +240,22 @@ const DaySelector: React.FC<Props> = () => {
 
             {/* Calendar grid */}
             <ol className={styles.dayGrid}>
-                {days?.map((day) => (
-                    <li
-                        className={`${styles.day} ${
-                            !day.isCurrentMonth && styles.notCurrentMonth
-                        }`}
-                        key={day.date.format("YYYY-MM-DD")}
-                    >
-                        <span className={styles.number}>
-                            {day.date.format("DD")}
-                        </span>
-                    </li>
-                ))}
+                {days?.map((day) => {
+                    const dateStr = day.date.format("YYYY-MM-DD");
+                    return (
+                        <li
+                            className={`${styles.day} ${
+                                !day.isCurrentMonth && styles.notCurrentMonth
+                            } ${selectedDays.has(dateStr) && styles.selected}`}
+                            key={dateStr}
+                            onClick={() => toggleDaySelection(dateStr)}
+                        >
+                            <span className={styles.number}>
+                                {day.date.format("D")}
+                            </span>
+                        </li>
+                    );
+                })}
             </ol>
         </div>
     );

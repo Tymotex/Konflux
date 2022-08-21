@@ -82,6 +82,10 @@ $cell-min-height: 80px;
                 color: $grey-400;
                 background-color: $grey-300;
             }
+
+            &.selected {
+                background-color: yellow;
+            }
         }
     }
 }

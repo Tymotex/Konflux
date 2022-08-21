@@ -11,6 +11,12 @@ const Home: NextPage = () => {
     const eventNameInput = useRef<HTMLInputElement>(null);
     const [eventCreated, setEventCreated] = useState<boolean>(false);
 
+    // An unordered set of date strings of the universal ISO format "YYYY-MM-DD"
+    // selected by the user.
+    const [selectedDays, setSelectedDays] = useState<Set<string>>(
+        new Set<string>(),
+    );
+
     // Handle the creation of an event.
     const createEvent = useCallback((e: FormEvent) => {
         e.preventDefault();
@@ -81,7 +87,15 @@ const Home: NextPage = () => {
                                 type="text"
                                 placeholder="Eg. Math group study"
                             />
-                            <DaySelector />
+                            <DaySelector
+                                selectedDays={selectedDays}
+                                setSelectedDays={setSelectedDays}
+                            />
+                            <ul>
+                                {Array.from(selectedDays).map((date) => (
+                                    <li key={date}>{date}</li>
+                                ))}
+                            </ul>
                             <Timetable />
                         </motion.div>
                     )}
