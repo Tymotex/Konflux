@@ -8,6 +8,7 @@ $cell-min-height: 80px;
     background-color: $grey-100;
     border: 1px solid $grey-500;
     max-width: 600px;
+    user-select: none;
 
     .header {
         display: flex;
@@ -78,13 +79,37 @@ $cell-min-height: 80px;
                 height: 20px;
             }
 
+            // The calendar will render all days in the selected month, however
+            // it will also render days from the previous and next month to
+            // fill the first and last rows. This class is applied to those
+            // filler days, not in the current month.
             &.notCurrentMonth {
                 color: $grey-400;
                 background-color: $grey-300;
             }
 
+            // When the user is attempted to select a range, we should show them
+            // which days are part of that range.
+            @mixin in-range {
+                background-color: gold;
+                font-weight: bold;
+            }
+            &.inSelectionRange {
+                @include in-range;
+            }
+
+            &:active {
+                @include in-range;
+            }
+
+            // When a day is selected for consideration:
             &.selected {
                 background-color: yellow;
+
+                // When a selected day is clicked on:
+                &:active {
+                    background: white;
+                }
             }
         }
     }

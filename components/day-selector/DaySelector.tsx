@@ -8,6 +8,7 @@ import React, {
 import styles from "./DaySelector.module.scss";
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
+import { toast } from "react-toastify";
 
 // Make the Weekday plugin available through `dayjs`.
 // See: https://day.js.org/docs/en/plugin/weekday.
@@ -170,8 +171,54 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
     const [displayYear, setDisplayYear] = useState<string>(INITIAL_YEAR);
     const [displayMonth, setDislayMonth] = useState<string>(INITIAL_MONTH);
 
+    // The user can select a range of days by pressing down on a starting day
+    // then dragging their mouse and lifting up on an ending day on the
+    // calendar.
+    // While this is happening, we track 3 state variables to help us determine
+    // which cells to apply styling to and what days should be added to the
+    // `selectedDays` set:
+    //   1. `isSelectingRange` which becomes true onMouseLeave from a starting
+    //      day.
+    //   2. `rangeStartDate` which is starting day of the range (where the
+    //      user's mouse started and exited.
+    //      Universal ISO format("YYYY-MM-DD").
+    //   3. The last hovered day of the range.
+    //      Universal ISO format("YYYY-MM-DD").
+    const [isSelectingRange, setIsSelectingRange] = useState<boolean>(false);
+    const [rangeStartDate, setRangeStartDate] = useState<string>("");
+    const [rangeEndDate, setRangeEndDate] = useState<string>("");
+
+    // When the user is selecting a range and lifts up their finger anywhere on
+    // the <body>, add the selected ranges to the `selectedDays`.
+    // When the user's mouse exits the <body>, just abort the range selection.
+    useEffect(() => {
+        const commitRangeSelection = () => {
+            // toast.success("Committing range selection");
+            setIsSelectingRange(false);
+            setRangeStartDate("");
+            setRangeEndDate("");
+        };
+        const abortRangeSelection = () => {
+            setIsSelectingRange(false);
+            setRangeStartDate("");
+            setRangeEndDate("");
+        };
+
+        const body = document.querySelector("body");
+        if (!body) {
+            toast.error("Fatal error. Document body not found");
+            return;
+        }
+        body.addEventListener("mouseup", commitRangeSelection);
+        body.addEventListener("mouseleave", abortRangeSelection);
+        return () => {
+            body.removeEventListener("mouseup", commitRangeSelection);
+            body.removeEventListener("mouseleave", abortRangeSelection);
+        };
+    }, [setIsSelectingRange, rangeStartDate, rangeEndDate]);
+
     // When the user sets a different month in the calendar, rerender the day
-    // grid.
+    // grid to show the days of that new display month.
     useEffect(() => {
         setDays(getCalendarDays(displayYear, displayMonth));
     }, [displayMonth, displayYear]);
@@ -215,49 +262,101 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
         [selectedDays, setSelectedDays],
     );
 
+    // TODO: documentation
+    const beginSelectingRange = useCallback(
+        (startDate: string) => {
+            setIsSelectingRange(true);
+            setRangeStartDate(startDate);
+        },
+        [setIsSelectingRange, setRangeStartDate],
+    );
+
+    // TODO: documentation
+    const isInRangeSelection = useCallback(
+        (thisDate: string) => {
+            if (!(rangeStartDate && rangeEndDate)) return false;
+            return rangeStartDate <= thisDate && thisDate <= rangeEndDate;
+            // TODO: Remove:
+            // console.log(
+            //     `Checking if ${rangeStartDate} <= ${thisDate} <= ${rangeEndDate}: `,
+            //     dayjs(rangeStartDate).isBefore(thisDate) &&
+            //         dayjs(rangeEndDate).isAfter(thisDate),
+            // );
+            // return (
+            //     dayjs(rangeStartDate).isBefore(thisDate) &&
+            //     dayjs(rangeEndDate).isAfter(thisDate)
+            // );
+        },
+        [rangeStartDate, rangeEndDate],
+    );
+
     return (
-        <div className={styles.calendarMonth}>
-            {/* Calendar header */}
-            <section className={styles.header}>
-                <div className={styles.selectedMonth}>
-                    {dayjs(`${displayYear}-${displayMonth}-01`).format(
-                        "MMM YYYY",
-                    )}
-                </div>
-                {/* Paginator */}
-                <div className={styles.monthSelector}>
-                    <span onClick={renderPrevMonth}>←</span>
-                    <span onClick={renderNextMonth}>→</span>
-                </div>
-            </section>
+        <>
+            <div className={styles.calendarMonth}>
+                {/* Calendar header */}
+                <section className={styles.header}>
+                    <div className={styles.selectedMonth}>
+                        {dayjs(`${displayYear}-${displayMonth}-01`).format(
+                            "MMM YYYY",
+                        )}
+                    </div>
+                    {/* Paginator */}
+                    <div className={styles.monthSelector}>
+                        <span onClick={renderPrevMonth}>←</span>
+                        <span onClick={renderNextMonth}>→</span>
+                    </div>
+                </section>
 
-            {/* Calendar days of week bar */}
-            <ol className={styles.daysOfWeek}>
-                {WEEKDAYS.map((weekday) => (
-                    <li key={weekday}>{weekday}</li>
-                ))}
-            </ol>
+                {/* Calendar days of week bar */}
+                <ol className={styles.daysOfWeek}>
+                    {WEEKDAYS.map((weekday) => (
+                        <li key={weekday}>{weekday}</li>
+                    ))}
+                </ol>
 
-            {/* Calendar grid */}
-            <ol className={styles.dayGrid}>
-                {days?.map((day) => {
-                    const dateStr = day.date.format("YYYY-MM-DD");
-                    return (
-                        <li
-                            className={`${styles.day} ${
-                                !day.isCurrentMonth && styles.notCurrentMonth
-                            } ${selectedDays.has(dateStr) && styles.selected}`}
-                            key={dateStr}
-                            onClick={() => toggleDaySelection(dateStr)}
-                        >
-                            <span className={styles.number}>
-                                {day.date.format("D")}
-                            </span>
-                        </li>
-                    );
-                })}
-            </ol>
-        </div>
+                {/* Calendar grid */}
+                <ol className={styles.dayGrid}>
+                    {days?.map((day) => {
+                        const dateStr = day.date.format("YYYY-MM-DD");
+                        return (
+                            <li
+                                className={`${styles.day} ${
+                                    !day.isCurrentMonth
+                                        ? styles.notCurrentMonth
+                                        : ""
+                                } ${
+                                    selectedDays.has(dateStr)
+                                        ? styles.selected
+                                        : ""
+                                } ${
+                                    isInRangeSelection(dateStr)
+                                        ? styles.inSelectionRange
+                                        : ""
+                                }`}
+                                key={dateStr}
+                                onClick={() => toggleDaySelection(dateStr)}
+                                onMouseLeave={(e) => {
+                                    if (e.buttons === 1 && !isSelectingRange) {
+                                        beginSelectingRange(dateStr);
+                                        toast.success("SELECTING RANGE");
+                                    }
+                                }}
+                                onMouseEnter={() => {
+                                    setRangeEndDate(dateStr);
+                                }}
+                            >
+                                <span className={styles.number}>
+                                    {day.date.format("D")}
+                                </span>
+                            </li>
+                        );
+                    })}
+                </ol>
+            </div>
+            <pre>Selecting? {isSelectingRange ? "YES" : "NO"}</pre>
+            <pre>Start: {"    " + rangeStartDate?.slice(-2)}</pre>
+            <pre>End: {"      " + rangeEndDate?.slice(-2)}</pre>
+        </>
     );
 };
 
