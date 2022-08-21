@@ -3,31 +3,43 @@
 $grid-gap: 1px;
 $cell-min-height: 80px;
 
+// Colours:
+$default-bg-colour: white;
+$selected-bg-colour: $primary-500;
+$selected-text-colour: $text-100;
+$selection-indicator-bg-colour: $primary-300;
+$selection-indiciator-text-colour: $text-200;
+$deselection-indiciator-bg-colour: $grey-200;
+$deselection-indiciator-text-colour: $text-700;
+$not-current-month-bg-colour: $grey-100;
+
 .calendarMonth {
     position: relative;
     background-color: $grey-100;
-    border: 1px solid $grey-500;
     user-select: none;
 
     .header {
         display: flex;
-        justify-content: space-between;
+        justify-content: space-around;
+        align-items: center;
         background-color: $grey-200;
         padding: $spacing-sm;
 
         .selectedMonth {
             font-size: $font-size-md;
             font-weight: bold;
+            max-width: 150px;
+            width: 100%;
+            text-align: center;
         }
-        .monthSelector {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 120px;
 
-            * {
-                cursor: pointer;
-            }
+        .prevMonthButton {
+            font-size: $font-size-md;
+            cursor: pointer;
+        }
+        .nextMonthButton {
+            font-size: $font-size-md;
+            cursor: pointer;
         }
     }
 
@@ -49,6 +61,8 @@ $cell-min-height: 80px;
     }
 
     .dayGrid {
+        // Show 7 equally sized columns for aligning days to monday, tuesday,
+        // ... and so on.
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         grid-column-gap: $grid-gap;
@@ -65,7 +79,7 @@ $cell-min-height: 80px;
             position: relative;
             min-height: $cell-min-height;
             font-size: $font-size-sm;
-            background: white;
+            background: $default-bg-colour;
             border: 1px solid rgba($grey-500, 0.2);
 
             .number {
@@ -83,18 +97,19 @@ $cell-min-height: 80px;
             // fill the first and last rows. This class is applied to those
             // filler days, not in the current month.
             &.notCurrentMonth {
-                color: $grey-400;
-                background-color: $grey-300;
+                background-color: $not-current-month-bg-colour;
             }
 
             // When the user is attempted to select a range, we should show them
             // which days are part of that range.
             @mixin in-selection-range {
-                background-color: gold;
+                background-color: $selection-indicator-bg-colour;
+                color: $selection-indiciator-text-colour;
                 font-weight: bold;
             }
             @mixin in-deselection-range {
-                background-color: $grey-100;
+                background-color: $deselection-indiciator-bg-colour;
+                color: $deselection-indiciator-text-colour;
                 font-weight: bold;
             }
 
@@ -106,7 +121,8 @@ $cell-min-height: 80px;
 
             // When a day is selected for consideration:
             &.selected {
-                background-color: yellow;
+                background-color: $selected-bg-colour;
+                color: $selected-text-colour;
 
                 // When a selected day is clicked on:
                 &.pressed {

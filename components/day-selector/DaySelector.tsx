@@ -7,6 +7,10 @@ import React, {
 } from "react";
 import styles from "./DaySelector.module.scss";
 import { toast } from "react-toastify";
+import {
+    FaChevronCircleLeft as LeftIcon,
+    FaChevronCircleRight as RightIcon,
+} from "react-icons/fa";
 import dayjs, { Dayjs } from "dayjs";
 import {
     getCalendarDays,
@@ -15,7 +19,6 @@ import {
     INITIAL_YEAR,
 } from "./calendar-utils";
 
-// TODO: in .scss, clear out magic numbers as much as possible.
 // TODO: write some Jest unit tests for these utilities.
 
 interface Day {
@@ -219,16 +222,17 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
             <div className={styles.calendarMonth}>
                 {/* Calendar header */}
                 <section className={styles.header}>
+                    <span onClick={renderPrevMonth}>
+                        <LeftIcon className={styles.prevMonthButton} />
+                    </span>
                     <div className={styles.selectedMonth}>
                         {dayjs(`${displayYear}-${displayMonth}-01`).format(
                             "MMM YYYY",
                         )}
                     </div>
-                    {/* Paginator */}
-                    <div className={styles.monthSelector}>
-                        <span onClick={renderPrevMonth}>←</span>
-                        <span onClick={renderNextMonth}>→</span>
-                    </div>
+                    <span onClick={renderNextMonth}>
+                        <RightIcon className={styles.nextMonthButton} />
+                    </span>
                 </section>
 
                 {/* Calendar days of week bar */}
