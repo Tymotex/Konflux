@@ -17,15 +17,8 @@ import {
     WEEKDAYS,
     INITIAL_MONTH,
     INITIAL_YEAR,
+    Day,
 } from "./calendar-utils";
-
-// TODO: write some Jest unit tests for these utilities.
-
-interface Day {
-    date: Dayjs;
-    dayOfMonth: number;
-    isCurrentMonth: boolean;
-}
 
 interface Props {
     selectedDays: Set<string>;
@@ -126,6 +119,9 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
         setIsDeselectingRange,
         rangeStartDate,
         rangeEndDate,
+        isSelectingRange,
+        resetRangeTrackingState,
+        setSelectedDays,
     ]);
 
     // When the user sets a different month in the calendar, rerender the day
@@ -198,7 +194,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
             if (isLeftClicking && notTrackingRange)
                 beginSelectingRange(dateStr);
         },
-        [isSelectingRange, isDeselectingRange],
+        [isSelectingRange, isDeselectingRange, beginSelectingRange],
     );
 
     // Determines whether the given date (in the universal ISO format,

@@ -9,6 +9,12 @@ export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const INITIAL_YEAR = dayjs().format("YYYY");
 export const INITIAL_MONTH = dayjs().format("M");
 
+export interface Day {
+    date: Dayjs;
+    dayOfMonth: number;
+    isCurrentMonth: boolean;
+}
+
 /**
  * Determines how many days there are in the given year's given month. For
  * example, there are 31 days in August 2022.
