@@ -90,16 +90,19 @@ $cell-min-height: 80px;
 
             // When the user is attempted to select a range, we should show them
             // which days are part of that range.
-            @mixin in-range {
+            @mixin in-selection-range {
                 background-color: gold;
                 font-weight: bold;
             }
-            &.inSelectionRange {
-                @include in-range;
+            @mixin in-deselection-range {
+                background-color: $grey-100;
+                font-weight: bold;
             }
 
-            &:active {
-                @include in-range;
+            &.notSelected {
+                &.pressed {
+                    @include in-selection-range;
+                }
             }
 
             // When a day is selected for consideration:
@@ -107,9 +110,17 @@ $cell-min-height: 80px;
                 background-color: yellow;
 
                 // When a selected day is clicked on:
-                &:active {
-                    background: white;
+                &.pressed {
+                    @include in-deselection-range;
                 }
+            }
+
+            &.inSelectionRange {
+                @include in-selection-range;
+            }
+
+            &.inDeselectionRange {
+                @include in-deselection-range;
             }
         }
     }

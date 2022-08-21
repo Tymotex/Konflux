@@ -185,6 +185,8 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
     //   3. The last hovered day of the range.
     //      Universal ISO format("YYYY-MM-DD").
     const [isSelectingRange, setIsSelectingRange] = useState<boolean>(false);
+    const [isDeselectingRange, setIsDeselectingRange] =
+        useState<boolean>(false);
     const [rangeStartDate, setRangeStartDate] = useState<string>("");
     const [rangeEndDate, setRangeEndDate] = useState<string>("");
 
@@ -193,13 +195,32 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
     // When the user's mouse exits the <body>, just abort the range selection.
     useEffect(() => {
         const commitRangeSelection = () => {
-            // toast.success("Committing range selection");
+            const newSelectedDays = new Set(selectedDays);
+            const endDay = dayjs(
+                rangeEndDate >= rangeStartDate ? rangeEndDate : rangeStartDate,
+            );
+            let currDay = dayjs(
+                rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate,
+            );
+
+            while (currDay.isBefore(endDay) || currDay.isSame(endDay)) {
+                if (isSelectingRange)
+                    newSelectedDays.add(currDay.format("YYYY-MM-DD"));
+                else newSelectedDays.delete(currDay.format("YYYY-MM-DD"));
+                currDay = currDay.add(1, "day");
+            }
+
+            setSelectedDays(newSelectedDays);
+            toast.success("Committing range selection");
+
             setIsSelectingRange(false);
+            setIsDeselectingRange(false);
             setRangeStartDate("");
             setRangeEndDate("");
         };
         const abortRangeSelection = () => {
             setIsSelectingRange(false);
+            setIsDeselectingRange(false);
             setRangeStartDate("");
             setRangeEndDate("");
         };
@@ -215,7 +236,13 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
             body.removeEventListener("mouseup", commitRangeSelection);
             body.removeEventListener("mouseleave", abortRangeSelection);
         };
-    }, [setIsSelectingRange, rangeStartDate, rangeEndDate]);
+    }, [
+        selectedDays,
+        setIsSelectingRange,
+        setIsDeselectingRange,
+        rangeStartDate,
+        rangeEndDate,
+    ]);
 
     // When the user sets a different month in the calendar, rerender the day
     // grid to show the days of that new display month.
@@ -265,27 +292,28 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
     // TODO: documentation
     const beginSelectingRange = useCallback(
         (startDate: string) => {
-            setIsSelectingRange(true);
+            if (!selectedDays.has(startDate)) setIsSelectingRange(true);
+            else setIsDeselectingRange(true);
+
             setRangeStartDate(startDate);
         },
-        [setIsSelectingRange, setRangeStartDate],
+        [
+            selectedDays,
+            setIsSelectingRange,
+            setIsDeselectingRange,
+            setRangeStartDate,
+        ],
     );
 
     // TODO: documentation
     const isInRangeSelection = useCallback(
         (thisDate: string) => {
             if (!(rangeStartDate && rangeEndDate)) return false;
-            return rangeStartDate <= thisDate && thisDate <= rangeEndDate;
-            // TODO: Remove:
-            // console.log(
-            //     `Checking if ${rangeStartDate} <= ${thisDate} <= ${rangeEndDate}: `,
-            //     dayjs(rangeStartDate).isBefore(thisDate) &&
-            //         dayjs(rangeEndDate).isAfter(thisDate),
-            // );
-            // return (
-            //     dayjs(rangeStartDate).isBefore(thisDate) &&
-            //     dayjs(rangeEndDate).isAfter(thisDate)
-            // );
+            const earlierDate =
+                rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate;
+            const laterDate =
+                rangeStartDate <= rangeEndDate ? rangeEndDate : rangeStartDate;
+            return earlierDate <= thisDate && thisDate <= laterDate;
         },
         [rangeStartDate, rangeEndDate],
     );
@@ -327,19 +355,31 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
                                 } ${
                                     selectedDays.has(dateStr)
                                         ? styles.selected
-                                        : ""
+                                        : styles.notSelected
                                 } ${
                                     isInRangeSelection(dateStr)
-                                        ? styles.inSelectionRange
+                                        ? isDeselectingRange
+                                            ? styles.inDeselectionRange
+                                            : styles.inSelectionRange
                                         : ""
                                 }`}
                                 key={dateStr}
                                 onClick={() => toggleDaySelection(dateStr)}
                                 onMouseLeave={(e) => {
-                                    if (e.buttons === 1 && !isSelectingRange) {
+                                    if (
+                                        e.buttons === 1 &&
+                                        !(
+                                            isSelectingRange ||
+                                            isDeselectingRange
+                                        )
+                                    ) {
                                         beginSelectingRange(dateStr);
-                                        toast.success("SELECTING RANGE");
                                     }
+                                }}
+                                onMouseDown={(e) => {
+                                    const thisElem =
+                                        e.target as HTMLUListElement;
+                                    thisElem.classList.add(styles.pressed);
                                 }}
                                 onMouseEnter={() => {
                                     setRangeEndDate(dateStr);
@@ -354,6 +394,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
                 </ol>
             </div>
             <pre>Selecting? {isSelectingRange ? "YES" : "NO"}</pre>
+            <pre>Deselect? {isDeselectingRange ? "YES" : "NO"}</pre>
             <pre>Start: {"    " + rangeStartDate?.slice(-2)}</pre>
             <pre>End: {"      " + rangeEndDate?.slice(-2)}</pre>
         </>
