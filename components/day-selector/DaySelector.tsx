@@ -6,156 +6,23 @@ import React, {
     useState,
 } from "react";
 import styles from "./DaySelector.module.scss";
-import dayjs, { Dayjs } from "dayjs";
-import weekday from "dayjs/plugin/weekday";
 import { toast } from "react-toastify";
-
-// Make the Weekday plugin available through `dayjs`.
-// See: https://day.js.org/docs/en/plugin/weekday.
-dayjs.extend(weekday);
+import dayjs, { Dayjs } from "dayjs";
+import {
+    getCalendarDays,
+    WEEKDAYS,
+    INITIAL_MONTH,
+    INITIAL_YEAR,
+} from "./calendar-utils";
 
 // TODO: in .scss, clear out magic numbers as much as possible.
 // TODO: write some Jest unit tests for these utilities.
-// TODO: Move these utilities and constants to a separate .ts file
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const INITIAL_YEAR = dayjs().format("YYYY");
-const INITIAL_MONTH = dayjs().format("M");
 
 interface Day {
     date: Dayjs;
     dayOfMonth: number;
     isCurrentMonth: boolean;
 }
-
-/**
- * Determines how many days there are in the given year's given month. For
- * example, there are 31 days in August 2022.
- * @param year
- * @param month
- * @returns
- * @example
- * const numDays = getNumberofDaysInMonth('2022', '08');
- */
-const getNumberOfDaysInMonth = (year: string, month: string): number =>
-    dayjs(`${year}-${month}-01`).daysInMonth();
-
-/**
- * Forms a list of days in the given year & month.
- * @param year
- * @param month
- * @returns Array of days in the month
- * @example
- * const days = getAllDaysInMonth('2022', '08');
- */
-const getAllDaysInMonth = (year: string, month: string): Day[] => {
-    return [...Array(getNumberOfDaysInMonth(year, month))].map((_, day) => ({
-        date: dayjs(`${year}-${month}-${day + 1}`),
-        dayOfMonth: day + 1,
-        isCurrentMonth: true,
-    }));
-};
-
-/**
- * Returns the date's day in the week. For example, 2022-07-01 is a Friday, so
- * `getWeekday` would return 4.
- * @param date
- * @returns a number in range [0, 6] representing Monday to Sunday.
- * @example
- * const dayOfWeek = getWeekday(new Date());
- */
-const getWeekday = (date: Dayjs): number => {
-    // Dayjs actually returns a number in range [0, 6] with Monday being 1 and
-    // Sunday at 0. We need to normalise this so that Monday is 0 and Sunday is
-    // 6.
-    let weekday = dayjs(date).weekday();
-    if (weekday === 0) weekday = 7;
-    return weekday - 1;
-};
-
-/**
- * Gets an array of what should be the leading days from the previous month to
- * be displayed on the first row of the calendar.
- * Why? If we want to render the days of July 2022, the problem is that the
- * 1st of July starts on a Friday. It's ideal to also show 27th Aug, 28th Aug,
- * 29th Aug and 30th Aug and then 1st of July on the first row. This funciton
- * returns those dates from the previous month.
- * @param year
- * @param month
- * @returns Array of leading days to display on the first row before the first
- * date of the current month.
- * @example
- * const leadingDays = getLeadingDays("2022", "07");
- */
-const getLeadingDays = (year: string, month: string): Day[] => {
-    const firstDayThisMonth = dayjs(`${year}-${month}-01`);
-
-    // If the first day this month is a Friday, then the number of leading days
-    // from the previous month is equal to 4 (the first row should show the last
-    // Mon, Tue, Wed, Thu of the previous month).
-    const numLeadingDays = getWeekday(firstDayThisMonth);
-
-    const prevMonth = firstDayThisMonth.subtract(1, "month");
-
-    // Get the last monday of the previous month's date, a number in the range
-    // [1, 31].
-    const lastMondayOfPrevMonth = firstDayThisMonth
-        .subtract(numLeadingDays, "day")
-        .date();
-
-    return [...Array(numLeadingDays)].map((_, i) => ({
-        date: dayjs(
-            `${prevMonth.year()}-${prevMonth.month() + 1}-${
-                lastMondayOfPrevMonth + i
-            }`,
-        ),
-        dayOfMonth: lastMondayOfPrevMonth + i,
-        isCurrentMonth: false,
-    }));
-};
-
-/**
- * Gets an array of what should be the trailing days in the next month to
- * be displayed on the last row of the calendar for this month.
- * Why? If we want to render the days of August 2022, the problem is that the
- * 31st of August is a Wednesday. It's ideal to also show the days: 1st Sep,
- * 2nd Sep, 3rd Sep, 4th Sep to pad out the last row. This funciton returns
- * those dates in the next month.
- * @param year
- * @param month
- * @returns Array of trailing days to display on the last row after the last
- * date of the current month.
- * @example
- * const trailingDays = getTrailingDays("2022", "08");
- */
-const getTrailingDays = (year: string, month: string): Day[] => {
-    const lastDayThisMonth = dayjs(
-        `${year}-${month}-${getNumberOfDaysInMonth(year, month)}`,
-    );
-
-    // If the last day this month is a Friday, then the number of leading days
-    // from the next month should be 2 (the last row should show the remaining
-    // Saturday and Sunday from next month).
-    const numTrailingDays = 6 - getWeekday(lastDayThisMonth);
-
-    const nextMonth = dayjs(`${year}-${month}-01`).add(1, "month");
-
-    return [...Array(numTrailingDays)].map((_, i) => ({
-        date: dayjs(`${nextMonth.year()}-${nextMonth.month() + 1}-${i + 1}`),
-        dayOfMonth: i + 1,
-        isCurrentMonth: false,
-    }));
-};
-
-const getCalendarDays = (
-    year: string = INITIAL_YEAR,
-    month: string = INITIAL_MONTH,
-): Day[] => {
-    return [
-        ...getLeadingDays(year, month),
-        ...getAllDaysInMonth(year, month),
-        ...getTrailingDays(year, month),
-    ];
-};
 
 interface Props {
     selectedDays: Set<string>;
@@ -190,10 +57,22 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
     const [rangeStartDate, setRangeStartDate] = useState<string>("");
     const [rangeEndDate, setRangeEndDate] = useState<string>("");
 
+    // Resets all range-tracking variables. Should be called after committing or
+    // aborting a range selection/deselection.
+    const resetRangeTrackingState = useCallback(() => {
+        setIsSelectingRange(false);
+        setIsDeselectingRange(false);
+        setRangeStartDate("");
+        setRangeEndDate("");
+    }, []);
+
     // When the user is selecting a range and lifts up their finger anywhere on
     // the <body>, add the selected ranges to the `selectedDays`.
     // When the user's mouse exits the <body>, just abort the range selection.
+    // When the user is deselecting, we go by the same logic, except we remove
+    // days from the `selectedDays` set instead of adding.
     useEffect(() => {
+        // Commits the selected days in the range into the `selectedDays` set.
         const commitRangeSelection = () => {
             const newSelectedDays = new Set(selectedDays);
             const endDay = dayjs(
@@ -204,6 +83,8 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
             );
 
             while (currDay.isBefore(endDay) || currDay.isSame(endDay)) {
+                // Adds or removes selected days if we're selecting or
+                // deselecting respectively.
                 if (isSelectingRange)
                     newSelectedDays.add(currDay.format("YYYY-MM-DD"));
                 else newSelectedDays.delete(currDay.format("YYYY-MM-DD"));
@@ -211,20 +92,20 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
             }
 
             setSelectedDays(newSelectedDays);
-            toast.success("Committing range selection");
-
-            setIsSelectingRange(false);
-            setIsDeselectingRange(false);
-            setRangeStartDate("");
-            setRangeEndDate("");
+            resetRangeTrackingState();
         };
+
+        // Cancel the range selection/deselection by doing nothing and resetting
+        // the range-tracking state.
         const abortRangeSelection = () => {
-            setIsSelectingRange(false);
-            setIsDeselectingRange(false);
-            setRangeStartDate("");
-            setRangeEndDate("");
+            resetRangeTrackingState();
         };
 
+        // Attaching commit/abort functions as handlers to the document body.
+        // We're attaching the mouse events on the body instead of on the
+        // calendar UI since this allows the user to be less precise with their
+        // mouse movement (when they let go of the click outside the calendar
+        // instead of inside it).
         const body = document.querySelector("body");
         if (!body) {
             toast.error("Fatal error. Document body not found");
@@ -289,7 +170,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
         [selectedDays, setSelectedDays],
     );
 
-    // TODO: documentation
+    // Flips on the `isSelectingRange` or `isDeselectingRange` boolean state.
     const beginSelectingRange = useCallback(
         (startDate: string) => {
             if (!selectedDays.has(startDate)) setIsSelectingRange(true);
@@ -305,10 +186,25 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
         ],
     );
 
-    // TODO: documentation
+    // When the user's mouse leaves a day cell while still holding the left
+    // mouse button, begin selecting/deselecting a range of days.
+    const handleMouseLeave = useCallback(
+        (e: React.MouseEvent, dateStr: string) => {
+            const isLeftClicking = e.buttons === 1;
+            const notTrackingRange = !(isSelectingRange || isDeselectingRange);
+            if (isLeftClicking && notTrackingRange)
+                beginSelectingRange(dateStr);
+        },
+        [isSelectingRange, isDeselectingRange],
+    );
+
+    // Determines whether the given date (in the universal ISO format,
+    // 'YYYY-MM-DD') is in the selection/deselection range spanning from
+    // `rangeStartDate` to `rangeEndDate`.
     const isInRangeSelection = useCallback(
         (thisDate: string) => {
             if (!(rangeStartDate && rangeEndDate)) return false;
+
             const earlierDate =
                 rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate;
             const laterDate =
@@ -365,18 +261,11 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
                                 }`}
                                 key={dateStr}
                                 onClick={() => toggleDaySelection(dateStr)}
-                                onMouseLeave={(e) => {
-                                    if (
-                                        e.buttons === 1 &&
-                                        !(
-                                            isSelectingRange ||
-                                            isDeselectingRange
-                                        )
-                                    ) {
-                                        beginSelectingRange(dateStr);
-                                    }
-                                }}
+                                onMouseLeave={(e) =>
+                                    handleMouseLeave(e, dateStr)
+                                }
                                 onMouseDown={(e) => {
+                                    // Apply the `pressed` class to this element.
                                     const thisElem =
                                         e.target as HTMLUListElement;
                                     thisElem.classList.add(styles.pressed);
@@ -393,10 +282,10 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
                     })}
                 </ol>
             </div>
-            <pre>Selecting? {isSelectingRange ? "YES" : "NO"}</pre>
+            {/* <pre>Selecting? {isSelectingRange ? "YES" : "NO"}</pre>
             <pre>Deselect? {isDeselectingRange ? "YES" : "NO"}</pre>
             <pre>Start: {"    " + rangeStartDate?.slice(-2)}</pre>
-            <pre>End: {"      " + rangeEndDate?.slice(-2)}</pre>
+            <pre>End: {"      " + rangeEndDate?.slice(-2)}</pre> */}
         </>
     );
 };
