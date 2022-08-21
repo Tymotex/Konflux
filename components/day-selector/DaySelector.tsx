@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styles from "./DaySelector.module.scss";
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
@@ -132,43 +132,83 @@ const getTrailingDays = (year: string, month: string): Day[] => {
     // Saturday and Sunday from next month).
     const numTrailingDays = 6 - getWeekday(lastDayThisMonth);
 
+    const nextMonth = dayjs(`${year}-${month}-01`).add(1, "month");
+
     return [...Array(numTrailingDays)].map((_, i) => ({
-        date: dayjs(`${year}-${month + 1}-${i + 1}`),
-        dayOfMonth: 1,
+        date: dayjs(`${nextMonth.year()}-${nextMonth.month() + 1}-${i + 1}`),
+        dayOfMonth: i + 1,
         isCurrentMonth: false,
     }));
 };
 
-const getCalendarDays = (): Day[] => {
+const getCalendarDays = (
+    year: string = INITIAL_YEAR,
+    month: string = INITIAL_MONTH,
+): Day[] => {
     return [
-        ...getLeadingDays(INITIAL_YEAR, INITIAL_MONTH),
-        ...getAllDaysInMonth(INITIAL_YEAR, INITIAL_MONTH),
-        ...getTrailingDays(INITIAL_YEAR, INITIAL_MONTH),
+        ...getLeadingDays(year, month),
+        ...getAllDaysInMonth(year, month),
+        ...getTrailingDays(year, month),
     ];
 };
 
 const DaySelector: React.FC<Props> = () => {
-    const [days, setDays] = useState<Day[]>(getCalendarDays());
+    const [days, setDays] = useState<Day[]>(
+        getCalendarDays(INITIAL_YEAR, INITIAL_MONTH),
+    );
+    const [displayYear, setDisplayYear] = useState<string>(INITIAL_YEAR);
+    const [displayMonth, setDislayMonth] = useState<string>(INITIAL_MONTH);
+
+    // TODO: idea: maintain an unordered set of selected days. Let the timetabler be responsible for taking in this set and creating an array of contiguous time intervals.
+
+    console.log(days);
+
+    useEffect(() => {
+        setDays(getCalendarDays(displayYear, displayMonth));
+    }, [displayMonth, displayYear]);
+
+    const renderPrevMonth = useCallback(() => {
+        setDislayMonth((m) => {
+            if (Number(m) === 1) {
+                setDisplayYear((y) => String(Number(y) - 1));
+                return "12";
+            } else {
+                return String(Number(m) - 1);
+            }
+        });
+    }, []);
+
+    const renderNextMonth = useCallback(() => {
+        setDislayMonth((m) => {
+            if (Number(m) === 12) {
+                setDisplayYear((y) => String(Number(y) + 1));
+                return "1";
+            } else {
+                return String(Number(m) + 1);
+            }
+        });
+    }, []);
 
     return (
         <div className={styles.calendarMonth}>
             {/* Calendar header */}
             <section className={styles.header}>
-                <div
-                    className={styles.selectedMonth}
-                >{`${INITIAL_MONTH} ${INITIAL_YEAR}`}</div>
+                <div className={styles.selectedMonth}>
+                    {dayjs(`${displayYear}-${displayMonth}-01`).format(
+                        "MMM YYYY",
+                    )}
+                </div>
                 {/* Paginator */}
                 <div className={styles.monthSelector}>
-                    <span id="prev-month">←</span>
-                    <span id="curr-month">Today</span>
-                    <span id="next-month">→</span>
+                    <span onClick={renderPrevMonth}>←</span>
+                    <span onClick={renderNextMonth}>→</span>
                 </div>
             </section>
 
             {/* Calendar days of week bar */}
             <ol className={styles.daysOfWeek}>
                 {WEEKDAYS.map((weekday) => (
-                    <li>{weekday}</li>
+                    <li key={weekday}>{weekday}</li>
                 ))}
             </ol>
 
@@ -179,6 +219,7 @@ const DaySelector: React.FC<Props> = () => {
                         className={`${styles.day} ${
                             !day.isCurrentMonth && styles.notCurrentMonth
                         }`}
+                        key={day.date.format("YYYY-MM-DD")}
                     >
                         <span className={styles.number}>
                             {day.date.format("DD")}
