@@ -2,9 +2,10 @@ import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
+import { createIntervals } from "components/timetable/timetable-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
-import { FormEvent, useCallback, useRef, useState } from "react";
+import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
 
 const Home: NextPage = () => {
@@ -15,6 +16,11 @@ const Home: NextPage = () => {
     // selected by the user.
     const [selectedDays, setSelectedDays] = useState<Set<string>>(
         new Set<string>(),
+    );
+
+    const timeIntervals = useMemo(
+        () => createIntervals(selectedDays),
+        [selectedDays],
     );
 
     // Handle the creation of an event.
@@ -72,13 +78,6 @@ const Home: NextPage = () => {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            // TODO: remove or move:
-                            // style={{
-                            //     position: "absolute",
-                            //     top: "50%",
-                            //     left: "50%",
-                            //     transform: "translateX(-50%) translateY(-50%)",
-                            // }}
                         >
                             <label htmlFor="event-name">Event Name</label>
                             <input
@@ -91,12 +90,13 @@ const Home: NextPage = () => {
                                 selectedDays={selectedDays}
                                 setSelectedDays={setSelectedDays}
                             />
-                            <ul>
+                            {/* TODO: remove this: */}
+                            {/* <ul>
                                 {Array.from(selectedDays).map((date) => (
                                     <li key={date}>{date}</li>
                                 ))}
-                            </ul>
-                            <Timetable />
+                            </ul> */}
+                            <Timetable timeIntervals={timeIntervals} />
                         </motion.div>
                     )}
                 </AnimatePresence>

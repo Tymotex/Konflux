@@ -6,8 +6,8 @@ Firebase realtime database data model:
 ```json
 {
     "events": {
-        "COMP4128 Group Study": {
-            id: "comp4128-group-study-13ad",
+        "comp4128-group-study-134ca1": {
+            name: "COMP4128 Group Study",
             earliest: "9:00AM",
             latest: "5:00PM",
             days: [
@@ -16,31 +16,33 @@ Firebase realtime database data model:
                     // Array of 48 integers denoting how many responders are
                     // available at a certain 30-min time block, ordered from
                     // 00:00 to 23:59.
-                    filledTimes: [
-                        0,
-                        0,
-                        1,
-                        2,
-                        0,
-                        1,
+                    whoIsAvailable: [
+                        [],                 // 12:00AM
+                        [],                 // 12:30AM
+                        ["Alice"],          // 1:00AM
+                        ["Alice", "Bob"],   // 1:30AM
+                        [],                 // 2:00AM
+                        ["Bob"],            // 2:30AM
                         // ... and so on.
                     ]
                 },
                 // ... and so on for further dates.
             ],
             members: {
-                "Andrew Taylor": {
+                "Alice": {
                     password: "...",            // Optional. Only for this event.
-                    email: "andrew@taylor.com", // Optional. Only for registered members.
+                    email: "alice@gmail.com",   // Optional. Only for registered members.
                     profilePicUrl: "...",       // Optional. Only for registerd members.
                 },
+                "Bob": {
+                }
                 // ...
             }
         },
         "Dinner with Linus Torvalds": {
             // ...
         }
-    }
+    },
 }
 ```
 

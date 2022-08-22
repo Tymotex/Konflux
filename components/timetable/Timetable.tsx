@@ -1,9 +1,20 @@
-import React from "react";
+import React, { useCallback } from "react";
 
-interface Props {}
+export interface DayAvailabilities {
+    date: string;
+    whoIsAvailable: string[][];
+}
 
-const Timetable: React.FC<Props> = () => {
-    return <div>Timetable!!!</div>;
+// Holds an array of contiguous days' availabilities.
+export type TimeInterval = DayAvailabilities[];
+
+interface Props {
+    timeIntervals: TimeInterval[];
+}
+
+const Timetable: React.FC<Props> = ({ timeIntervals }) => {
+    console.log(timeIntervals);
+    return <div></div>;
 };
 
 export default Timetable;
