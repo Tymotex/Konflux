@@ -1,4 +1,6 @@
 import React, { useCallback } from "react";
+import styles from "./Timetable.module.scss";
+import TimetableGrid from "./TimetableGrid";
 
 export interface DayAvailabilities {
     date: string;
@@ -13,8 +15,11 @@ interface Props {
 }
 
 const Timetable: React.FC<Props> = ({ timeIntervals }) => {
-    console.log(timeIntervals);
-    return <div></div>;
+    return (
+        <>
+            <TimetableGrid timeIntervals={timeIntervals} />
+        </>
+    );
 };
 
 export default Timetable;
