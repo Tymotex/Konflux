@@ -83,7 +83,14 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
                 // deselecting respectively.
                 if (isSelectingRange)
                     newSelectedDays.add(currDay.format("YYYY-MM-DD"));
-                else newSelectedDays.delete(currDay.format("YYYY-MM-DD"));
+                else if (isDeselectingRange)
+                    newSelectedDays.delete(currDay.format("YYYY-MM-DD"));
+                else {
+                    // TODO: fatal err. What do?
+                    toast.error("Neither selecting nor deselecting...");
+                    resetRangeTrackingState();
+                    return;
+                }
                 currDay = currDay.add(1, "day");
             }
 

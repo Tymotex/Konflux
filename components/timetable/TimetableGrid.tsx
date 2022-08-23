@@ -33,8 +33,6 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
     const [selectionEndTime, setSelectionEndTime] = useState<number>();
     const [selectionEndDate, setSelectionEndDate] = useState<string>();
 
-    console.log(selectedBlocks);
-
     // For every day in the time intervals that are not present in the
     // `selectedBlocks` data structure, put in that missing day. For the
     // days that are present in `selectedBlocks`, do nothing to prevent
@@ -52,7 +50,7 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
             });
         });
         setSelectedBlocks(newSelectedBlocks);
-    }, [timeIntervals]);
+    }, [timeIntervals, selectedBlocks]);
 
     // Resets all range-tracking variables. Should be called after committing or
     // aborting a range selection/deselection.
@@ -77,6 +75,77 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
             // setSelectedBlocks(newSelectedBlocks);
             if (isSelectingArea || isDeselectingArea)
                 toast.success("Committing area");
+
+            // Iterate through each time block within the rectangular are
+            // defined by the start time/date and end time/date.
+            // TODO: this bound validity checking logic is duplicated (I think).
+            if (
+                selectionStartTime === undefined ||
+                selectionEndTime === undefined ||
+                !selectionStartDate ||
+                !selectionEndDate
+            ) {
+                // TODO: fatal error. what do?
+                toast.error("Rectangular bounds not correctly set");
+                return;
+            }
+            const startRow =
+                selectionStartTime <= selectionEndTime
+                    ? selectionStartTime
+                    : selectionEndTime;
+            const endRow =
+                selectionStartTime <= selectionEndTime
+                    ? selectionEndTime
+                    : selectionStartTime;
+            const startCol =
+                selectionStartDate <= selectionEndDate
+                    ? selectionStartDate
+                    : selectionEndDate;
+            const endCol =
+                selectionStartDate <= selectionEndDate
+                    ? selectionEndDate
+                    : selectionStartDate;
+
+            const newSelectedBlocks = { ...selectedBlocks };
+            console.log(
+                `Looping from timeBlockIndex=${selectionStartTime} to ${selectionEndTime}`,
+            );
+            for (
+                let timeBlockIndex = startRow;
+                timeBlockIndex <= endRow;
+                ++timeBlockIndex
+            ) {
+                let currDate = startCol;
+                console.log(`Curr date=${currDate}, going to ${endCol}`);
+                while (currDate <= endCol) {
+                    // It's possible for the current date to not exist in the
+                    // `selectedBlocks` map because of discontinuity in the
+                    // selected days. In this case, we simply skip.
+                    if (!(currDate in newSelectedBlocks)) {
+                        currDate = dayjs(currDate)
+                            .add(1, "day")
+                            .format("YYYY-MM-DD");
+                        continue;
+                    }
+
+                    // Add or remove the current timeblock in the rectangular
+                    // area depending on if we're selecting or deselecting.
+                    if (isSelectingArea)
+                        newSelectedBlocks[currDate][timeBlockIndex] = true;
+                    else if (isDeselectingArea)
+                        newSelectedBlocks[currDate][timeBlockIndex] = false;
+                    else {
+                        // TODO: fatal err. What do?
+                        toast.error("Neither selecting nor deselecting...");
+                        resetRangeTrackingState();
+                        return;
+                    }
+                    currDate = dayjs(currDate)
+                        .add(1, "day")
+                        .format("YYYY-MM-DD");
+                }
+            }
+            setSelectedBlocks(newSelectedBlocks);
             resetRangeTrackingState();
         };
 
@@ -111,6 +180,10 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
         isSelectingArea,
         isDeselectingArea,
         resetRangeTrackingState,
+        selectionStartDate,
+        selectionStartTime,
+        selectionEndDate,
+        selectionEndTime,
     ]);
 
     // TODO: doc
@@ -140,14 +213,13 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
     // TODO: doc
     const beginSelectingArea = useCallback(
         (date: string, timeBlockIndex: number) => {
-            toast.info("Beginning selecting area");
             if (!isSelected(date, timeBlockIndex)) setIsSelectingArea(true);
             else setIsDeselectingArea(true);
 
             setSelectionStartTime(timeBlockIndex);
             setSelectionStartDate(date);
         },
-        [],
+        [isSelected],
     );
 
     // Determines whether the given time block is in the selection/deselection
@@ -219,21 +291,31 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
         <>
             <pre>Selecting area? {isSelectingArea ? "YES" : "NO"}</pre>
             <pre>Deselect area? {isDeselectingArea ? "YES" : "NO"}</pre>
+            <pre>Start time? {selectionStartTime}</pre>
+            <pre>Start date? {selectionStartDate}</pre>
+            <pre>End time? {selectionEndTime}</pre>
+            <pre>End date? {selectionEndDate}</pre>
             <div className={styles.timetable}>
                 <div className={styles.timeBlockLabels}>
                     {[...Array(48)].map((_, i) => (
-                        <span className={styles.label}>{i}</span>
+                        // TODO: key should not be i
+                        <span key={i} className={styles.label}>
+                            {i}
+                        </span>
                     ))}
                 </div>
-                {timeIntervals.map((interval) => (
-                    <div className={styles.columnGroup}>
+                {timeIntervals.map((interval, i) => (
+                    // TODO: key should not be i
+                    <div key={i} className={styles.columnGroup}>
                         {interval.map((day) => (
-                            <div className={styles.column}>
+                            <div key={day.date} className={styles.column}>
                                 <span className={styles.dateLabel}>
                                     {dayjs(day.date).format("Do MMM")}
                                 </span>
                                 {day.whoIsAvailable.map((time, i) => (
                                     <div
+                                        // TODO key should not be i
+                                        key={i}
                                         className={`${styles.timeBlock} ${
                                             isSelected(day.date, i)
                                                 ? styles.selected
@@ -270,7 +352,11 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
                                             setSelectionEndTime(i);
                                             setSelectionEndDate(day.date);
                                         }}
-                                    ></div>
+                                    >
+                                        {isSelected(day.date, i)
+                                            ? "SELECTED"
+                                            : "~"}
+                                    </div>
                                 ))}
                             </div>
                         ))}
