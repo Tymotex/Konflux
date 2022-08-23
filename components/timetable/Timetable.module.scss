@@ -10,6 +10,7 @@ $time-block-width: 80px;
     column-gap: $spacing-md;
     flex: 0 0 100%;
     overflow: auto;
+    user-select: none;
 
     .timeBlockLabels {
         display: flex;
@@ -54,6 +55,10 @@ $time-block-width: 80px;
 
                 &.pressed {
                     background: gold;
+                }
+
+                &.inSelectedArea {
+                    background: blue;
                 }
             }
         }
