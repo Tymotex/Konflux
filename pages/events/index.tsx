@@ -1,12 +1,12 @@
 import { PageTransition } from "components/page-transition";
 import type { NextPage } from "next";
 
-const Home: NextPage = () => {
+const EventsHome: NextPage = () => {
     return (
         <PageTransition>
-            <h1>Event Page</h1>
+            <h1>Events</h1>
         </PageTransition>
     );
 };
 
-export default Home;
+export default EventsHome;

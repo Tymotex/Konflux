@@ -22,10 +22,10 @@ import {
 
 interface Props {
     selectedDays: Set<string>;
-    setSelectedDays: Dispatch<SetStateAction<Set<string>>>;
+    handleChange: (newDays: Set<string>) => void;
 }
 
-const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
+const DaySelector: React.FC<Props> = ({ selectedDays, handleChange }) => {
     // The days to be displayed on the calendar. By default, we start by showing
     // the days of the current month.
     const [days, setDays] = useState<Day[]>(
@@ -94,7 +94,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
                 currDay = currDay.add(1, "day");
             }
 
-            setSelectedDays(newSelectedDays);
+            handleChange(newSelectedDays);
             resetRangeTrackingState();
         };
 
@@ -129,7 +129,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
         rangeEndDate,
         isSelectingRange,
         resetRangeTrackingState,
-        setSelectedDays,
+        handleChange,
     ]);
 
     // When the user sets a different month in the calendar, rerender the day
@@ -172,9 +172,9 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
             } else {
                 newSelectedDays.add(date);
             }
-            setSelectedDays(newSelectedDays);
+            handleChange(newSelectedDays);
         },
-        [selectedDays, setSelectedDays],
+        [selectedDays, handleChange],
     );
 
     // Flips on the `isSelectingRange` or `isDeselectingRange` boolean state.

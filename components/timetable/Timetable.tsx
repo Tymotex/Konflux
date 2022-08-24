@@ -16,12 +16,14 @@ interface Props {
     timeIntervals: TimeInterval[];
     selectedBlocks: FilledSchedule;
     setSelectedBlocks: Dispatch<SetStateAction<FilledSchedule>>;
+    showGroupAvailability?: boolean;
 }
 
 const Timetable: React.FC<Props> = ({
     timeIntervals,
     selectedBlocks,
     setSelectedBlocks,
+    showGroupAvailability = false,
 }) => {
     return (
         <>

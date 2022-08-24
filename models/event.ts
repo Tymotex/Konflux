@@ -1,7 +1,6 @@
 import { TimeInterval } from "components/timetable/Timetable";
 import { FilledSchedule } from "components/timetable/timetable-utils";
 import { getDatabase, push, ref, set } from "firebase/database";
-import { db } from "utils/firebaseInit";
 
 // TODO: doc
 export interface LocalEventMember {
@@ -32,7 +31,7 @@ export const createEvent = (eventName: string): string => {
         members: {},
     };
     // TODO: error handling
-    const reference = push(ref(db, `events`), event);
+    const reference = push(ref(getDatabase(), `events`), event);
     if (!reference.key) throw Error("Failed to create event.");
     return reference.key;
 };
@@ -43,7 +42,7 @@ export const syncEventDays = (
     timeIntervals: TimeInterval[],
 ): void => {
     // TODO: error handling
-    set(ref(db, `events/${eventId}/days`), timeIntervals);
+    set(ref(getDatabase(), `events/${eventId}/days`), timeIntervals);
 };
 
 // TODO: doc
@@ -54,5 +53,5 @@ export const syncEventAvailability = (
     // We need to convert the `FilledSchedule` data structure into type
     // `TimeInterval[]` to fit the event data model.
     //
-    // set(ref(db, `events/${eventId}/`));
+    // set(ref(getDatabase(), `events/${eventId}/`));
 };

@@ -76,6 +76,21 @@ export const mapScheduleToTimeIntervals = (
     return [];
 };
 
+/**
+ * From the given list of time intervals, extract out dates in all their days.
+ * @param timeIntervals
+ * @returns a set of all the dates in the time intervals.
+ */
+export const extractOutSelectedDays = (
+    timeIntervals: TimeInterval[],
+): Set<string> => {
+    const allDates = timeIntervals?.reduce((currDates, interval) => {
+        const dates: string[] = interval.map((day) => day.date);
+        return [...currDates, ...dates];
+    }, [] as string[]);
+    return new Set<string>(allDates);
+};
+
 export const TIME_LABELS = [
     "12:00 AM",
     "12:30 AM",

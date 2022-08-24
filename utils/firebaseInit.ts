@@ -1,6 +1,6 @@
-import { initializeApp } from "firebase/app";
-import { connectDatabaseEmulator, getDatabase } from "firebase/database";
+import { FirebaseOptions, getApp, initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 
 const firebaseInitConfig = {
     apiKey: "AIzaSyCWYC8b93kQS7XbiBNPSoA2BR4H4BuUagQ",
@@ -11,18 +11,17 @@ const firebaseInitConfig = {
         "https://konflux-services-default-rtdb.asia-southeast1.firebasedatabase.app/",
 };
 
-export const app = initializeApp(firebaseInitConfig);
-
-export const db = getDatabase(app);
-
-let emulatorInitialised = false;
-export const connectToLocalEmulator = () => {
-    // Point to the RTDB emulator running on localhost.
-    // See: https://firebase.google.com/docs/emulator-suite/connect_and_prototype?database=RTDB#web-version-9.
-    if (!emulatorInitialised) {
+function createFirebaseApp(config: FirebaseOptions) {
+    try {
+        return getApp();
+    } catch {
+        const app = initializeApp(config);
+        const db = getDatabase(app);
         connectDatabaseEmulator(db, "localhost", 9000);
-        emulatorInitialised = true;
+        return app;
     }
-};
+}
 
-export const auth = getAuth(app);
+const firebaseApp = createFirebaseApp(firebaseInitConfig);
+
+export const auth = getAuth(firebaseApp);
