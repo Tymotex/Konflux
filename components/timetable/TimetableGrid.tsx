@@ -1,26 +1,33 @@
 import dayjs from "dayjs";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 import { TimeInterval } from "./Timetable";
 import styles from "./Timetable.module.scss";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { toast } from "react-toastify";
+import { FilledSchedule, TIME_LABELS } from "./timetable-utils";
 
 // TODO: move this to somewhere else. Should only have to run once and then never again.
 dayjs.extend(advancedFormat);
 
 interface Props {
     timeIntervals: TimeInterval[];
+    selectedBlocks: FilledSchedule;
+    setSelectedBlocks: Dispatch<SetStateAction<FilledSchedule>>;
+    disabled?: boolean;
 }
 
-interface FilledSchedule {
-    [day: string]: boolean[];
-}
-
-const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
-    // A map structure containing a superset of the days on the timetable grid
-    // and the availabilities filled by the user.
-    const [selectedBlocks, setSelectedBlocks] = useState<FilledSchedule>({});
-
+const TimetableGrid: React.FC<Props> = ({
+    timeIntervals,
+    selectedBlocks,
+    setSelectedBlocks,
+    disabled = false,
+}) => {
     // State for tracking whether the user is selecting or deselecting a
     // rectangular area of time blocks.
     const [isSelectingArea, setIsSelectingArea] = useState<boolean>(false);
@@ -53,7 +60,7 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
             });
         });
         if (mutated) setSelectedBlocks(newSelectedBlocks);
-    }, [timeIntervals, selectedBlocks]);
+    }, [timeIntervals, selectedBlocks, setSelectedBlocks]);
 
     // Resets all range-tracking variables. Should be called after committing or
     // aborting a range selection/deselection.
@@ -74,11 +81,6 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
     useEffect(() => {
         // Commits the time blocks in the selected area into `selectedBlocks`.
         const commitAreaSelection = () => {
-            // const newSelectedBlocks = { ...selectedBlocks };
-            // setSelectedBlocks(newSelectedBlocks);
-            if (isSelectingArea || isDeselectingArea)
-                toast.success("Committing area");
-
             // Iterate through each time block within the rectangular are
             // defined by the start time/date and end time/date.
             // TODO: this bound validity checking logic is duplicated (I think).
@@ -178,6 +180,7 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
         };
     }, [
         selectedBlocks,
+        setSelectedBlocks,
         setIsSelectingArea,
         setIsDeselectingArea,
         isSelectingArea,
@@ -298,65 +301,74 @@ const TimetableGrid: React.FC<Props> = ({ timeIntervals }) => {
             <pre>Start date? {selectionStartDate}</pre>
             <pre>End time? {selectionEndTime}</pre>
             <pre>End date? {selectionEndDate}</pre> */}
-            <div className={styles.timetable}>
+            <div
+                className={`${styles.timetable} ${disabled && styles.disabled}`}
+            >
                 <div className={styles.timeBlockLabels}>
-                    {[...Array(48)].map((_, i) => (
-                        // TODO: key should not be i
-                        <span key={i} className={styles.label}>
-                            {i}
+                    {TIME_LABELS.map((label) => (
+                        <span key={label} className={styles.label}>
+                            {label}
                         </span>
                     ))}
                 </div>
                 {timeIntervals.map((interval, i) => (
-                    // TODO: key should not be i
                     <div key={i} className={styles.columnGroup}>
                         {interval.map((day) => (
                             <div key={day.date} className={styles.column}>
                                 <span className={styles.dateLabel}>
                                     {dayjs(day.date).format("Do MMM")}
                                 </span>
-                                {day.whoIsAvailable.map((time, i) => (
-                                    <div
-                                        // TODO key should not be i
-                                        key={i}
-                                        className={`${styles.timeBlock} ${
-                                            isSelected(day.date, i)
-                                                ? styles.selected
-                                                : styles.notSelected
-                                        } ${
-                                            isInAreaSelection(day.date, i)
-                                                ? styles.inSelectedArea
-                                                : ""
-                                        }`}
-                                        onClick={() =>
-                                            toggleTimeblockSelection(
-                                                day.date,
-                                                i,
-                                            )
-                                        }
-                                        onMouseDown={(e) => {
-                                            // Apply the `pressed` class to this element.
-                                            const thisElem =
-                                                e.target as HTMLUListElement;
-                                            thisElem.classList.add(
-                                                styles.pressed,
-                                            );
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            // Revoke the `pressed` class from this element.
-                                            const thisElem =
-                                                e.target as HTMLUListElement;
-                                            thisElem.classList.remove(
-                                                styles.pressed,
-                                            );
-                                            handleMouseLeave(e, day.date, i);
-                                        }}
-                                        onMouseEnter={() => {
-                                            setSelectionEndTime(i);
-                                            setSelectionEndDate(day.date);
-                                        }}
-                                    ></div>
-                                ))}
+                                {day.whoIsAvailable.map(
+                                    (peopleAvailable, i) => (
+                                        <div
+                                            key={i}
+                                            className={`${styles.timeBlock} ${
+                                                isSelected(day.date, i)
+                                                    ? styles.selected
+                                                    : styles.notSelected
+                                            } ${
+                                                isInAreaSelection(day.date, i)
+                                                    ? styles.inSelectedArea
+                                                    : ""
+                                            }`}
+                                            onClick={() =>
+                                                toggleTimeblockSelection(
+                                                    day.date,
+                                                    i,
+                                                )
+                                            }
+                                            onMouseDown={(e) => {
+                                                // Apply the `pressed` class to this element.
+                                                const thisElem =
+                                                    e.target as HTMLUListElement;
+                                                thisElem.classList.add(
+                                                    styles.pressed,
+                                                );
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                // Revoke the `pressed` class from this element.
+                                                const thisElem =
+                                                    e.target as HTMLUListElement;
+                                                thisElem.classList.remove(
+                                                    styles.pressed,
+                                                );
+                                                handleMouseLeave(
+                                                    e,
+                                                    day.date,
+                                                    i,
+                                                );
+                                            }}
+                                            onMouseEnter={() => {
+                                                setSelectionEndTime(i);
+                                                setSelectionEndDate(day.date);
+                                            }}
+                                        >
+                                            {peopleAvailable.map((person) => (
+                                                <>{person[0]},</>
+                                            ))}
+                                        </div>
+                                    ),
+                                )}
                             </div>
                         ))}
                     </div>

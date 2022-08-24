@@ -122,6 +122,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, setSelectedDays }) => {
         };
     }, [
         selectedDays,
+        isDeselectingRange,
         setIsSelectingRange,
         setIsDeselectingRange,
         rangeStartDate,

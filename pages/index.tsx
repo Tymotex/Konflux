@@ -6,6 +6,7 @@ import Link from "next/link";
 import Logo from "public/logo.svg";
 import styles from "./index.module.scss";
 import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
+import { getDatabase, ref, set } from "firebase/database";
 
 const Home: NextPage = () => {
     return (

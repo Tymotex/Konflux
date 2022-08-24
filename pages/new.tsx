@@ -2,15 +2,29 @@ import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
-import { createIntervals } from "components/timetable/timetable-utils";
+import {
+    createIntervals,
+    FilledSchedule,
+} from "components/timetable/timetable-utils";
+import { getDatabase, push, ref, set } from "firebase/database";
 import { AnimatePresence, motion } from "framer-motion";
+import { createEvent, syncEventDays } from "models/event";
 import type { NextPage } from "next";
-import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
+import {
+    FormEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
 
 const Home: NextPage = () => {
     const eventNameInput = useRef<HTMLInputElement>(null);
-    const [eventCreated, setEventCreated] = useState<boolean>(false);
+
+    // The ID of the event after creation.
+    const [eventId, setEventId] = useState<string>("");
 
     // An unordered set of date strings of the universal ISO format "YYYY-MM-DD"
     // selected by the user.
@@ -18,13 +32,28 @@ const Home: NextPage = () => {
         new Set<string>(),
     );
 
+    // A map structure containing a superset of the days on the timetable grid
+    // and the availabilities filled by the user.
+    const [selectedBlocks, setSelectedBlocks] = useState<FilledSchedule>({});
+
     const timeIntervals = useMemo(
         () => createIntervals(selectedDays),
         [selectedDays],
     );
 
+    // Whenever the organiser sets a different set of days, sync those changes
+    // with the remote copy.
+    useEffect(() => {
+        syncEventDays(eventId, timeIntervals);
+        // TODO: this would be a good place to update the state for a 'saved' status UI.
+    }, [timeIntervals, eventId]);
+
+    // Whenever the organiser changes their timetable availabilities, sync those
+    // changes with the remote copy.
+    useEffect(() => {}, [selectedBlocks]);
+
     // Handle the creation of an event.
-    const createEvent = useCallback((e: FormEvent) => {
+    const handleEventCreation = useCallback((e: FormEvent) => {
         e.preventDefault();
 
         if (eventNameInput.current === null) {
@@ -33,26 +62,29 @@ const Home: NextPage = () => {
             return;
         }
 
-        const eventName = String(eventNameInput.current.value);
-        if (eventName.length === 0) {
+        const formEventName = String(eventNameInput.current.value);
+        if (formEventName.length === 0) {
             alert("Event name must not be empty.");
             return;
         }
+        // TODO: handle max event name length.
 
-        setEventCreated(true);
-        // TODO: Invoke firebase event creation
+        // Creating the event in Firebase realtime DB.
+        const eventId = createEvent(formEventName);
+        setEventId(eventId);
+        // TODO: push to localstorage the event. Write a simple API for this.
     }, []);
 
     return (
         <PageTransition>
             <Container>
                 <AnimatePresence mode="wait">
-                    {!eventCreated ? (
+                    {!eventId ? (
                         <motion.form
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onSubmit={createEvent}
+                            onSubmit={handleEventCreation}
                             // TODO: remove this:
                             style={{
                                 position: "absolute",
@@ -86,17 +118,19 @@ const Home: NextPage = () => {
                                 type="text"
                                 placeholder="Eg. Math group study"
                             />
+                            <div>
+                                Share with invitees the link:{" "}
+                                <strong>{`http://localhost:3000/events/${eventId}`}</strong>
+                            </div>
                             <DaySelector
                                 selectedDays={selectedDays}
                                 setSelectedDays={setSelectedDays}
                             />
-                            {/* TODO: remove this: */}
-                            {/* <ul>
-                                {Array.from(selectedDays).map((date) => (
-                                    <li key={date}>{date}</li>
-                                ))}
-                            </ul> */}
-                            <Timetable timeIntervals={timeIntervals} />
+                            <Timetable
+                                timeIntervals={timeIntervals}
+                                selectedBlocks={selectedBlocks}
+                                setSelectedBlocks={setSelectedBlocks}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>

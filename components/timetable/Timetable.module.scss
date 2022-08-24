@@ -12,6 +12,11 @@ $time-block-width: 80px;
     overflow: auto;
     user-select: none;
 
+    &.disabled {
+        pointer-events: none;
+        filter: blur(3px);
+    }
+
     .timeBlockLabels {
         display: flex;
         flex-direction: column;

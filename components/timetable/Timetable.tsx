@@ -1,4 +1,6 @@
-import React, { useCallback } from "react";
+import React, { Dispatch, SetStateAction, useCallback } from "react";
+import EventSignIn from "./EventSignIn";
+import { FilledSchedule } from "./timetable-utils";
 import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
 
@@ -12,12 +14,24 @@ export type TimeInterval = DayAvailabilities[];
 
 interface Props {
     timeIntervals: TimeInterval[];
+    selectedBlocks: FilledSchedule;
+    setSelectedBlocks: Dispatch<SetStateAction<FilledSchedule>>;
 }
 
-const Timetable: React.FC<Props> = ({ timeIntervals }) => {
+const Timetable: React.FC<Props> = ({
+    timeIntervals,
+    selectedBlocks,
+    setSelectedBlocks,
+}) => {
     return (
         <>
-            <TimetableGrid timeIntervals={timeIntervals} />
+            <EventSignIn />
+            <TimetableGrid
+                // disabled
+                timeIntervals={timeIntervals}
+                selectedBlocks={selectedBlocks}
+                setSelectedBlocks={setSelectedBlocks}
+            />
         </>
     );
 };
