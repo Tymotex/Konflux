@@ -200,8 +200,10 @@ const TimetableGrid: React.FC<Props> = ({
                 alert("Fatal error");
                 return;
             }
-            selectedBlocks[date][timeBlockIndex] =
-                !selectedBlocks[date][timeBlockIndex];
+            const newSelectedBlocks = { ...selectedBlocks };
+            newSelectedBlocks[date][timeBlockIndex] =
+                !newSelectedBlocks[date][timeBlockIndex];
+            setSelectedBlocks(newSelectedBlocks);
         },
         [selectedBlocks],
     );
@@ -342,6 +344,15 @@ const TimetableGrid: React.FC<Props> = ({
                                                 const thisElem =
                                                     e.target as HTMLUListElement;
                                                 thisElem.classList.add(
+                                                    styles.pressed,
+                                                );
+                                            }}
+                                            onMouseUp={(e) => {
+                                                // TODO: this is duplicated.
+                                                // Revoke the `pressed` class from this element.
+                                                const thisElem =
+                                                    e.target as HTMLUListElement;
+                                                thisElem.classList.remove(
                                                     styles.pressed,
                                                 );
                                             }}

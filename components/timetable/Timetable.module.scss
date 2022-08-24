@@ -58,12 +58,12 @@ $time-block-width: 80px;
                     border: 1px solid black;
                 }
 
-                &.pressed {
-                    background: gold;
-                }
-
                 &.inSelectedArea {
                     background: blue;
+                }
+
+                &.pressed {
+                    background: gold;
                 }
             }
         }

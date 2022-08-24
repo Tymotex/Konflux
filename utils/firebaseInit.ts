@@ -14,10 +14,15 @@ const firebaseInitConfig = {
 export const app = initializeApp(firebaseInitConfig);
 
 export const db = getDatabase(app);
+
+let emulatorInitialised = false;
 export const connectToLocalEmulator = () => {
     // Point to the RTDB emulator running on localhost.
     // See: https://firebase.google.com/docs/emulator-suite/connect_and_prototype?database=RTDB#web-version-9.
-    connectDatabaseEmulator(db, "localhost", 9000);
+    if (!emulatorInitialised) {
+        connectDatabaseEmulator(db, "localhost", 9000);
+        emulatorInitialised = true;
+    }
 };
 
 export const auth = getAuth(app);

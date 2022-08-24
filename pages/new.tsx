@@ -6,7 +6,6 @@ import {
     createIntervals,
     FilledSchedule,
 } from "components/timetable/timetable-utils";
-import { getDatabase, push, ref, set } from "firebase/database";
 import { AnimatePresence, motion } from "framer-motion";
 import { createEvent, syncEventDays } from "models/event";
 import type { NextPage } from "next";

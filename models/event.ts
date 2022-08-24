@@ -54,5 +54,5 @@ export const syncEventAvailability = (
     // We need to convert the `FilledSchedule` data structure into type
     // `TimeInterval[]` to fit the event data model.
     //
-    // set(ref(db, `events/${eventId}/`))
+    // set(ref(db, `events/${eventId}/`));
 };
