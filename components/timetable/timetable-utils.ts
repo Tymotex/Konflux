@@ -33,7 +33,7 @@ export const createIntervals = (selectedDays: Set<string>): TimeInterval[] => {
         .map(
             (date: string): DayAvailabilities => ({
                 date: date,
-                whoIsAvailable: [...Array(48)].map(() => []),
+                groupAvailabilities: [...Array(48)].map(() => []),
             }),
         );
 
@@ -70,6 +70,7 @@ export const createIntervals = (selectedDays: Set<string>): TimeInterval[] => {
  * @returns array of time intervals.
  */
 export const mapScheduleToTimeIntervals = (
+    timeIntervals: TimeInterval[],
     timeBlocks: FilledSchedule,
     username: string,
 ): TimeInterval[] => {

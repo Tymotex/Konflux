@@ -18,14 +18,14 @@ dayjs.extend(advancedFormat);
 interface Props {
     timeIntervals: TimeInterval[];
     selectedBlocks: FilledSchedule;
-    setSelectedBlocks: Dispatch<SetStateAction<FilledSchedule>>;
+    onChange: (newSelectedBlocks: FilledSchedule) => void;
     disabled?: boolean;
 }
 
 const TimetableGrid: React.FC<Props> = ({
     timeIntervals,
     selectedBlocks,
-    setSelectedBlocks,
+    onChange,
     disabled = false,
 }) => {
     // State for tracking whether the user is selecting or deselecting a
@@ -59,8 +59,8 @@ const TimetableGrid: React.FC<Props> = ({
                 }
             });
         });
-        if (mutated) setSelectedBlocks(newSelectedBlocks);
-    }, [timeIntervals, selectedBlocks, setSelectedBlocks]);
+        if (mutated) onChange(newSelectedBlocks);
+    }, [timeIntervals, selectedBlocks, onChange]);
 
     // Resets all range-tracking variables. Should be called after committing or
     // aborting a range selection/deselection.
@@ -150,7 +150,7 @@ const TimetableGrid: React.FC<Props> = ({
                         .format("YYYY-MM-DD");
                 }
             }
-            setSelectedBlocks(newSelectedBlocks);
+            onChange(newSelectedBlocks);
             resetRangeTrackingState();
         };
 
@@ -180,7 +180,7 @@ const TimetableGrid: React.FC<Props> = ({
         };
     }, [
         selectedBlocks,
-        setSelectedBlocks,
+        onChange,
         setIsSelectingArea,
         setIsDeselectingArea,
         isSelectingArea,
@@ -203,9 +203,9 @@ const TimetableGrid: React.FC<Props> = ({
             const newSelectedBlocks = { ...selectedBlocks };
             newSelectedBlocks[date][timeBlockIndex] =
                 !newSelectedBlocks[date][timeBlockIndex];
-            setSelectedBlocks(newSelectedBlocks);
+            onChange(newSelectedBlocks);
         },
-        [selectedBlocks],
+        [selectedBlocks, onChange],
     );
 
     // TODO: doc
@@ -320,7 +320,7 @@ const TimetableGrid: React.FC<Props> = ({
                                 <span className={styles.dateLabel}>
                                     {dayjs(day.date).format("Do MMM")}
                                 </span>
-                                {day.whoIsAvailable.map(
+                                {day.groupAvailabilities.map(
                                     (peopleAvailable, i) => (
                                         <div
                                             key={i}

@@ -7,6 +7,7 @@ import {
     createIntervals,
     extractOutSelectedDays,
     FilledSchedule,
+    mapScheduleToTimeIntervals,
 } from "components/timetable/timetable-utils";
 import { BASE_URL } from "constants/url";
 import { getDatabase, onValue, ref } from "firebase/database";
@@ -51,13 +52,15 @@ const EventPage: NextPage = () => {
         if (eventId !== undefined && eventId !== "undefined") {
             const eventRef = ref(getDatabase(), `events/${eventId}`);
             onValue(eventRef, (snapshot) => {
-                const currEvent = snapshot.val();
+                const currEvent = snapshot.val() as KonfluxEvent;
                 if (currEvent) {
                     setEvent(currEvent);
 
                     // Set the selected days, if they exist already:
-                    if (currEvent.days) {
-                        const days = extractOutSelectedDays(currEvent.days);
+                    if (currEvent.timeIntervals) {
+                        const days = extractOutSelectedDays(
+                            currEvent.timeIntervals,
+                        );
                         setSelectedDays(days);
                         setTimeIntervals(createIntervals(days));
                     }
@@ -78,18 +81,40 @@ const EventPage: NextPage = () => {
             // Clear URL query parameters. See: https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params.
             router.replace(`/events/${eventId}`, undefined, { shallow: true });
         }
-    }, [router]);
+    }, [router, eventId]);
 
     // Whenever the organiser sets a different set of days, sync those changes
     // with the remote copy.
-    const handleChange = useCallback(
+    const handleDaySelectionChange = useCallback(
         (newDays: Set<string>) => {
             setSelectedDays(newDays);
             const timeIntervals = createIntervals(newDays);
             setTimeIntervals(timeIntervals);
             syncEventDays(eventId, timeIntervals);
         },
-        [timeIntervals, eventId],
+        [eventId],
+    );
+
+    const handleTimetableSelectionChange = useCallback(
+        (newSelectedBlocks: FilledSchedule) => {
+            setSelectedBlocks(newSelectedBlocks);
+
+            // Update the local `timeIntervals` state.
+            if (!username) {
+                toast.error(
+                    "You must have a username associated with the schedule.",
+                );
+                return;
+            }
+            // const newTimeIntervals = mapScheduleToTimeIntervals(
+            //     newSelectedBlocks,
+            //     username,
+            // );
+            // setTimeIntervals(newTimeIntervals);
+
+            // Sync the changes with remote.
+        },
+        [setSelectedBlocks, username],
     );
 
     // Whenever the organiser changes their timetable availabilities, sync those
@@ -122,20 +147,20 @@ const EventPage: NextPage = () => {
                         <DaySelector
                             selectedDays={selectedDays}
                             // setSelectedDays={setSelectedDays}
-                            handleChange={handleChange}
+                            onChange={handleDaySelectionChange}
                         />
                         {/* Timetable for filling availabilities. */}
                         <Timetable
                             timeIntervals={timeIntervals}
                             selectedBlocks={selectedBlocks}
-                            setSelectedBlocks={setSelectedBlocks}
+                            onChange={handleTimetableSelectionChange}
                         />
                         {/* Timetable for showing the group's availabilities */}
                         <Timetable
                             timeIntervals={timeIntervals}
                             selectedBlocks={selectedBlocks}
-                            setSelectedBlocks={setSelectedBlocks}
                             showGroupAvailability
+                            onChange={handleTimetableSelectionChange}
                         />
                     </motion.div>
                 </AnimatePresence>

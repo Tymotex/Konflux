@@ -6,7 +6,7 @@ import TimetableGrid from "./TimetableGrid";
 
 export interface DayAvailabilities {
     date: string;
-    whoIsAvailable: string[][];
+    groupAvailabilities: string[][];
 }
 
 // Holds an array of contiguous days' availabilities.
@@ -15,15 +15,15 @@ export type TimeInterval = DayAvailabilities[];
 interface Props {
     timeIntervals: TimeInterval[];
     selectedBlocks: FilledSchedule;
-    setSelectedBlocks: Dispatch<SetStateAction<FilledSchedule>>;
+    onChange: (newSelectedBlocks: FilledSchedule) => void;
     showGroupAvailability?: boolean;
 }
 
 const Timetable: React.FC<Props> = ({
     timeIntervals,
     selectedBlocks,
-    setSelectedBlocks,
     showGroupAvailability = false,
+    onChange,
 }) => {
     return (
         <>
@@ -32,7 +32,7 @@ const Timetable: React.FC<Props> = ({
                 // disabled
                 timeIntervals={timeIntervals}
                 selectedBlocks={selectedBlocks}
-                setSelectedBlocks={setSelectedBlocks}
+                onChange={onChange}
             />
         </>
     );

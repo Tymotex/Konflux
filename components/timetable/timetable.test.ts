@@ -10,7 +10,7 @@ describe("Timetable utility tests", () => {
                 date: "2022-01-20",
             },
         ]);
-        expect(intervals[0][0].whoIsAvailable).toHaveLength(48);
+        expect(intervals[0][0].groupAvailabilities).toHaveLength(48);
     });
     test("Merges into 2 intervals.", () => {
         const daySet = new Set<string>([

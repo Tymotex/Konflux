@@ -60,7 +60,7 @@ const Home: NextPage = () => {
         }
 
         // Creating the event in Firebase realtime DB.
-        const eventId = createEvent(formEventName);
+        const eventId = createEvent(formEventName, formUsername);
         setEventId(eventId);
         // TODO: push to localstorage the event. Write a simple API for this.
 
@@ -73,7 +73,7 @@ const Home: NextPage = () => {
                 password: formPassword,
             },
         });
-    }, []);
+    }, [router]);
 
     return (
         <PageTransition>
