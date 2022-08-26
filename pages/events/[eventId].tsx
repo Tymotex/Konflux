@@ -3,82 +3,13 @@ import { DaySelector } from "components/day-selector";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
 import { BASE_URL } from "constants/url";
+import { EventContext, eventReducer } from "contexts/event-context";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-    EMPTY_EVENT,
-    KonfluxEvent,
-    onEventChange,
-    updateRemoteAvailabilities,
-} from "models/event";
+import { EMPTY_EVENT, onEventChange } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import {
-    createContext,
-    Dispatch,
-    useEffect,
-    useMemo,
-    useReducer,
-    useRef,
-    useState,
-} from "react";
-import {
-    spawnNotification,
-    spawnPromiseNotification,
-} from "utils/notifications";
-
-/* --------------------------- Reducer and actions -------------------------- */
-// TODO: Move all this reducer stuff and actions to a separate file.
-type EventAction =
-    | { type: "SET_EVENT"; payload: { event: KonfluxEvent } }
-    | {
-          type: "SET_DAYS";
-          payload: {
-              eventId: string;
-              groupAvailabilities: KonfluxEvent["groupAvailabilities"];
-          };
-      };
-
-const eventReducer = (
-    state: KonfluxEvent,
-    action: EventAction,
-): KonfluxEvent => {
-    switch (action.type) {
-        case "SET_EVENT":
-            return action.payload.event;
-        case "SET_DAYS":
-            updateRemoteAvailabilities(
-                action.payload.eventId,
-                action.payload.groupAvailabilities,
-            ).catch((error) =>
-                spawnNotification(
-                    "error",
-                    `Couldn't sync to remote. Reason: ${error}`,
-                ),
-            );
-            return {
-                ...state,
-                groupAvailabilities: action.payload.groupAvailabilities,
-            };
-        default:
-            throw new Error(
-                `Unknown event action type ${(action as EventAction).type}`,
-            );
-    }
-};
-
-/* --------------------------------- Context -------------------------------- */
-// TODO: move this away to a separate file.
-
-interface EventContextInterface {
-    state: KonfluxEvent;
-    dispatch: Dispatch<EventAction>;
-}
-
-export const EventContext = createContext<EventContextInterface>(
-    {} as EventContextInterface,
-);
-
-/* ---------------------------------- Page ---------------------------------- */
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { spawnNotification } from "utils/notifications";
 
 const EventPage: NextPage = () => {
     const router = useRouter();

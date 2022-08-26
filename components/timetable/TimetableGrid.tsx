@@ -1,5 +1,5 @@
+import { EventContext } from "contexts/event-context";
 import dayjs from "dayjs";
-import { EventContext } from "pages/events/[eventId]";
 import React, {
     useCallback,
     useContext,
