@@ -18,7 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             >
                 <Component {...pageProps} key={router.route} />
             </AnimatePresence>
-            <ToastContainer />
+            <ToastContainer theme="dark" position="top-center" />
         </>
     );
 }

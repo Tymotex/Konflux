@@ -71,16 +71,23 @@ export const EMPTY_EVENT: KonfluxEvent = {
  * @param eventId
  * @param handleChange
  */
-export const onEventChange = (
+export const onEventChange = async (
     eventId: string,
     handleChange: (newEvent: KonfluxEvent) => void,
 ) => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
-    const eventRef = ref(getDatabase(), `events/${eventId}`);
-    onValue(eventRef, (snapshot) => {
-        const currEvent = snapshot.val() as KonfluxEvent;
-        handleChange(currEvent);
-    });
+
+    try {
+        const eventRef = ref(getDatabase(), `events/${eventId}`);
+        onValue(eventRef, (snapshot) => {
+            const currEvent = snapshot.val() as KonfluxEvent;
+            handleChange(currEvent);
+        });
+    } catch (err) {
+        throw new Error(
+            `Failed to listen to event with ID '${eventId}'. Reason: ${err}`,
+        );
+    }
 };
 
 /**
@@ -90,10 +97,10 @@ export const onEventChange = (
  * @param creatorUsername
  * @returns
  */
-export const createEvent = (
+export const createEvent = async (
     eventName: string,
     creatorUsername: string,
-): string => {
+): Promise<string> => {
     const event: KonfluxEvent = {
         name: eventName,
         earliest: 18,
@@ -105,10 +112,13 @@ export const createEvent = (
             },
         },
     };
-    // TODO: error handling
-    const reference = push(ref(getDatabase(), `events`), event);
-    if (!reference.key) throw Error("Failed to create event.");
-    return reference.key;
+    try {
+        const reference = push(ref(getDatabase(), `events`), event);
+        if (!reference.key) throw Error("Firebase did not assign an ID.");
+        return reference.key;
+    } catch (err) {
+        throw new Error(`Failed to create event. Reason: ${err}`);
+    }
 };
 
 /**
@@ -122,13 +132,18 @@ export const createEvent = (
  * @param eventId
  * @param availabilities
  */
-export const updateRemoteAvailabilities = (
+export const updateRemoteAvailabilities = async (
     eventId: string,
     availabilities: KonfluxEvent["groupAvailabilities"],
-): void => {
-    // TODO: error handling
-    set(
-        ref(getDatabase(), `events/${eventId}/groupAvailabilities`),
-        availabilities,
-    );
+): Promise<void> => {
+    try {
+        set(
+            ref(getDatabase(), `events/${eventId}/groupAvailabilities`),
+            availabilities,
+        );
+    } catch (err) {
+        throw new Error(
+            `Failed to update the event's availabilities. Reason: ${err}`,
+        );
+    }
 };

@@ -21,6 +21,10 @@ import {
     useRef,
     useState,
 } from "react";
+import {
+    spawnNotification,
+    spawnPromiseNotification,
+} from "utils/notifications";
 
 /* --------------------------- Reducer and actions -------------------------- */
 // TODO: Move all this reducer stuff and actions to a separate file.
@@ -45,6 +49,11 @@ const eventReducer = (
             updateRemoteAvailabilities(
                 action.payload.eventId,
                 action.payload.groupAvailabilities,
+            ).catch((error) =>
+                spawnNotification(
+                    "error",
+                    `Couldn't sync to remote. Reason: ${error}`,
+                ),
             );
             return {
                 ...state,
@@ -101,7 +110,9 @@ const EventPage: NextPage = () => {
                     type: "SET_EVENT",
                     payload: { event: newEvent },
                 }),
-            );
+            ).catch((err) => {
+                spawnNotification("error", err);
+            });
     }, [eventId, dispatch]);
 
     // Grab the username and password transmitted through navigation from a

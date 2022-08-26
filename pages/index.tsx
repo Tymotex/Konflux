@@ -7,7 +7,11 @@ import { useRouter } from "next/router";
 import Logo from "public/logo.svg";
 import { useCallback, useRef, useState } from "react";
 import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
-import { spawnNotification } from "utils/notifications";
+import { toast } from "react-toastify";
+import {
+    spawnNotification,
+    spawnPromiseNotification,
+} from "utils/notifications";
 import styles from "./index.module.scss";
 
 const Home: NextPage = () => {
@@ -17,7 +21,7 @@ const Home: NextPage = () => {
     const passwordInput = useRef<HTMLInputElement>(null);
 
     // Handle the creation of an event.
-    const handleEventCreation = useCallback((): void => {
+    const handleEventCreation = useCallback(async (): Promise<void> => {
         if (
             eventNameInput.current === null ||
             usernameInput.current === null ||
@@ -62,19 +66,25 @@ const Home: NextPage = () => {
             return;
         }
 
-        // Creating the event in Firebase realtime DB.
-        const eventId = createEvent(formEventName, formUsername);
-        // TODO: push to localstorage the event. Write a simple API for this.
+        try {
+            // Creating the event in Firebase realtime DB.
+            const eventId = await createEvent(formEventName, formUsername);
 
-        // Transmit username and password to the event details page so that it
-        // need not be fetched and verified.
-        router.push({
-            pathname: `/events/${eventId}`,
-            query: {
-                username: formUsername,
-                password: formPassword,
-            },
-        });
+            // TODO: push to localstorage the event. Write a simple API for this.
+
+            // Transmit username and password to the event details page so that it
+            // need not be fetched and verified.
+            router.push({
+                pathname: `/events/${eventId}`,
+                query: {
+                    username: formUsername,
+                    password: formPassword,
+                },
+            });
+        } catch (err) {
+            if (err instanceof Error) spawnNotification("error", err.message);
+            else throw err;
+        }
     }, [router]);
 
     return (
@@ -126,7 +136,12 @@ const Home: NextPage = () => {
                         size="md"
                         icon={<ArrowRight />}
                         iconInset
-                        onClick={handleEventCreation}
+                        onClick={() =>
+                            spawnPromiseNotification(handleEventCreation(), {
+                                pendingMessage: "Creating a new event.",
+                                successMessage: "Created a new event.",
+                            })
+                        }
                     />
                 </div>
                 <Button
