@@ -1,9 +1,11 @@
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
+import advancedFormat from "dayjs/plugin/advancedFormat";
 
 // Make the Weekday plugin available through `dayjs`.
 // See: https://day.js.org/docs/en/plugin/weekday.
 dayjs.extend(weekday);
+dayjs.extend(advancedFormat);
 
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const INITIAL_YEAR = dayjs().format("YYYY");
@@ -134,6 +136,14 @@ const getTrailingDays = (year: string, month: string): Day[] => {
     }));
 };
 
+/**
+ * Forms an array of all the days that should be rendered on a calendar,
+ * including days from the given month and also all the days from the previous
+ * and next month that are needed to align the displayed days to Monday.
+ * @param year
+ * @param month
+ * @returns
+ */
 export const getCalendarDays = (
     year: string = INITIAL_YEAR,
     month: string = INITIAL_MONTH,

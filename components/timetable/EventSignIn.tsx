@@ -15,6 +15,9 @@ const EventSignIn: React.FC<Props> = ({ setUsername, setPassword }) => {
     const usernameInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
 
+    /**
+     * Sets the credentials of the user who's trying to fill out the timetable.
+     */
     const setCredentials = useCallback(
         (e: FormEvent) => {
             e.preventDefault();

@@ -2,10 +2,6 @@ import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 import { TimeInterval } from "./Timetable";
 
-// A single person's availabilities. This is meant to be used by the timetable
-// for filling out availabilities, not for showing the group's availabilities.
-export type IndividualAvailabilities = boolean[];
-
 /**
  * From the map `selectedDays` containing universal ISO string dates as keys,
  * create a sorted array of intervals containing contiguous days.
@@ -50,6 +46,7 @@ export const createIntervals = (
     return contiguousDays;
 };
 
+// A list of all time labels for the time blocks of the timetable.
 export const TIME_LABELS = [
     "12:00 AM",
     "12:30 AM",

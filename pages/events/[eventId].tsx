@@ -3,11 +3,11 @@ import { DaySelector } from "components/day-selector";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
 import { BASE_URL } from "constants/url";
-import { getDatabase, onValue, ref } from "firebase/database";
 import { AnimatePresence, motion } from "framer-motion";
 import {
     EMPTY_EVENT,
     KonfluxEvent,
+    onEventChange,
     updateRemoteAvailabilities,
 } from "models/event";
 import type { NextPage } from "next";
@@ -21,7 +21,6 @@ import {
     useRef,
     useState,
 } from "react";
-import { toast } from "react-toastify";
 
 /* --------------------------- Reducer and actions -------------------------- */
 // TODO: Move all this reducer stuff and actions to a separate file.
@@ -52,7 +51,9 @@ const eventReducer = (
                 groupAvailabilities: action.payload.groupAvailabilities,
             };
         default:
-            throw new Error(`Unknown action`);
+            throw new Error(
+                `Unknown event action type ${(action as EventAction).type}`,
+            );
     }
 };
 
@@ -87,20 +88,20 @@ const EventPage: NextPage = () => {
     const [password, setPassword] = useState<string>("");
 
     // Get the event's ID from the route.
-    const eventId = useMemo(() => String(router.query.eventId), [router]);
+    const eventId = useMemo(
+        () => (router.query.eventId ? String(router.query.eventId) : ""),
+        [router],
+    );
 
     // Fetch and listen for changes to the remote Event data object.
     useEffect(() => {
-        if (eventId !== undefined && eventId !== "undefined" && dispatch) {
-            const eventRef = ref(getDatabase(), `events/${eventId}`);
-            onValue(eventRef, (snapshot) => {
-                const currEvent = snapshot.val() as KonfluxEvent;
+        if (eventId && dispatch)
+            onEventChange(eventId, (newEvent) =>
                 dispatch({
                     type: "SET_EVENT",
-                    payload: { event: currEvent },
-                });
-            });
-        }
+                    payload: { event: newEvent },
+                }),
+            );
     }, [eventId, dispatch]);
 
     // Grab the username and password transmitted through navigation from a

@@ -1,35 +1,29 @@
 import { Button } from "components/button";
 import { PageTransition } from "components/page-transition";
-import { motion } from "framer-motion";
+import { createEvent } from "models/event";
 import type { NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import Logo from "public/logo.svg";
-import styles from "./index.module.scss";
+import { useCallback, useRef, useState } from "react";
 import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
-import { getDatabase, ref, set } from "firebase/database";
-import { FormEvent, useCallback, useRef, useState } from "react";
-import { toast } from "react-toastify";
-import { createEvent, KonfluxEvent } from "models/event";
-import Router, { useRouter } from "next/router";
+import { spawnNotification } from "utils/notifications";
+import styles from "./index.module.scss";
 
 const Home: NextPage = () => {
     const router = useRouter();
-
     const eventNameInput = useRef<HTMLInputElement>(null);
     const usernameInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
 
-    // The ID of the event after creation.
-    const [eventId, setEventId] = useState<string>("");
-
     // Handle the creation of an event.
-    const handleEventCreation = useCallback(() => {
+    const handleEventCreation = useCallback((): void => {
         if (
             eventNameInput.current === null ||
             usernameInput.current === null ||
             passwordInput.current === null
         ) {
-            toast.error("Input element references detached!");
+            spawnNotification("error", "Input element references detached!");
             return;
         }
 
@@ -37,10 +31,13 @@ const Home: NextPage = () => {
         // TODO: see if these input rules can be enforced on firebase's side.
         const formEventName = String(eventNameInput.current.value);
         if (formEventName.length === 0) {
-            toast.error("Event name must not be empty.");
+            spawnNotification("error", "Event name must not be empty.");
             return;
         } else if (formEventName.length >= 255) {
-            toast.error("Event name must be fewer than 255 characters.");
+            spawnNotification(
+                "error",
+                "Event name must be fewer than 255 characters.",
+            );
             return;
         }
 
@@ -48,20 +45,25 @@ const Home: NextPage = () => {
         const formUsername = String(usernameInput.current.value);
         const formPassword = String(passwordInput.current.value);
         if (formUsername.length === 0) {
-            toast.error("Username is required.");
+            spawnNotification("error", "Username is required.");
             return;
         } else if (formUsername.length >= 255) {
-            toast.error("Username must be fewer than 255 characters.");
+            spawnNotification(
+                "error",
+                "Username must be fewer than 255 characters.",
+            );
             return;
         }
         if (formPassword.length >= 64) {
-            toast.error("Password must be fewer than 64 characters.");
+            spawnNotification(
+                "error",
+                "Password must be fewer than 64 characters.",
+            );
             return;
         }
 
         // Creating the event in Firebase realtime DB.
         const eventId = createEvent(formEventName, formUsername);
-        setEventId(eventId);
         // TODO: push to localstorage the event. Write a simple API for this.
 
         // Transmit username and password to the event details page so that it
@@ -85,7 +87,7 @@ const Home: NextPage = () => {
             </h1>
             <aside className={styles.slogan}>Painless meetup planning.</aside>
             <aside className={styles.featureRequest}>
-                <Link scroll={false} href="/request">
+                <Link scroll={false} href="/feature-request">
                     Request a feature.
                 </Link>
             </aside>

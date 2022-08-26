@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import EventSignIn from "./EventSignIn";
 import TimetableGrid from "./TimetableGrid";
 
-// Holds an array of contiguous dates.
+/** Holds an array of contiguous dates. */
 export type TimeInterval = string[];
 
 interface Props {
