@@ -34,20 +34,27 @@ export const spawnNotification = (
  * @returns whatever the given promise wraps around
  */
 export const spawnPromiseNotification = async <T>(
-    promise: Promise<T>,
+    promise: Promise<T> | (() => Promise<T>),
     options?: {
         pendingMessage?: string;
         successMessage?: string;
         errorMessage?: string;
     },
-): Promise<T> => {
-    return await toast.promise(() => promise, {
-        pending: options?.pendingMessage || "Pending...",
-        success: options?.successMessage || "Success!",
-        error: options?.errorMessage || {
-            render({ data }) {
-                return data.message || "Failure.";
+): Promise<T | Error> => {
+    try {
+        return await toast.promise(
+            promise instanceof Function ? promise : () => promise,
+            {
+                pending: options?.pendingMessage || "Pending...",
+                success: options?.successMessage || "Success!",
+                error: options?.errorMessage || {
+                    render({ data }) {
+                        return data.message || "Failure.";
+                    },
+                },
             },
-        },
-    });
+        );
+    } catch (err) {
+        return err as Error;
+    }
 };

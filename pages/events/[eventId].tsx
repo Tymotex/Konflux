@@ -5,10 +5,17 @@ import { Timetable } from "components/timetable";
 import { BASE_URL } from "constants/url";
 import { EventContext, eventReducer } from "contexts/event-context";
 import { AnimatePresence, motion } from "framer-motion";
-import { EMPTY_EVENT, onEventChange } from "models/event";
+import { EMPTY_EVENT, onEventChange, updateEventName } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+    useRef,
+    useState,
+} from "react";
 import { spawnNotification } from "utils/notifications";
 
 const EventPage: NextPage = () => {
@@ -42,7 +49,7 @@ const EventPage: NextPage = () => {
                     payload: { event: newEvent },
                 }),
             ).catch((err) => {
-                spawnNotification("error", err);
+                spawnNotification("error", err.message);
             });
     }, [eventId, dispatch]);
 
@@ -61,6 +68,18 @@ const EventPage: NextPage = () => {
         }
     }, [router, eventId]);
 
+    /**
+     * Push the local name change to the remote copy of the event.
+     */
+    const handleNameChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            updateEventName(eventId, e.target.value).catch((err) =>
+                spawnNotification("error", err.message),
+            );
+        },
+        [eventId],
+    );
+
     return (
         <PageTransition>
             <Container>
@@ -77,9 +96,8 @@ const EventPage: NextPage = () => {
                                 type="text"
                                 placeholder="Eg. Math group study"
                                 defaultValue={state?.name}
-                                onChange={() => {
-                                    // TODO: push commit to remote.
-                                }}
+                                value={state?.name}
+                                onChange={handleNameChange}
                             />
                             <div>
                                 Share with invitees the link:{" "}

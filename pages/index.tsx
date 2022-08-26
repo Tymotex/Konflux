@@ -5,9 +5,8 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Logo from "public/logo.svg";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
-import { toast } from "react-toastify";
 import {
     spawnNotification,
     spawnPromiseNotification,
@@ -32,38 +31,23 @@ const Home: NextPage = () => {
         }
 
         // Get and validate the event name.
-        // TODO: see if these input rules can be enforced on firebase's side.
         const formEventName = String(eventNameInput.current.value);
         if (formEventName.length === 0) {
-            spawnNotification("error", "Event name must not be empty.");
-            return;
+            throw new Error("Event name must not be empty.");
         } else if (formEventName.length >= 255) {
-            spawnNotification(
-                "error",
-                "Event name must be fewer than 255 characters.",
-            );
-            return;
+            throw new Error("Event name must be fewer than 255 characters.");
         }
 
         // Get and validate the username and password
         const formUsername = String(usernameInput.current.value);
         const formPassword = String(passwordInput.current.value);
         if (formUsername.length === 0) {
-            spawnNotification("error", "Username is required.");
-            return;
+            throw new Error("Username is required.");
         } else if (formUsername.length >= 255) {
-            spawnNotification(
-                "error",
-                "Username must be fewer than 255 characters.",
-            );
-            return;
+            throw new Error("Username must be fewer than 255 characters.");
         }
         if (formPassword.length >= 64) {
-            spawnNotification(
-                "error",
-                "Password must be fewer than 64 characters.",
-            );
-            return;
+            throw new Error("Password must be fewer than 64 characters.");
         }
 
         try {
@@ -137,7 +121,7 @@ const Home: NextPage = () => {
                         icon={<ArrowRight />}
                         iconInset
                         onClick={() =>
-                            spawnPromiseNotification(handleEventCreation(), {
+                            spawnPromiseNotification(handleEventCreation, {
                                 pendingMessage: "Creating a new event.",
                                 successMessage: "Created a new event.",
                             })

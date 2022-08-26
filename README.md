@@ -8,8 +8,8 @@ Firebase realtime database data model:
     "events": {
         "comp4128-group-study-134ca1": {
             name: "COMP4128 Group Study",
-            earliest: "9:00AM",
-            latest: "5:00PM",
+            earliest: 18,  // 9:00AM.
+            latest: 34,    // 5:00PM.
             groupAvailabilities: {
                 // Array of 48 integers denoting how many responders are
                 // available at a certain 30-min time block, ordered from

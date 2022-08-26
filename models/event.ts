@@ -113,7 +113,7 @@ export const createEvent = async (
         },
     };
     try {
-        const reference = push(ref(getDatabase(), `events`), event);
+        const reference = await push(ref(getDatabase(), `events`), event);
         if (!reference.key) throw Error("Firebase did not assign an ID.");
         return reference.key;
     } catch (err) {
@@ -136,8 +136,9 @@ export const updateRemoteAvailabilities = async (
     eventId: string,
     availabilities: KonfluxEvent["groupAvailabilities"],
 ): Promise<void> => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
     try {
-        set(
+        await set(
             ref(getDatabase(), `events/${eventId}/groupAvailabilities`),
             availabilities,
         );
@@ -145,5 +146,22 @@ export const updateRemoteAvailabilities = async (
         throw new Error(
             `Failed to update the event's availabilities. Reason: ${err}`,
         );
+    }
+};
+
+/**
+ * Sets a new name for the event with the given ID.
+ * @param eventId
+ * @param newName name of the event to set. Between 0 and 255 characters.
+ */
+export const updateEventName = async (
+    eventId: string,
+    newName: string,
+): Promise<void> => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+    try {
+        await set(ref(getDatabase(), `events/${eventId}/name`), newName);
+    } catch (err) {
+        throw new Error(`Failed to update the event's name. Reason: ${err}`);
     }
 };
