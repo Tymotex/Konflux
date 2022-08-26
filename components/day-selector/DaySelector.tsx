@@ -2,7 +2,9 @@ import React, {
     Dispatch,
     SetStateAction,
     useCallback,
+    useContext,
     useEffect,
+    useReducer,
     useState,
 } from "react";
 import styles from "./DaySelector.module.scss";
@@ -19,13 +21,15 @@ import {
     INITIAL_YEAR,
     Day,
 } from "./calendar-utils";
+import { EventContext } from "pages/events/[eventId]";
 
 interface Props {
-    selectedDays: Set<string>;
-    onChange: (newDays: Set<string>) => void;
+    eventId: string;
 }
 
-const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
+const DaySelector: React.FC<Props> = ({ eventId }) => {
+    const { state, dispatch } = useContext(EventContext);
+
     // The days to be displayed on the calendar. By default, we start by showing
     // the days of the current month.
     const [days, setDays] = useState<Day[]>(
@@ -62,39 +66,48 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
         setRangeEndDate("");
     }, []);
 
-    // When the user is selecting a range and lifts up their finger anywhere on
-    // the <body>, add the selected ranges to the `selectedDays`.
-    // When the user's mouse exits the <body>, just abort the range selection.
-    // When the user is deselecting, we go by the same logic, except we remove
-    // days from the `selectedDays` set instead of adding.
+    /**
+     * When the user is selecting a range and lifts up their finger anywhere on
+     * the <body>, add the selected ranges to the `selectedDays`.
+     * When the user's mouse exits the <body>, just abort the range selection.
+     * When the user is deselecting, we go by the same logic, except we remove
+     * days from the `selectedDays` set instead of adding.
+     */
     useEffect(() => {
         // Commits the selected days in the range into the `selectedDays` set.
         const commitRangeSelection = () => {
-            const newSelectedDays = new Set(selectedDays);
+            if (!isSelectingRange && !isDeselectingRange) return;
+            const newAvailabilities = { ...state.groupAvailabilities };
             const endDay = dayjs(
                 rangeEndDate >= rangeStartDate ? rangeEndDate : rangeStartDate,
             );
             let currDay = dayjs(
                 rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate,
             );
-
             while (currDay.isBefore(endDay) || currDay.isSame(endDay)) {
                 // Adds or removes selected days if we're selecting or
                 // deselecting respectively.
+                const date = currDay.format("YYYY-MM-DD");
                 if (isSelectingRange)
-                    newSelectedDays.add(currDay.format("YYYY-MM-DD"));
-                else if (isDeselectingRange)
-                    newSelectedDays.delete(currDay.format("YYYY-MM-DD"));
+                    newAvailabilities[date] = { placeholder: true };
+                else if (isDeselectingRange && date in newAvailabilities)
+                    delete newAvailabilities[date];
                 else {
-                    // TODO: fatal err. What do?
-                    toast.error("Neither selecting nor deselecting...");
+                    toast.error(
+                        "Error: neither selecting nor deselecting. Please try again.",
+                    );
                     resetRangeTrackingState();
                     return;
                 }
                 currDay = currDay.add(1, "day");
             }
-
-            onChange(newSelectedDays);
+            dispatch({
+                type: "SET_DAYS",
+                payload: {
+                    eventId: eventId,
+                    groupAvailabilities: newAvailabilities,
+                },
+            });
             resetRangeTrackingState();
         };
 
@@ -121,7 +134,8 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
             body.removeEventListener("mouseleave", abortRangeSelection);
         };
     }, [
-        selectedDays,
+        dispatch,
+        state,
         isDeselectingRange,
         setIsSelectingRange,
         setIsDeselectingRange,
@@ -129,16 +143,20 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
         rangeEndDate,
         isSelectingRange,
         resetRangeTrackingState,
-        onChange,
+        eventId,
     ]);
 
-    // When the user sets a different month in the calendar, rerender the day
-    // grid to show the days of that new display month.
+    /**
+     * When the user sets a different month in the calendar, rerender the day
+     * grid to show the days of that new display month.
+     */
     useEffect(() => {
         setDays(getCalendarDays(displayYear, displayMonth));
     }, [displayMonth, displayYear]);
 
-    // Show the days of the previous month.
+    /**
+     * Show the days of the previous month.
+     */
     const renderPrevMonth = useCallback(() => {
         setDislayMonth((m) => {
             if (Number(m) === 1) {
@@ -150,7 +168,9 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
         });
     }, []);
 
-    // Show the days of the next month.
+    /**
+     * Show the days of the next month.
+     */
     const renderNextMonth = useCallback(() => {
         setDislayMonth((m) => {
             if (Number(m) === 12) {
@@ -162,39 +182,50 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
         });
     }, []);
 
-    // Toggles whether the given date is selected.
-    // Expects the string to be of the universal ISO format: "YYYY-MM-DD".
+    /**
+     * Toggles whether the given date is selected.
+     * Expects the string to be of the universal ISO format: "YYYY-MM-DD".
+     */
     const toggleDaySelection = useCallback(
         (date: string) => {
-            const newSelectedDays = new Set(selectedDays);
-            if (newSelectedDays.has(date)) {
-                newSelectedDays.delete(date);
+            const newAvailabilities = { ...state.groupAvailabilities };
+            if (date in newAvailabilities) {
+                delete newAvailabilities[date];
             } else {
-                newSelectedDays.add(date);
+                // TODO. this logic is duplicated.
+                newAvailabilities[date] = { placeholder: true };
             }
-            onChange(newSelectedDays);
+            dispatch({
+                type: "SET_DAYS",
+                payload: {
+                    eventId: eventId,
+                    groupAvailabilities: newAvailabilities,
+                },
+            });
         },
-        [selectedDays, onChange],
+        [state, dispatch, eventId],
     );
 
-    // Flips on the `isSelectingRange` or `isDeselectingRange` boolean state.
+    /**
+     * Flips on the `isSelectingRange` or `isDeselectingRange` boolean state.
+     */
     const beginSelectingRange = useCallback(
         (startDate: string) => {
-            if (!selectedDays.has(startDate)) setIsSelectingRange(true);
+            if (
+                state.groupAvailabilities !== undefined &&
+                !(startDate in state.groupAvailabilities)
+            )
+                setIsSelectingRange(true);
             else setIsDeselectingRange(true);
-
             setRangeStartDate(startDate);
         },
-        [
-            selectedDays,
-            setIsSelectingRange,
-            setIsDeselectingRange,
-            setRangeStartDate,
-        ],
+        [state, setIsSelectingRange, setIsDeselectingRange, setRangeStartDate],
     );
 
-    // When the user's mouse leaves a day cell while still holding the left
-    // mouse button, begin selecting/deselecting a range of days.
+    /**
+     * When the user's mouse leaves a day cell while still holding the left
+     * mouse button, begin selecting/deselecting a range of days.
+     */
     const handleMouseLeave = useCallback(
         (e: React.MouseEvent, dateStr: string) => {
             const isLeftClicking = e.buttons === 1;
@@ -205,13 +236,24 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
         [isSelectingRange, isDeselectingRange, beginSelectingRange],
     );
 
-    // Determines whether the given date (in the universal ISO format,
-    // 'YYYY-MM-DD') is in the selection/deselection range spanning from
-    // `rangeStartDate` to `rangeEndDate`.
+    const isSelected = useCallback(
+        (date: string) => {
+            return (
+                state.groupAvailabilities !== undefined &&
+                date in state.groupAvailabilities
+            );
+        },
+        [state],
+    );
+
+    /**
+     * Determines whether the given date (in the universal ISO format,
+     * 'YYYY-MM-DD') is in the selection/deselection range spanning from
+     * `rangeStartDate` to `rangeEndDate`.
+     */
     const isInRangeSelection = useCallback(
         (thisDate: string) => {
             if (!(rangeStartDate && rangeEndDate)) return false;
-
             const earlierDate =
                 rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate;
             const laterDate =
@@ -257,7 +299,7 @@ const DaySelector: React.FC<Props> = ({ selectedDays, onChange }) => {
                                         ? styles.notCurrentMonth
                                         : ""
                                 } ${
-                                    selectedDays.has(dateStr)
+                                    isSelected(dateStr)
                                         ? styles.selected
                                         : styles.notSelected
                                 } ${

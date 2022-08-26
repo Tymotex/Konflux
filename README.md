@@ -10,19 +10,19 @@ Firebase realtime database data model:
             name: "COMP4128 Group Study",
             earliest: "9:00AM",
             latest: "5:00PM",
-            groupAvailabilities {
+            groupAvailabilities: {
                 // Array of 48 integers denoting how many responders are
                 // available at a certain 30-min time block, ordered from
                 // 00:00 to 23:59.
-                "2022-08-20": [ 
-                    {},                         // 12:00AM.
-                    {},                         // 12:30AM.
-                    {"Alice": {}},              // 1:00AM.
-                    {"Alice": {}, "Bob": {}},   // 1:30AM.
-                    {},                         // 2:00AM.
-                    {"Bob": {}},                // 2:30AM.
+                "2022-08-20": {
+                    0: {},                         // 12:00AM.
+                    1: {},                         // 12:30AM.
+                    2: {"Alice": {}},              // 1:00AM.
+                    3: {"Alice": {}, "Bob": {}},   // 1:30AM.
+                    4: {},                         // 2:00AM.
+                    5: {"Bob": {}},                // 2:30AM.
                     // ... and so on.
-                ]
+                }
                 // ... and so on for further dates.
             },
             members: {

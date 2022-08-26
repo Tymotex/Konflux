@@ -2,72 +2,106 @@ import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
-import { TimeInterval } from "components/timetable/Timetable";
-import {
-    createIntervals,
-    extractOutSelectedDays,
-    FilledSchedule,
-    mapScheduleToTimeIntervals,
-} from "components/timetable/timetable-utils";
 import { BASE_URL } from "constants/url";
 import { getDatabase, onValue, ref } from "firebase/database";
 import { AnimatePresence, motion } from "framer-motion";
-import { KonfluxEvent, syncEventDays } from "models/event";
+import {
+    EMPTY_EVENT,
+    KonfluxEvent,
+    updateRemoteAvailabilities,
+} from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    createContext,
+    Dispatch,
+    useEffect,
+    useMemo,
+    useReducer,
+    useRef,
+    useState,
+} from "react";
 import { toast } from "react-toastify";
+
+/* --------------------------- Reducer and actions -------------------------- */
+// TODO: Move all this reducer stuff and actions to a separate file.
+type EventAction =
+    | { type: "SET_EVENT"; payload: { event: KonfluxEvent } }
+    | {
+          type: "SET_DAYS";
+          payload: {
+              eventId: string;
+              groupAvailabilities: KonfluxEvent["groupAvailabilities"];
+          };
+      };
+
+const eventReducer = (
+    state: KonfluxEvent,
+    action: EventAction,
+): KonfluxEvent => {
+    switch (action.type) {
+        case "SET_EVENT":
+            return action.payload.event;
+        case "SET_DAYS":
+            updateRemoteAvailabilities(
+                action.payload.eventId,
+                action.payload.groupAvailabilities,
+            );
+            return {
+                ...state,
+                groupAvailabilities: action.payload.groupAvailabilities,
+            };
+        default:
+            throw new Error(`Unknown action`);
+    }
+};
+
+/* --------------------------------- Context -------------------------------- */
+// TODO: move this away to a separate file.
+
+interface EventContextInterface {
+    state: KonfluxEvent;
+    dispatch: Dispatch<EventAction>;
+}
+
+export const EventContext = createContext<EventContextInterface>(
+    {} as EventContextInterface,
+);
+
+/* ---------------------------------- Page ---------------------------------- */
 
 const EventPage: NextPage = () => {
     const router = useRouter();
     const eventNameInput = useRef<HTMLInputElement>(null);
 
-    // Copy of the remote event.
-    const [event, setEvent] = useState<KonfluxEvent>();
+    // Using context and reducer together to allow for descendants to cleanly
+    // modify the local single source of truth for the event's data.
+    const [state, dispatch] = useReducer(eventReducer, EMPTY_EVENT);
+    const contextValue = useMemo(
+        () => ({ state, dispatch }),
+        [state, dispatch],
+    );
 
-    // User credentials localised just to this event.
+    // User credentials, localised just to this event.
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    // An unordered set of date strings of the universal ISO format "YYYY-MM-DD"
-    // selected by the user.
-    const [selectedDays, setSelectedDays] = useState<Set<string>>(
-        new Set<string>(),
-    );
-
-    // A map structure containing a superset of the days on the timetable grid
-    // and the availabilities filled by the user.
-    const [selectedBlocks, setSelectedBlocks] = useState<FilledSchedule>({});
-
-    // Form the time intervals to be passed down to the timetable for rendering.
-    const [timeIntervals, setTimeIntervals] = useState<TimeInterval[]>([]);
-
     // Get the event's ID from the route.
-    const eventId = useMemo(() => {
-        return String(router.query.eventId);
-    }, [router]);
+    const eventId = useMemo(() => String(router.query.eventId), [router]);
 
     // Fetch and listen for changes to the remote Event data object.
     useEffect(() => {
-        if (eventId !== undefined && eventId !== "undefined") {
+        if (eventId !== undefined && eventId !== "undefined" && dispatch) {
             const eventRef = ref(getDatabase(), `events/${eventId}`);
             onValue(eventRef, (snapshot) => {
                 const currEvent = snapshot.val() as KonfluxEvent;
-                if (currEvent) {
-                    setEvent(currEvent);
-
-                    // Set the selected days, if they exist already:
-                    if (currEvent.timeIntervals) {
-                        const days = extractOutSelectedDays(
-                            currEvent.timeIntervals,
-                        );
-                        setSelectedDays(days);
-                        setTimeIntervals(createIntervals(days));
-                    }
-                }
+                dispatch({
+                    type: "SET_EVENT",
+                    payload: { event: currEvent },
+                });
             });
         }
-    }, [eventId]);
+    }, [eventId, dispatch]);
 
     // Grab the username and password transmitted through navigation from a
     // previous page. See: https://www.youtube.com/watch?v=7wzMMBRVrfw.
@@ -78,92 +112,52 @@ const EventPage: NextPage = () => {
         if (username) {
             setUsername(String(username));
             setPassword(String(password));
-            // Clear URL query parameters. See: https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params.
+            // Clear URL query parameters.
+            // See: https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params.
             router.replace(`/events/${eventId}`, undefined, { shallow: true });
         }
     }, [router, eventId]);
 
-    // Whenever the organiser sets a different set of days, sync those changes
-    // with the remote copy.
-    const handleDaySelectionChange = useCallback(
-        (newDays: Set<string>) => {
-            setSelectedDays(newDays);
-            const timeIntervals = createIntervals(newDays);
-            setTimeIntervals(timeIntervals);
-            syncEventDays(eventId, timeIntervals);
-        },
-        [eventId],
-    );
-
-    const handleTimetableSelectionChange = useCallback(
-        (newSelectedBlocks: FilledSchedule) => {
-            setSelectedBlocks(newSelectedBlocks);
-
-            // Update the local `timeIntervals` state.
-            if (!username) {
-                toast.error(
-                    "You must have a username associated with the schedule.",
-                );
-                return;
-            }
-            // const newTimeIntervals = mapScheduleToTimeIntervals(
-            //     newSelectedBlocks,
-            //     username,
-            // );
-            // setTimeIntervals(newTimeIntervals);
-
-            // Sync the changes with remote.
-        },
-        [setSelectedBlocks, username],
-    );
-
-    // Whenever the organiser changes their timetable availabilities, sync those
-    // changes with the remote copy.
-    useEffect(() => {}, [selectedBlocks]);
-
     return (
         <PageTransition>
             <Container>
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
-                        <label htmlFor="event-name">Event Name</label>
-                        <input
-                            ref={eventNameInput}
-                            id="event-name"
-                            type="text"
-                            placeholder="Eg. Math group study"
-                            defaultValue={event?.name}
-                            onChange={() => {
-                                // TODO: push commit to remote.
-                            }}
-                        />
-                        <div>
-                            Share with invitees the link:{" "}
-                            <strong>{`${BASE_URL}/events/${eventId}`}</strong>
-                        </div>
-                        <DaySelector
-                            selectedDays={selectedDays}
-                            // setSelectedDays={setSelectedDays}
-                            onChange={handleDaySelectionChange}
-                        />
-                        {/* Timetable for filling availabilities. */}
-                        <Timetable
-                            timeIntervals={timeIntervals}
-                            selectedBlocks={selectedBlocks}
-                            onChange={handleTimetableSelectionChange}
-                        />
-                        {/* Timetable for showing the group's availabilities */}
-                        <Timetable
-                            timeIntervals={timeIntervals}
-                            selectedBlocks={selectedBlocks}
-                            showGroupAvailability
-                            onChange={handleTimetableSelectionChange}
-                        />
-                    </motion.div>
-                </AnimatePresence>
+                <EventContext.Provider value={contextValue}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
+                            <label htmlFor="event-name">Event Name</label>
+                            <input
+                                ref={eventNameInput}
+                                id="event-name"
+                                type="text"
+                                placeholder="Eg. Math group study"
+                                defaultValue={state?.name}
+                                onChange={() => {
+                                    // TODO: push commit to remote.
+                                }}
+                            />
+                            <div>
+                                Share with invitees the link:{" "}
+                                <strong>{`${BASE_URL}/events/${eventId}`}</strong>
+                            </div>
+                            <DaySelector eventId={eventId} />
+                            {/* Timetable for filling availabilities. */}
+                            <Timetable
+                                username={username}
+                                setUsername={setUsername}
+                                setPassword={setPassword}
+                                eventId={eventId}
+                            />
+                            {/* Timetable for showing the group's availabilities */}
+                            {/* <Timetable showGroupAvailability /> */}
+                            <pre>
+                                {JSON.stringify(state || "Nothing", null, 4)}
+                            </pre>
+                        </motion.div>
+                    </AnimatePresence>
+                </EventContext.Provider>
             </Container>
         </PageTransition>
     );

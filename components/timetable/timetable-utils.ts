@@ -1,20 +1,15 @@
 import dayjs from "dayjs";
-import { DayAvailabilities, TimeInterval } from "./Timetable";
-
-// A map of universal ISO date strings to an array of timeblocks which are
-// either filled (indiciating availability) or empty.
-// Each index in the boolean array corresponds to a time block.
-export interface FilledSchedule {
-    [day: string]: IndividualAvailabilities;
-}
+import { KonfluxEvent } from "models/event";
+import { TimeInterval } from "./Timetable";
 
 // A single person's availabilities. This is meant to be used by the timetable
 // for filling out availabilities, not for showing the group's availabilities.
 export type IndividualAvailabilities = boolean[];
 
 /**
- * From the set `selectedDays`, create a sorted array of intervals containing
- * contiguous days.
+ * From the map `selectedDays` containing universal ISO string dates as keys,
+ * create a sorted array of intervals containing contiguous days.
+ *
  * Example:
  *   Suppose `selectedDays` is["2022-08-03", "2022-08-04", "2022-08-07"].
  *   This function is expected to return:
@@ -23,73 +18,36 @@ export type IndividualAvailabilities = boolean[];
  *       [{ date: "2022-08-07" }]
  *     ]
  *
- * @param selectedDays set of dates (universal ISO standard format).
+ * @param selectedDays
  * @returns
  * Sorted array of arrays of contiguous time intervals.
  */
-export const createIntervals = (selectedDays: Set<string>): TimeInterval[] => {
-    const days = Array.from(selectedDays)
-        .sort()
-        .map(
-            (date: string): DayAvailabilities => ({
-                date: date,
-                groupAvailabilities: [...Array(48)].map(() => []),
-            }),
-        );
+export const createIntervals = (
+    selectedDays: KonfluxEvent["groupAvailabilities"],
+): TimeInterval[] => {
+    if (!selectedDays) return [];
+    const days = Object.keys(selectedDays).sort();
 
     const contiguousDays: TimeInterval[] = [];
-    let prevDay: DayAvailabilities | null = null;
-    days.forEach((day) => {
+    let prevDay = "";
+    days.forEach((date) => {
         // Use the first day to create the first interval.
         if (!prevDay) {
-            prevDay = day;
-            contiguousDays.push([day]);
+            prevDay = date;
+            contiguousDays.push([date]);
             return;
         }
         // If the current day is 1 day ahead of the previous day, then
         // merge it in the same interval, otherwise start a new one.
-        if (
-            dayjs(day.date).subtract(1, "day").format("YYYY-MM-DD") ===
-            prevDay.date
-        ) {
-            contiguousDays[contiguousDays.length - 1].push(day);
+        if (dayjs(date).subtract(1, "day").format("YYYY-MM-DD") === prevDay) {
+            contiguousDays[contiguousDays.length - 1].push(date);
         } else {
-            contiguousDays.push([day]);
+            contiguousDays.push([date]);
         }
-        prevDay = day;
+        prevDay = date;
     });
 
     return contiguousDays;
-};
-
-/**
- * Converts the given `FilledSchedules` data structure into a `TimeInterval[]`,
- * adding the current user's schedule into the time intervals.
- * This is necessary because the event data model stores only `TimeInterval[]`.
- * @param timeBlocks
- * @returns array of time intervals.
- */
-export const mapScheduleToTimeIntervals = (
-    timeIntervals: TimeInterval[],
-    timeBlocks: FilledSchedule,
-    username: string,
-): TimeInterval[] => {
-    return [];
-};
-
-/**
- * From the given list of time intervals, extract out dates in all their days.
- * @param timeIntervals
- * @returns a set of all the dates in the time intervals.
- */
-export const extractOutSelectedDays = (
-    timeIntervals: TimeInterval[],
-): Set<string> => {
-    const allDates = timeIntervals?.reduce((currDates, interval) => {
-        const dates: string[] = interval.map((day) => day.date);
-        return [...currDates, ...dates];
-    }, [] as string[]);
-    return new Set<string>(allDates);
 };
 
 export const TIME_LABELS = [

@@ -1,38 +1,37 @@
-import React, { Dispatch, SetStateAction, useCallback } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import EventSignIn from "./EventSignIn";
-import { FilledSchedule } from "./timetable-utils";
-import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
 
-export interface DayAvailabilities {
-    date: string;
-    groupAvailabilities: string[][];
-}
-
-// Holds an array of contiguous days' availabilities.
-export type TimeInterval = DayAvailabilities[];
+// Holds an array of contiguous dates.
+export type TimeInterval = string[];
 
 interface Props {
-    timeIntervals: TimeInterval[];
-    selectedBlocks: FilledSchedule;
-    onChange: (newSelectedBlocks: FilledSchedule) => void;
+    username: string;
+    setUsername: Dispatch<SetStateAction<string>>;
+    setPassword: Dispatch<SetStateAction<string>>;
+    eventId: string;
     showGroupAvailability?: boolean;
 }
 
 const Timetable: React.FC<Props> = ({
-    timeIntervals,
-    selectedBlocks,
     showGroupAvailability = false,
-    onChange,
+    username,
+    setUsername,
+    setPassword,
+    eventId,
 }) => {
     return (
         <>
-            <EventSignIn />
+            {!username && (
+                <EventSignIn
+                    setUsername={setUsername}
+                    setPassword={setPassword}
+                />
+            )}
             <TimetableGrid
-                // disabled
-                timeIntervals={timeIntervals}
-                selectedBlocks={selectedBlocks}
-                onChange={onChange}
+                username={username}
+                eventId={eventId}
+                disabled={!username}
             />
         </>
     );

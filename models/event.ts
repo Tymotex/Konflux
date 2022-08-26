@@ -1,8 +1,3 @@
-import { TimeInterval } from "components/timetable/Timetable";
-import {
-    FilledSchedule,
-    mapScheduleToTimeIntervals,
-} from "components/timetable/timetable-utils";
 import { getDatabase, push, ref, set } from "firebase/database";
 
 // TODO doc
@@ -15,15 +10,41 @@ export interface LocalEventMember {
 }
 
 // TODO: doc
+export type AvailabilityInfo = {
+    [timeBlockIndex: number]: {
+        [username: string]: {
+            // A very annoying detail about Firebase is that you cannot store empty
+            // objects or arrays. The officially suggested workaround is to put in
+            // a placeholder value.
+            // See: https://groups.google.com/g/firebase-talk/c/fdjqrn93OcY/m/-Tml0ifSiV4J?pli=1.
+            placeholder?: boolean;
+            // Data about this availability.
+            // To be determined in the next iteration.
+        };
+    };
+    placeholder?: true;
+};
+
+// TODO: doc
 export interface KonfluxEvent {
     name: string;
     earliest: number;
     latest: number;
-    timeIntervals: TimeInterval[];
+    groupAvailabilities: {
+        [date: string]: AvailabilityInfo;
+    };
     members: {
         [username: string]: Omit<LocalEventMember, "username">;
     };
 }
+
+export const EMPTY_EVENT = {
+    name: "",
+    earliest: 0,
+    latest: 48,
+    groupAvailabilities: {},
+    members: {},
+};
 
 // TODO: doc
 export const createEvent = (
@@ -34,7 +55,7 @@ export const createEvent = (
         name: eventName,
         earliest: 18,
         latest: 34,
-        timeIntervals: [],
+        groupAvailabilities: {},
         members: {
             [creatorUsername]: {
                 isOwner: true,
@@ -48,28 +69,13 @@ export const createEvent = (
 };
 
 // TODO: doc
-export const syncEventDays = (
+export const updateRemoteAvailabilities = (
     eventId: string,
-    timeIntervals: TimeInterval[],
+    availabilities: KonfluxEvent["groupAvailabilities"],
 ): void => {
     // TODO: error handling
-    set(ref(getDatabase(), `events/${eventId}/timeIntervals`), timeIntervals);
-};
-
-// TODO: doc
-export const syncEventAvailability = (
-    eventId: string,
-    timeBlocks: FilledSchedule,
-    username: string,
-) => {
-    // We need to convert the `FilledSchedule` data structure into type
-    // `TimeInterval[]` to fit the event data model.
-    if (!username) {
-        throw Error(
-            "A non-empty username must be associated with the given schedule.",
-        );
-    }
-    // const timeIntervals = mapScheduleToTimeIntervals(timeBlocks, username);
-
-    // set(ref(getDatabase(), `events/${eventId}/timeIntervals`), timeIntervals);
+    set(
+        ref(getDatabase(), `events/${eventId}/groupAvailabilities`),
+        availabilities,
+    );
 };
