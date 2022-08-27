@@ -26,7 +26,7 @@ export interface Day {
  * @example
  * const numDays = getNumberofDaysInMonth('2022', '08');
  */
-const getNumberOfDaysInMonth = (year: string, month: string): number =>
+export const getNumberOfDaysInMonth = (year: string, month: string): number =>
     dayjs(`${year}-${month}-01`).daysInMonth();
 
 /**
@@ -60,6 +60,15 @@ const getWeekday = (date: Dayjs): number => {
     let weekday = dayjs(date).weekday();
     if (weekday === 0) weekday = 7;
     return weekday - 1;
+};
+
+/**
+ * Determines the date of the day after the given date.
+ * @param date
+ * @returns the next date in universal ISO form.
+ */
+export const getNextDate = (date: string): string => {
+    return dayjs(date).add(1, "day").format("YYYY-MM-DD");
 };
 
 /**

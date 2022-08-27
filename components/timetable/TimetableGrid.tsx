@@ -1,5 +1,7 @@
+import { getNextDate } from "components/day-selector/calendar-utils";
 import { EventContext } from "contexts/event-context";
 import dayjs from "dayjs";
+import { KonfluxEvent } from "models/event";
 import React, {
     useCallback,
     useContext,
@@ -8,7 +10,13 @@ import React, {
     useState,
 } from "react";
 import { spawnNotification } from "utils/notifications";
-import { createIntervals, TIME_LABELS } from "./timetable-utils";
+import {
+    boundsAreValid,
+    createIntervals,
+    createNewAvailabilitiesAfterSelection,
+    getStartAndEndRowsAndCols,
+    TIME_LABELS,
+} from "./timetable-utils";
 import styles from "./Timetable.module.scss";
 
 interface Props {
@@ -16,6 +24,8 @@ interface Props {
     username: string;
     eventId: string;
 }
+
+// TODO: doc and move
 
 const TimetableGrid: React.FC<Props> = ({
     disabled = false,
@@ -61,94 +71,33 @@ const TimetableGrid: React.FC<Props> = ({
     // When the user is deselecting, we go by the same logic as above, except we
     // remove time blocks from `selectedBlocks` instead of adding.
     useEffect(() => {
-        // Commits the time blocks in the selected area into `selectedBlocks`.
         const commitAreaSelection = () => {
-            // Iterate through each time block within the rectangular are
-            // defined by the start time/date and end time/date.
-            // TODO: this bound validity checking logic is duplicated (I think).
-            if (
-                selectionStartTime === undefined ||
-                selectionEndTime === undefined ||
-                !selectionStartDate ||
-                !selectionEndDate
-            ) {
-                return;
+            if (!isSelectingArea && !isDeselectingArea) return;
+            try {
+                const newAvailabilities = createNewAvailabilitiesAfterSelection(
+                    state.groupAvailabilities,
+                    username,
+                    selectionStartTime,
+                    selectionEndTime,
+                    selectionStartDate,
+                    selectionEndDate,
+                    isSelectingArea,
+                    isDeselectingArea,
+                );
+                dispatch({
+                    type: "SET_AVAILABILITIES",
+                    payload: {
+                        eventId: eventId,
+                        groupAvailabilities: newAvailabilities,
+                    },
+                });
+            } catch (err) {
+                if (err instanceof Error)
+                    spawnNotification("error", err.message);
+                else throw err;
+            } finally {
+                resetRangeTrackingState();
             }
-
-            const startRow =
-                selectionStartTime <= selectionEndTime
-                    ? selectionStartTime
-                    : selectionEndTime;
-            const endRow =
-                selectionStartTime <= selectionEndTime
-                    ? selectionEndTime
-                    : selectionStartTime;
-            const startCol =
-                selectionStartDate <= selectionEndDate
-                    ? selectionStartDate
-                    : selectionEndDate;
-            const endCol =
-                selectionStartDate <= selectionEndDate
-                    ? selectionEndDate
-                    : selectionStartDate;
-
-            const newAvailabilities = { ...state.groupAvailabilities };
-            for (
-                let timeBlockIndex = startRow;
-                timeBlockIndex <= endRow;
-                ++timeBlockIndex
-            ) {
-                let currDate = startCol;
-                while (currDate <= endCol) {
-                    // It's possible for the current date to not exist in the
-                    // `selectedBlocks` map because of discontinuity in the
-                    // selected days. In this case, we simply skip.
-                    if (!(currDate in newAvailabilities)) {
-                        currDate = dayjs(currDate)
-                            .add(1, "day")
-                            .format("YYYY-MM-DD");
-                        continue;
-                    }
-
-                    // Add or remove the current timeblock in the rectangular
-                    // area depending on if we're selecting or deselecting.
-                    // TODO: refactor this area. It's messy.
-                    if (isSelectingArea) {
-                        newAvailabilities[currDate][timeBlockIndex] = {
-                            ...newAvailabilities[currDate][timeBlockIndex],
-                            [username]: { placeholder: true },
-                        };
-                    } else if (isDeselectingArea) {
-                        if (
-                            newAvailabilities[currDate][timeBlockIndex] &&
-                            username in
-                                newAvailabilities[currDate][timeBlockIndex]
-                        )
-                            delete newAvailabilities[currDate][timeBlockIndex][
-                                username
-                            ];
-                    } else {
-                        // TODO: Really, we should extract notifications to its own component.
-                        spawnNotification(
-                            "error",
-                            "Error: neither selecting nor deselecting. Please try again.",
-                        );
-                        resetRangeTrackingState();
-                        return;
-                    }
-                    currDate = dayjs(currDate)
-                        .add(1, "day")
-                        .format("YYYY-MM-DD");
-                }
-            }
-            dispatch({
-                type: "SET_DAYS",
-                payload: {
-                    eventId: eventId,
-                    groupAvailabilities: newAvailabilities,
-                },
-            });
-            resetRangeTrackingState();
         };
 
         // Cancel the area selection/deselection by doing nothing and resetting
@@ -206,22 +155,18 @@ const TimetableGrid: React.FC<Props> = ({
                 return;
             }
             const newAvailabilities = { ...state.groupAvailabilities };
-            if (
-                newAvailabilities[date][timeBlockIndex] &&
-                username in newAvailabilities[date][timeBlockIndex]
-            ) {
+            const timeBlock = newAvailabilities[date][timeBlockIndex];
+            if (timeBlock && username in timeBlock) {
                 delete newAvailabilities[date][timeBlockIndex][username];
             } else {
                 newAvailabilities[date][timeBlockIndex] = {
-                    ...newAvailabilities[date][timeBlockIndex],
+                    ...timeBlock,
                     [username]: { placeholder: true },
                 };
             }
 
-            console.log(newAvailabilities);
-
             dispatch({
-                type: "SET_DAYS",
+                type: "SET_AVAILABILITIES",
                 payload: {
                     eventId,
                     groupAvailabilities: newAvailabilities,
@@ -281,32 +226,22 @@ const TimetableGrid: React.FC<Props> = ({
     const isInAreaSelection = useCallback(
         (date: string, timeBlockIndex: number): boolean => {
             if (
-                !(
-                    selectionStartTime !== undefined &&
-                    selectionStartDate &&
-                    selectionEndTime !== undefined &&
-                    selectionEndDate
+                !boundsAreValid(
+                    selectionStartTime,
+                    selectionEndTime,
+                    selectionStartDate,
+                    selectionEndDate,
                 )
-            ) {
+            )
                 return false;
-            }
 
-            const startRow =
-                selectionStartTime <= selectionEndTime
-                    ? selectionStartTime
-                    : selectionEndTime;
-            const endRow =
-                selectionStartTime <= selectionEndTime
-                    ? selectionEndTime
-                    : selectionStartTime;
-            const startCol =
-                selectionStartDate <= selectionEndDate
-                    ? selectionStartDate
-                    : selectionEndDate;
-            const endCol =
-                selectionStartDate <= selectionEndDate
-                    ? selectionEndDate
-                    : selectionStartDate;
+            const { startRow, endRow, startCol, endCol } =
+                getStartAndEndRowsAndCols(
+                    selectionStartTime,
+                    selectionEndTime,
+                    selectionStartDate,
+                    selectionEndDate,
+                );
 
             return (
                 startRow <= timeBlockIndex &&
@@ -346,6 +281,20 @@ const TimetableGrid: React.FC<Props> = ({
         [isSelectingArea, isDeselectingArea, beginSelectingArea],
     );
 
+    /**
+     * Set the `pressed` class in response to an event, imperatively.
+     */
+    const setPressedClass = useCallback(
+        (e: React.MouseEvent<HTMLElement>, apply: boolean = true) => {
+            // Revoke the `pressed` class from this element.
+            const thisElem = e.target as HTMLElement;
+            apply
+                ? thisElem.classList.add(styles.pressed)
+                : thisElem.classList.remove(styles.pressed);
+        },
+        [],
+    );
+
     return (
         <div className={`${styles.timetable} ${disabled && styles.disabled}`}>
             <div className={styles.timeBlockLabels}>
@@ -378,28 +327,14 @@ const TimetableGrid: React.FC<Props> = ({
                                     onClick={() =>
                                         toggleTimeblockSelection(date, i)
                                     }
-                                    onMouseDown={(e) => {
-                                        // Apply the `pressed` class to this element.
-                                        const thisElem =
-                                            e.target as HTMLUListElement;
-                                        thisElem.classList.add(styles.pressed);
-                                    }}
+                                    onMouseDown={(e) =>
+                                        setPressedClass(e, true)
+                                    }
                                     onMouseUp={(e) => {
-                                        // TODO: this is duplicated.
-                                        // Revoke the `pressed` class from this element.
-                                        const thisElem =
-                                            e.target as HTMLUListElement;
-                                        thisElem.classList.remove(
-                                            styles.pressed,
-                                        );
+                                        setPressedClass(e, false);
                                     }}
                                     onMouseLeave={(e) => {
-                                        // Revoke the `pressed` class from this element.
-                                        const thisElem =
-                                            e.target as HTMLUListElement;
-                                        thisElem.classList.remove(
-                                            styles.pressed,
-                                        );
+                                        setPressedClass(e, false);
                                         handleMouseLeave(e, date, i);
                                     }}
                                     onMouseEnter={() => {

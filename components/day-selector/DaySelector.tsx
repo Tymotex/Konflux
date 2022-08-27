@@ -97,7 +97,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                 currDay = currDay.add(1, "day");
             }
             dispatch({
-                type: "SET_DAYS",
+                type: "SET_AVAILABILITIES",
                 payload: {
                     eventId: eventId,
                     groupAvailabilities: newAvailabilities,
@@ -191,7 +191,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                 newAvailabilities[date] = { placeholder: true };
             }
             dispatch({
-                type: "SET_DAYS",
+                type: "SET_AVAILABILITIES",
                 payload: {
                     eventId: eventId,
                     groupAvailabilities: newAvailabilities,

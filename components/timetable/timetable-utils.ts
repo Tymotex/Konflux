@@ -1,6 +1,12 @@
+import {
+    getNextDate,
+    getNumberOfDaysInMonth,
+} from "components/day-selector/calendar-utils";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 import { TimeInterval } from "./Timetable";
+
+const UNIVERSAL_ISO_PATTERN = /(\d{4})-(\d{1,2})-(\d{1,2})/;
 
 /**
  * From the map `selectedDays` containing universal ISO string dates as keys,
@@ -44,6 +50,162 @@ export const createIntervals = (
     });
 
     return contiguousDays;
+};
+
+export const getStartAndEndRowsAndCols = (
+    time1: number | undefined,
+    time2: number | undefined,
+    date1: string | undefined,
+    date2: string | undefined,
+) => {
+    if (!time1 || !time2 || !date1 || !date2)
+        throw new Error(
+            "Can't determine start and end rows and cols from invalid bounds.",
+        );
+    const timeCmp = time1 <= time2;
+    const dateCmp = date1 <= date2;
+    return {
+        startRow: timeCmp ? time1 : time2,
+        endRow: timeCmp ? time2 : time1,
+        startCol: dateCmp ? date1 : date2,
+        endCol: dateCmp ? date2 : date1,
+    };
+};
+
+/**
+ * Determines whether the given times and dates are valid.
+ * @param time1
+ * @param time2
+ * @param date1
+ * @param date2
+ * @returns
+ */
+export const boundsAreValid = (
+    time1: number | undefined,
+    time2: number | undefined,
+    date1: string | undefined,
+    date2: string | undefined,
+) => {
+    return (
+        time1 !== undefined &&
+        time1 >= 0 &&
+        time2 !== undefined &&
+        time2 < 48 &&
+        date1 &&
+        isUniversalIsoFormat(date1) &&
+        date2 &&
+        isUniversalIsoFormat(date2)
+    );
+};
+
+/**
+ * Determines whether the given string adheres to the universal ISO date format,
+ * 'YYYY-MM-DD' and contains a valid year, month and day.
+ * @param date
+ * @returns
+ */
+export const isUniversalIsoFormat = (date: string): boolean => {
+    if (!date) return false;
+
+    const matches = UNIVERSAL_ISO_PATTERN.exec(date);
+    if (!matches) return false;
+
+    const year = Number(matches[1]);
+    const month = Number(matches[2]);
+    const day = Number(matches[3]);
+
+    return (
+        year >= 0 &&
+        year <= 9999 &&
+        month >= 1 &&
+        month <= 12 &&
+        day >= 1 &&
+        day <= getNumberOfDaysInMonth(String(year), String(month))
+    );
+};
+
+/**
+ * Creates a new availabilities data object based on the current availabilities
+ * and the rectangular area drawn by the time1/time2/date1/date2 bounds.
+ * If the user is selecting, then new time blocks are marked with their
+ * username, otherwise if they're deselecting, then their username is removed
+ * from time blocks.
+ * @param availabilities the current availabilities
+ * @param username the name of the user drawing the selection
+ * @param time1 first time bound (not necessarily earlier than `time2`)
+ * @param time2 second time bound
+ * @param date1 first date bound (not necessarily earlier than `date2`)
+ * @param date2 second date bound
+ * @param isSelecting
+ * @param isDeselecting
+ * @returns new availabilities object.
+ */
+export const createNewAvailabilitiesAfterSelection = (
+    availabilities: KonfluxEvent["groupAvailabilities"],
+    username: string,
+    time1: number | undefined,
+    time2: number | undefined,
+    date1: string | undefined,
+    date2: string | undefined,
+    isSelecting: boolean,
+    isDeselecting: boolean,
+): KonfluxEvent["groupAvailabilities"] => {
+    if (!boundsAreValid(time1, time2, date1, date2))
+        throw new Error("Can't commit area selection due to invalid bounds.");
+    if (isSelecting && isDeselecting)
+        throw new Error(
+            "Invalid state: selecting and deselecting at the same time.",
+        );
+    if (!isSelecting && !isDeselecting)
+        throw new Error("Neither selecting nor deselecting.");
+
+    // Iterate through each time block within the rectangular are
+    // defined by the start time/date and end time/date.
+    const { startRow, endRow, startCol, endCol } = getStartAndEndRowsAndCols(
+        time1,
+        time2,
+        date1,
+        date2,
+    );
+
+    const newAvailabilities = { ...availabilities };
+    for (
+        let timeBlockIndex = startRow;
+        timeBlockIndex <= endRow;
+        ++timeBlockIndex
+    ) {
+        let currDate = startCol;
+        while (currDate <= endCol) {
+            // It's possible for the current date to not exist in the
+            // `selectedBlocks` map because of discontinuity in the
+            // selected days. In this case, we simply skip.
+            if (!(currDate in newAvailabilities)) {
+                currDate = getNextDate(currDate);
+                continue;
+            }
+
+            // Add or remove the current timeblock in the rectangular
+            // area depending on if we're selecting or deselecting.
+            const timeBlock = newAvailabilities[currDate][timeBlockIndex];
+            if (isSelecting)
+                newAvailabilities[currDate][timeBlockIndex] = {
+                    ...timeBlock,
+                    [username]: { placeholder: true },
+                };
+            else if (isDeselecting) {
+                if (timeBlock && username in timeBlock)
+                    delete newAvailabilities[currDate][timeBlockIndex][
+                        username
+                    ];
+            } else {
+                throw new Error(
+                    "Neither selecting nor deselecting. Please try again.",
+                );
+            }
+            currDate = getNextDate(currDate);
+        }
+    }
+    return newAvailabilities;
 };
 
 // A list of all time labels for the time blocks of the timetable.

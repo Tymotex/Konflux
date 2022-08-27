@@ -6,7 +6,7 @@ import { spawnNotification } from "utils/notifications";
 type EventAction =
     | { type: "SET_EVENT"; payload: { event: KonfluxEvent } }
     | {
-          type: "SET_DAYS";
+          type: "SET_AVAILABILITIES";
           payload: {
               eventId: string;
               groupAvailabilities: KonfluxEvent["groupAvailabilities"];
@@ -20,7 +20,7 @@ export const eventReducer = (
     switch (action.type) {
         case "SET_EVENT":
             return action.payload.event;
-        case "SET_DAYS":
+        case "SET_AVAILABILITIES":
             updateRemoteAvailabilities(
                 action.payload.eventId,
                 action.payload.groupAvailabilities,

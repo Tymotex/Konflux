@@ -52,6 +52,7 @@ $time-block-width: 80px;
             .timeBlock {
                 background-color: $grey-200;
                 height: $time-block-height;
+                cursor: pointer;
 
                 &.selected {
                     background: yellow;
@@ -60,6 +61,7 @@ $time-block-width: 80px;
 
                 &.inSelectedArea {
                     background: blue;
+                    cursor: move;
                 }
 
                 &.pressed {
