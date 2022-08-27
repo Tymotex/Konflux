@@ -43,8 +43,8 @@ export const eventReducer = (
 
 /* --------------------------------- Context -------------------------------- */
 export interface EventContextInterface {
-    state: KonfluxEvent;
-    dispatch: Dispatch<EventAction>;
+    eventState: KonfluxEvent;
+    eventDispatch: Dispatch<EventAction>;
 }
 
 export const EventContext = createContext<EventContextInterface>(

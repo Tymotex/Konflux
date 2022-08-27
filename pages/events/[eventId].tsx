@@ -24,10 +24,10 @@ const EventPage: NextPage = () => {
 
     // Using context and reducer together to allow for descendants to cleanly
     // modify the local single source of truth for the event's data.
-    const [state, dispatch] = useReducer(eventReducer, EMPTY_EVENT);
+    const [eventState, eventDispatch] = useReducer(eventReducer, EMPTY_EVENT);
     const contextValue = useMemo(
-        () => ({ state, dispatch }),
-        [state, dispatch],
+        () => ({ eventState, eventDispatch }),
+        [eventState, eventDispatch],
     );
 
     // User credentials, localised just to this event.
@@ -42,16 +42,16 @@ const EventPage: NextPage = () => {
 
     // Fetch and listen for changes to the remote Event data object.
     useEffect(() => {
-        if (eventId && dispatch)
+        if (eventId && eventDispatch)
             onEventChange(eventId, (newEvent) =>
-                dispatch({
+                eventDispatch({
                     type: "SET_EVENT",
                     payload: { event: newEvent },
                 }),
             ).catch((err) => {
                 spawnNotification("error", err.message);
             });
-    }, [eventId, dispatch]);
+    }, [eventId, eventDispatch]);
 
     // Grab the username and password transmitted through navigation from a
     // previous page. See: https://www.youtube.com/watch?v=7wzMMBRVrfw.
@@ -95,8 +95,8 @@ const EventPage: NextPage = () => {
                                 id="event-name"
                                 type="text"
                                 placeholder="Eg. Math group study"
-                                defaultValue={state?.name}
-                                value={state?.name}
+                                defaultValue={eventState?.name}
+                                value={eventState?.name}
                                 onChange={handleNameChange}
                             />
                             <div>
@@ -114,7 +114,11 @@ const EventPage: NextPage = () => {
                             {/* Timetable for showing the group's availabilities */}
                             {/* <Timetable showGroupAvailability /> */}
                             <pre>
-                                {JSON.stringify(state || "Nothing", null, 4)}
+                                {JSON.stringify(
+                                    eventState || "Nothing",
+                                    null,
+                                    4,
+                                )}
                             </pre>
                         </motion.div>
                     </AnimatePresence>

@@ -20,7 +20,7 @@ interface Props {
 }
 
 const DaySelector: React.FC<Props> = ({ eventId }) => {
-    const { state, dispatch } = useContext(EventContext);
+    const { eventState, eventDispatch } = useContext(EventContext);
 
     // The days to be displayed on the calendar. By default, we start by showing
     // the days of the current month.
@@ -71,7 +71,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
         // Commits the selected days in the range into the `selectedDays` set.
         const commitRangeSelection = () => {
             if (!isSelectingRange && !isDeselectingRange) return;
-            const newAvailabilities = { ...state.groupAvailabilities };
+            const newAvailabilities = { ...eventState?.groupAvailabilities };
             const endDay = dayjs(
                 rangeEndDate >= rangeStartDate ? rangeEndDate : rangeStartDate,
             );
@@ -96,7 +96,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                 }
                 currDay = currDay.add(1, "day");
             }
-            dispatch({
+            eventDispatch({
                 type: "SET_AVAILABILITIES",
                 payload: {
                     eventId: eventId,
@@ -129,8 +129,8 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
             body.removeEventListener("mouseleave", abortRangeSelection);
         };
     }, [
-        dispatch,
-        state,
+        eventDispatch,
+        eventState,
         isDeselectingRange,
         setIsSelectingRange,
         setIsDeselectingRange,
@@ -183,14 +183,14 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
      */
     const toggleDaySelection = useCallback(
         (date: string) => {
-            const newAvailabilities = { ...state.groupAvailabilities };
+            const newAvailabilities = { ...eventState.groupAvailabilities };
             if (date in newAvailabilities) {
                 delete newAvailabilities[date];
             } else {
                 // TODO. this logic is duplicated.
                 newAvailabilities[date] = { placeholder: true };
             }
-            dispatch({
+            eventDispatch({
                 type: "SET_AVAILABILITIES",
                 payload: {
                     eventId: eventId,
@@ -198,7 +198,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                 },
             });
         },
-        [state, dispatch, eventId],
+        [eventState, eventDispatch, eventId],
     );
 
     /**
@@ -207,14 +207,19 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
     const beginSelectingRange = useCallback(
         (startDate: string) => {
             if (
-                state.groupAvailabilities !== undefined &&
-                !(startDate in state.groupAvailabilities)
+                eventState.groupAvailabilities !== undefined &&
+                !(startDate in eventState.groupAvailabilities)
             )
                 setIsSelectingRange(true);
             else setIsDeselectingRange(true);
             setRangeStartDate(startDate);
         },
-        [state, setIsSelectingRange, setIsDeselectingRange, setRangeStartDate],
+        [
+            eventState,
+            setIsSelectingRange,
+            setIsDeselectingRange,
+            setRangeStartDate,
+        ],
     );
 
     /**
@@ -237,11 +242,11 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
     const isSelected = useCallback(
         (date: string) => {
             return (
-                state.groupAvailabilities !== undefined &&
-                date in state.groupAvailabilities
+                eventState?.groupAvailabilities !== undefined &&
+                date in eventState.groupAvailabilities
             );
         },
-        [state],
+        [eventState],
     );
 
     /**

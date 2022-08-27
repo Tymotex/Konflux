@@ -7,6 +7,7 @@ import React, {
     useContext,
     useEffect,
     useMemo,
+    useReducer,
     useState,
 } from "react";
 import { spawnNotification } from "utils/notifications";
@@ -25,45 +26,130 @@ interface Props {
     eventId: string;
 }
 
-// TODO: doc and move
+type SelectionAction =
+    | {
+          type: "BEGIN_SELECTION";
+          payload: {
+              /** If this is false, it means deselection */
+              isSelecting: boolean;
+              startTime: number;
+              startDate: string;
+          };
+      }
+    | {
+          type: "SET_SELECTION_END";
+          payload: {
+              endTime: number;
+              endDate: string;
+          };
+      }
+    | {
+          type: "COMMIT_SELECTION";
+          payload: {
+              availabilities: KonfluxEvent["groupAvailabilities"];
+              username: string;
+              onCommit: (
+                  newAvailabilities: KonfluxEvent["groupAvailabilities"],
+              ) => void;
+          };
+      }
+    | {
+          type: "RESET";
+      };
+
+// State for tracking whether the user's selection or deselection of a
+// rectangular area of time blocks.
+type SelectionState = {
+    isSelectingArea: boolean;
+    isDeselectingArea: boolean;
+    startTime: number | undefined;
+    endTime: number | undefined;
+    startDate: string | undefined;
+    endDate: string | undefined;
+};
+
+// Selection state with all range-tracking variables reset.
+const NO_SELECTION: SelectionState = {
+    isSelectingArea: false,
+    isDeselectingArea: false,
+    startTime: undefined,
+    endTime: undefined,
+    startDate: undefined,
+    endDate: undefined,
+};
+
+const reducer = (
+    state: SelectionState,
+    action: SelectionAction,
+): SelectionState => {
+    switch (action.type) {
+        case "BEGIN_SELECTION": {
+            const { isSelecting, startTime, startDate } = action.payload;
+            return {
+                ...state,
+                isSelectingArea: isSelecting,
+                isDeselectingArea: !isSelecting,
+                startTime,
+                startDate,
+            };
+        }
+        case "SET_SELECTION_END": {
+            const { endTime, endDate } = action.payload;
+            return {
+                ...state,
+                endTime,
+                endDate,
+            };
+        }
+        case "COMMIT_SELECTION": {
+            const { availabilities, username, onCommit } = action.payload;
+            const {
+                startTime,
+                endTime,
+                startDate,
+                endDate,
+                isSelectingArea,
+                isDeselectingArea,
+            } = state;
+            const newAvailabilities = createNewAvailabilitiesAfterSelection(
+                availabilities,
+                username,
+                startTime,
+                endTime,
+                startDate,
+                endDate,
+                isSelectingArea,
+                isDeselectingArea,
+            );
+            onCommit(newAvailabilities);
+            return NO_SELECTION;
+        }
+        case "RESET":
+            return NO_SELECTION;
+        default:
+            throw new Error(
+                `Unknown action: '${(action as SelectionAction).type}'`,
+            );
+    }
+};
 
 const TimetableGrid: React.FC<Props> = ({
     disabled = false,
     username,
     eventId,
 }) => {
-    const { state, dispatch } = useContext(EventContext);
+    const { eventState, eventDispatch } = useContext(EventContext);
+    const [selectionState, selectionDispatch] = useReducer(
+        reducer,
+        NO_SELECTION,
+    );
 
     // A list of lists of dates and group availability at those dates.
     // Used to render contiguous dates together and in chronological order.
     const timeIntervals = useMemo(
-        () => createIntervals(state.groupAvailabilities),
-        [state],
+        () => createIntervals(eventState?.groupAvailabilities),
+        [eventState],
     );
-
-    // TODO: refactor to use reducer.
-    // State for tracking whether the user is selecting or deselecting a
-    // rectangular area of time blocks.
-    const [isSelectingArea, setIsSelectingArea] = useState<boolean>(false);
-    const [isDeselectingArea, setIsDeselectingArea] = useState<boolean>(false);
-
-    // State for tracking the rectangular area drawn by the user from one
-    // time block on the grid to another.
-    const [selectionStartTime, setSelectionStartTime] = useState<number>();
-    const [selectionStartDate, setSelectionStartDate] = useState<string>();
-    const [selectionEndTime, setSelectionEndTime] = useState<number>();
-    const [selectionEndDate, setSelectionEndDate] = useState<string>();
-
-    // Resets all range-tracking variables. Should be called after committing or
-    // aborting a range selection/deselection.
-    const resetRangeTrackingState = useCallback(() => {
-        setIsSelectingArea(false);
-        setIsDeselectingArea(false);
-        setSelectionStartDate("");
-        setSelectionStartTime(undefined);
-        setSelectionEndDate("");
-        setSelectionEndTime(undefined);
-    }, []);
 
     // When the user is selecting an area and lifts up their finger anywhere on
     // the <body>, add the selected time blocks to the `selectedBlocks`.
@@ -72,23 +158,27 @@ const TimetableGrid: React.FC<Props> = ({
     // remove time blocks from `selectedBlocks` instead of adding.
     useEffect(() => {
         const commitAreaSelection = () => {
-            if (!isSelectingArea && !isDeselectingArea) return;
+            if (
+                !selectionState.isSelectingArea &&
+                !selectionState.isDeselectingArea
+            )
+                return;
+
             try {
-                const newAvailabilities = createNewAvailabilitiesAfterSelection(
-                    state.groupAvailabilities,
-                    username,
-                    selectionStartTime,
-                    selectionEndTime,
-                    selectionStartDate,
-                    selectionEndDate,
-                    isSelectingArea,
-                    isDeselectingArea,
-                );
-                dispatch({
-                    type: "SET_AVAILABILITIES",
+                selectionDispatch({
+                    type: "COMMIT_SELECTION",
                     payload: {
-                        eventId: eventId,
-                        groupAvailabilities: newAvailabilities,
+                        availabilities: eventState.groupAvailabilities,
+                        username,
+                        onCommit: (newAvailabilities) => {
+                            eventDispatch({
+                                type: "SET_AVAILABILITIES",
+                                payload: {
+                                    eventId: eventId,
+                                    groupAvailabilities: newAvailabilities,
+                                },
+                            });
+                        },
                     },
                 });
             } catch (err) {
@@ -96,16 +186,19 @@ const TimetableGrid: React.FC<Props> = ({
                     spawnNotification("error", err.message);
                 else throw err;
             } finally {
-                resetRangeTrackingState();
+                selectionDispatch({ type: "RESET" });
             }
         };
 
         // Cancel the area selection/deselection by doing nothing and resetting
         // the range-tracking state.
         const abortAreaSelection = () => {
-            if (isSelectingArea || isDeselectingArea)
+            if (
+                selectionState.isSelectingArea ||
+                selectionState.isDeselectingArea
+            )
                 spawnNotification("warning", "Aborted selection");
-            resetRangeTrackingState();
+            selectionDispatch({ type: "RESET" });
         };
 
         // Attaching commit/abort functions as handlers to the document body.
@@ -127,17 +220,10 @@ const TimetableGrid: React.FC<Props> = ({
     }, [
         eventId,
         username,
-        setIsSelectingArea,
-        setIsDeselectingArea,
-        isSelectingArea,
-        isDeselectingArea,
-        resetRangeTrackingState,
-        selectionStartDate,
-        selectionStartTime,
-        selectionEndDate,
-        selectionEndTime,
-        state,
-        dispatch,
+        eventState,
+        eventDispatch,
+        selectionState,
+        selectionDispatch,
     ]);
 
     /**
@@ -147,14 +233,14 @@ const TimetableGrid: React.FC<Props> = ({
      */
     const toggleTimeblockSelection = useCallback(
         (date: string, timeBlockIndex: number): void => {
-            if (!(date in state.groupAvailabilities)) {
+            if (!(date in eventState.groupAvailabilities)) {
                 spawnNotification(
                     "error",
                     `Error: timetable doesn't have date ${date}`,
                 );
                 return;
             }
-            const newAvailabilities = { ...state.groupAvailabilities };
+            const newAvailabilities = { ...eventState.groupAvailabilities };
             const timeBlock = newAvailabilities[date][timeBlockIndex];
             if (timeBlock && username in timeBlock) {
                 delete newAvailabilities[date][timeBlockIndex][username];
@@ -165,7 +251,7 @@ const TimetableGrid: React.FC<Props> = ({
                 };
             }
 
-            dispatch({
+            eventDispatch({
                 type: "SET_AVAILABILITIES",
                 payload: {
                     eventId,
@@ -173,7 +259,7 @@ const TimetableGrid: React.FC<Props> = ({
                 },
             });
         },
-        [state, dispatch, username, eventId],
+        [eventState, eventDispatch, username, eventId],
     );
 
     /**
@@ -185,30 +271,17 @@ const TimetableGrid: React.FC<Props> = ({
      */
     const isSelected = useCallback(
         (date: string, timeBlockIndex: number): boolean => {
-            if (state?.groupAvailabilities && state.groupAvailabilities[date])
-                return (
-                    state.groupAvailabilities[date][timeBlockIndex] &&
-                    username in state.groupAvailabilities[date][timeBlockIndex]
-                );
+            if (
+                eventState?.groupAvailabilities &&
+                eventState.groupAvailabilities[date]
+            ) {
+                const timeBlock =
+                    eventState.groupAvailabilities[date][timeBlockIndex];
+                return timeBlock && username in timeBlock;
+            }
             return false;
         },
-        [state, username],
-    );
-
-    /**
-     * Sets the state to begin the selection of an area.
-     * @param date universal ISO formatted string
-     * @param timeBlockIndex a number from 0 to 48
-     */
-    const beginSelectingArea = useCallback(
-        (date: string, timeBlockIndex: number): void => {
-            if (!isSelected(date, timeBlockIndex)) setIsSelectingArea(true);
-            else setIsDeselectingArea(true);
-
-            setSelectionStartTime(timeBlockIndex);
-            setSelectionStartDate(date);
-        },
-        [isSelected],
+        [eventState, username],
     );
 
     /**
@@ -227,20 +300,20 @@ const TimetableGrid: React.FC<Props> = ({
         (date: string, timeBlockIndex: number): boolean => {
             if (
                 !boundsAreValid(
-                    selectionStartTime,
-                    selectionEndTime,
-                    selectionStartDate,
-                    selectionEndDate,
+                    selectionState.startTime,
+                    selectionState.endTime,
+                    selectionState.startDate,
+                    selectionState.endDate,
                 )
             )
                 return false;
 
             const { startRow, endRow, startCol, endCol } =
                 getStartAndEndRowsAndCols(
-                    selectionStartTime,
-                    selectionEndTime,
-                    selectionStartDate,
-                    selectionEndDate,
+                    selectionState.startTime,
+                    selectionState.endTime,
+                    selectionState.startDate,
+                    selectionState.endDate,
                 );
 
             return (
@@ -250,22 +323,17 @@ const TimetableGrid: React.FC<Props> = ({
                 date <= endCol
             );
         },
-        [
-            selectionStartTime,
-            selectionStartDate,
-            selectionEndTime,
-            selectionEndDate,
-        ],
+        [selectionState],
     );
-
     /**
      * Begin selecting/deselecting an area of blocks when the user's mouse
      * leaves a time block while still holding the left mouse button.
+     * Sets the state to begin the selection of an area.
      * @param event
      * @param date universal ISO formatted string
      * @param timeBlockIndex a number from 0 to 48
      */
-    const handleMouseLeave = useCallback(
+    const beginSelectingArea = useCallback(
         (
             event: React.MouseEvent,
             date: string,
@@ -273,12 +341,38 @@ const TimetableGrid: React.FC<Props> = ({
         ): void => {
             const isLeftClicking = event.buttons === 1;
             const notTrackingAreaSelection = !(
-                isSelectingArea || isDeselectingArea
+                selectionState.isSelectingArea ||
+                selectionState.isDeselectingArea
             );
             if (isLeftClicking && notTrackingAreaSelection)
-                beginSelectingArea(date, timeBlockIndex);
+                selectionDispatch({
+                    type: "BEGIN_SELECTION",
+                    payload: {
+                        isSelecting: !isSelected(date, timeBlockIndex),
+                        startTime: timeBlockIndex,
+                        startDate: date,
+                    },
+                });
         },
-        [isSelectingArea, isDeselectingArea, beginSelectingArea],
+        [selectionState, selectionDispatch, isSelected],
+    );
+
+    /**
+     * Set the end coordinate of the rectangular area drawn by the user.
+     * @param date universal ISO formatted string
+     * @param timeBlockIndex a number from 0 to 48
+     */
+    const setSelectionAreaEnd = useCallback(
+        (date: string, timeBlockIndex: number) => {
+            selectionDispatch({
+                type: "SET_SELECTION_END",
+                payload: {
+                    endTime: timeBlockIndex,
+                    endDate: date,
+                },
+            });
+        },
+        [selectionDispatch],
     );
 
     /**
@@ -335,11 +429,10 @@ const TimetableGrid: React.FC<Props> = ({
                                     }}
                                     onMouseLeave={(e) => {
                                         setPressedClass(e, false);
-                                        handleMouseLeave(e, date, i);
+                                        beginSelectingArea(e, date, i);
                                     }}
                                     onMouseEnter={() => {
-                                        setSelectionEndTime(i);
-                                        setSelectionEndDate(date);
+                                        setSelectionAreaEnd(date, i);
                                     }}
                                 ></div>
                             ))}
