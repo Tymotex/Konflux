@@ -1,20 +1,17 @@
-import { getNextDate } from "components/day-selector/calendar-utils";
 import { EventContext } from "contexts/event-context";
 import dayjs from "dayjs";
-import { KonfluxEvent } from "models/event";
 import React, {
     useCallback,
     useContext,
     useEffect,
     useMemo,
     useReducer,
-    useState,
 } from "react";
 import { spawnNotification } from "utils/notifications";
+import { NO_SELECTION, areaSelectionReducer } from "./area-selection-reducer";
 import {
     boundsAreValid,
     createIntervals,
-    createNewAvailabilitiesAfterSelection,
     getStartAndEndRowsAndCols,
     TIME_LABELS,
 } from "./timetable-utils";
@@ -26,113 +23,6 @@ interface Props {
     eventId: string;
 }
 
-type SelectionAction =
-    | {
-          type: "BEGIN_SELECTION";
-          payload: {
-              /** If this is false, it means deselection */
-              isSelecting: boolean;
-              startTime: number;
-              startDate: string;
-          };
-      }
-    | {
-          type: "SET_SELECTION_END";
-          payload: {
-              endTime: number;
-              endDate: string;
-          };
-      }
-    | {
-          type: "COMMIT_SELECTION";
-          payload: {
-              availabilities: KonfluxEvent["groupAvailabilities"];
-              username: string;
-              onCommit: (
-                  newAvailabilities: KonfluxEvent["groupAvailabilities"],
-              ) => void;
-          };
-      }
-    | {
-          type: "RESET";
-      };
-
-// State for tracking whether the user's selection or deselection of a
-// rectangular area of time blocks.
-type SelectionState = {
-    isSelectingArea: boolean;
-    isDeselectingArea: boolean;
-    startTime: number | undefined;
-    endTime: number | undefined;
-    startDate: string | undefined;
-    endDate: string | undefined;
-};
-
-// Selection state with all range-tracking variables reset.
-const NO_SELECTION: SelectionState = {
-    isSelectingArea: false,
-    isDeselectingArea: false,
-    startTime: undefined,
-    endTime: undefined,
-    startDate: undefined,
-    endDate: undefined,
-};
-
-const reducer = (
-    state: SelectionState,
-    action: SelectionAction,
-): SelectionState => {
-    switch (action.type) {
-        case "BEGIN_SELECTION": {
-            const { isSelecting, startTime, startDate } = action.payload;
-            return {
-                ...state,
-                isSelectingArea: isSelecting,
-                isDeselectingArea: !isSelecting,
-                startTime,
-                startDate,
-            };
-        }
-        case "SET_SELECTION_END": {
-            const { endTime, endDate } = action.payload;
-            return {
-                ...state,
-                endTime,
-                endDate,
-            };
-        }
-        case "COMMIT_SELECTION": {
-            const { availabilities, username, onCommit } = action.payload;
-            const {
-                startTime,
-                endTime,
-                startDate,
-                endDate,
-                isSelectingArea,
-                isDeselectingArea,
-            } = state;
-            const newAvailabilities = createNewAvailabilitiesAfterSelection(
-                availabilities,
-                username,
-                startTime,
-                endTime,
-                startDate,
-                endDate,
-                isSelectingArea,
-                isDeselectingArea,
-            );
-            onCommit(newAvailabilities);
-            return NO_SELECTION;
-        }
-        case "RESET":
-            return NO_SELECTION;
-        default:
-            throw new Error(
-                `Unknown action: '${(action as SelectionAction).type}'`,
-            );
-    }
-};
-
 const TimetableGrid: React.FC<Props> = ({
     disabled = false,
     username,
@@ -140,7 +30,7 @@ const TimetableGrid: React.FC<Props> = ({
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
-        reducer,
+        areaSelectionReducer,
         NO_SELECTION,
     );
 

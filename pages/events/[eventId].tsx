@@ -95,7 +95,6 @@ const EventPage: NextPage = () => {
                                 id="event-name"
                                 type="text"
                                 placeholder="Eg. Math group study"
-                                defaultValue={eventState?.name}
                                 value={eventState?.name}
                                 onChange={handleNameChange}
                             />

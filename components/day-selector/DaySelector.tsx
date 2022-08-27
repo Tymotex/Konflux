@@ -1,6 +1,12 @@
 import { EventContext } from "contexts/event-context";
 import dayjs from "dayjs";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useReducer,
+    useState,
+} from "react";
 import {
     FaChevronCircleLeft as LeftIcon,
     FaChevronCircleRight as RightIcon,
@@ -14,6 +20,7 @@ import {
     WEEKDAYS,
 } from "./calendar-utils";
 import styles from "./DaySelector.module.scss";
+import { NO_SELECTION, rangeSelectionReducer } from "./range-selector-reducer";
 
 interface Props {
     eventId: string;
@@ -30,35 +37,15 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
     const [displayYear, setDisplayYear] = useState<string>(INITIAL_YEAR);
     const [displayMonth, setDislayMonth] = useState<string>(INITIAL_MONTH);
 
-    // The user can select a range of days by pressing down on a starting day
-    // then dragging their mouse and lifting up on an ending day on the
-    // calendar.
-    // While this is happening, we track 3 state variables to help us determine
-    // which cells to apply styling to and what days should be added to the
-    // `selectedDays` set:
-    //   1. `isSelectingRange` which becomes true onMouseLeave from a starting
-    //      day.
-    //   2. `rangeStartDate` which is starting day of the range (where the
-    //      user's mouse started and exited.
-    //      Universal ISO format("YYYY-MM-DD").
-    //   3. The last hovered day of the range.
-    //      Universal ISO format("YYYY-MM-DD").
-    const [isSelectingRange, setIsSelectingRange] = useState<boolean>(false);
-    const [isDeselectingRange, setIsDeselectingRange] =
-        useState<boolean>(false);
-    const [rangeStartDate, setRangeStartDate] = useState<string>("");
-    const [rangeEndDate, setRangeEndDate] = useState<string>("");
-
     /**
-     * Resets all range-tracking variables. Should be called after committing or
-     * aborting a range selection/deselection.
+     * The user can select a range of days by pressing down on a starting day
+     * then dragging their mouse and lifting up on an ending day on the
+     * calendar.
      */
-    const resetRangeTrackingState = useCallback((): void => {
-        setIsSelectingRange(false);
-        setIsDeselectingRange(false);
-        setRangeStartDate("");
-        setRangeEndDate("");
-    }, []);
+    const [selectionState, selectionDispatch] = useReducer(
+        rangeSelectionReducer,
+        NO_SELECTION,
+    );
 
     /**
      * When the user is selecting a range and lifts up their finger anywhere on
@@ -70,46 +57,40 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
     useEffect(() => {
         // Commits the selected days in the range into the `selectedDays` set.
         const commitRangeSelection = () => {
-            if (!isSelectingRange && !isDeselectingRange) return;
-            const newAvailabilities = { ...eventState?.groupAvailabilities };
-            const endDay = dayjs(
-                rangeEndDate >= rangeStartDate ? rangeEndDate : rangeStartDate,
-            );
-            let currDay = dayjs(
-                rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate,
-            );
-            while (currDay.isBefore(endDay) || currDay.isSame(endDay)) {
-                // Adds or removes selected days if we're selecting or
-                // deselecting respectively.
-                const date = currDay.format("YYYY-MM-DD");
-                if (isSelectingRange)
-                    newAvailabilities[date] = { placeholder: true };
-                else if (isDeselectingRange && date in newAvailabilities)
-                    delete newAvailabilities[date];
-                else {
-                    spawnNotification(
-                        "error",
-                        "Error: neither selecting nor deselecting. Please try again.",
-                    );
-                    resetRangeTrackingState();
-                    return;
-                }
-                currDay = currDay.add(1, "day");
+            if (
+                !selectionState.isSelectingRange &&
+                !selectionState.isDeselectingRange
+            )
+                return;
+            try {
+                selectionDispatch({
+                    type: "COMMIT_SELECTION",
+                    payload: {
+                        availabilities: eventState.groupAvailabilities,
+                        onCommit: (newAvailabilities) => {
+                            eventDispatch({
+                                type: "SET_AVAILABILITIES",
+                                payload: {
+                                    eventId: eventId,
+                                    groupAvailabilities: newAvailabilities,
+                                },
+                            });
+                        },
+                    },
+                });
+            } catch (err) {
+                if (err instanceof Error)
+                    spawnNotification("error", err.message);
+                throw err;
+            } finally {
+                selectionDispatch({ type: "RESET" });
             }
-            eventDispatch({
-                type: "SET_AVAILABILITIES",
-                payload: {
-                    eventId: eventId,
-                    groupAvailabilities: newAvailabilities,
-                },
-            });
-            resetRangeTrackingState();
         };
 
         // Cancel the range selection/deselection by doing nothing and resetting
         // the range-tracking state.
         const abortRangeSelection = () => {
-            resetRangeTrackingState();
+            selectionDispatch({ type: "RESET" });
         };
 
         // Attaching commit/abort functions as handlers to the document body.
@@ -128,18 +109,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
             body.removeEventListener("mouseup", commitRangeSelection);
             body.removeEventListener("mouseleave", abortRangeSelection);
         };
-    }, [
-        eventDispatch,
-        eventState,
-        isDeselectingRange,
-        setIsSelectingRange,
-        setIsDeselectingRange,
-        rangeStartDate,
-        rangeEndDate,
-        isSelectingRange,
-        resetRangeTrackingState,
-        eventId,
-    ]);
+    }, [eventDispatch, eventState, eventId, selectionState, selectionDispatch]);
 
     /**
      * When the user sets a different month in the calendar, rerender the day
@@ -187,7 +157,6 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
             if (date in newAvailabilities) {
                 delete newAvailabilities[date];
             } else {
-                // TODO. this logic is duplicated.
                 newAvailabilities[date] = { placeholder: true };
             }
             eventDispatch({
@@ -199,41 +168,6 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
             });
         },
         [eventState, eventDispatch, eventId],
-    );
-
-    /**
-     * Flips on the `isSelectingRange` or `isDeselectingRange` boolean state.
-     */
-    const beginSelectingRange = useCallback(
-        (startDate: string) => {
-            if (
-                eventState.groupAvailabilities !== undefined &&
-                !(startDate in eventState.groupAvailabilities)
-            )
-                setIsSelectingRange(true);
-            else setIsDeselectingRange(true);
-            setRangeStartDate(startDate);
-        },
-        [
-            eventState,
-            setIsSelectingRange,
-            setIsDeselectingRange,
-            setRangeStartDate,
-        ],
-    );
-
-    /**
-     * When the user's mouse leaves a day cell while still holding the left
-     * mouse button, begin selecting/deselecting a range of days.
-     */
-    const handleMouseLeave = useCallback(
-        (e: React.MouseEvent, dateStr: string) => {
-            const isLeftClicking = e.buttons === 1;
-            const notTrackingRange = !(isSelectingRange || isDeselectingRange);
-            if (isLeftClicking && notTrackingRange)
-                beginSelectingRange(dateStr);
-        },
-        [isSelectingRange, isDeselectingRange, beginSelectingRange],
     );
 
     /**
@@ -250,20 +184,48 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
     );
 
     /**
+     * When the user's mouse leaves a day cell while still holding the left
+     * mouse button, begin selecting/deselecting a range of days.
+     */
+    const handleMouseLeave = useCallback(
+        (e: React.MouseEvent, dateStr: string) => {
+            const isLeftClicking = e.buttons === 1;
+            const notTrackingRange = !(
+                selectionState.isSelectingRange ||
+                selectionState.isDeselectingRange
+            );
+            if (isLeftClicking && notTrackingRange)
+                selectionDispatch({
+                    type: "BEGIN_SELECTION",
+                    payload: {
+                        isSelecting: !isSelected(dateStr),
+                        startDate: dateStr,
+                    },
+                });
+        },
+        [selectionState, selectionDispatch, isSelected],
+    );
+
+    /**
      * Determines whether the given date (in the universal ISO format,
      * 'YYYY-MM-DD') is in the selection/deselection range spanning from
      * `rangeStartDate` to `rangeEndDate`.
      */
     const isInRangeSelection = useCallback(
         (thisDate: string) => {
-            if (!(rangeStartDate && rangeEndDate)) return false;
+            if (!(selectionState.startDate && selectionState.endDate))
+                return false;
             const earlierDate =
-                rangeStartDate <= rangeEndDate ? rangeStartDate : rangeEndDate;
+                selectionState.startDate <= selectionState.endDate
+                    ? selectionState.startDate
+                    : selectionState.endDate;
             const laterDate =
-                rangeStartDate <= rangeEndDate ? rangeEndDate : rangeStartDate;
+                selectionState.startDate <= selectionState.endDate
+                    ? selectionState.endDate
+                    : selectionState.startDate;
             return earlierDate <= thisDate && thisDate <= laterDate;
         },
-        [rangeStartDate, rangeEndDate],
+        [selectionState],
     );
 
     return (
@@ -306,7 +268,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                                     : styles.notSelected
                             } ${
                                 isInRangeSelection(dateStr)
-                                    ? isDeselectingRange
+                                    ? selectionState.isDeselectingRange
                                         ? styles.inDeselectionRange
                                         : styles.inSelectionRange
                                     : ""
@@ -320,7 +282,10 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                                 thisElem.classList.add(styles.pressed);
                             }}
                             onMouseEnter={() => {
-                                setRangeEndDate(dateStr);
+                                selectionDispatch({
+                                    type: "SET_SELECTION_END",
+                                    payload: { endDate: dateStr },
+                                });
                             }}
                         >
                             <span className={styles.number}>
