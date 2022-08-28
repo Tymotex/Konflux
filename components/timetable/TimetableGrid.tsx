@@ -8,7 +8,7 @@ import React, {
     useReducer,
 } from "react";
 import { spawnNotification } from "utils/notifications";
-import { NO_SELECTION, areaSelectionReducer } from "./area-selection-reducer";
+import { areaSelectionReducer, NO_SELECTION } from "./area-selection-reducer";
 import {
     boundsAreValid,
     createIntervals,

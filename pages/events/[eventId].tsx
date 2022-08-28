@@ -2,6 +2,7 @@ import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
+import { EventSignIn } from "components/event-credentials";
 import { BASE_URL } from "constants/url";
 import { EventContext, eventReducer } from "contexts/event-context";
 import { AnimatePresence, motion } from "framer-motion";
@@ -89,20 +90,36 @@ const EventPage: NextPage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                         >
-                            <label htmlFor="event-name">Event Name</label>
-                            <input
-                                ref={eventNameInput}
-                                id="event-name"
-                                type="text"
-                                placeholder="Eg. Math group study"
-                                value={eventState?.name}
-                                onChange={handleNameChange}
-                            />
-                            <div>
-                                Share with invitees the link:{" "}
-                                <strong>{`${BASE_URL}/events/${eventId}`}</strong>
-                            </div>
-                            <DaySelector eventId={eventId} />
+                            {/* TODO: refactor event credentials management. */}
+                            {!username && (
+                                <EventSignIn
+                                    eventId={eventId}
+                                    setUsername={setUsername}
+                                    setPassword={setPassword}
+                                />
+                            )}
+                            {username &&
+                                username in eventState.members &&
+                                eventState.members[username].isOwner && (
+                                    <>
+                                        <label htmlFor="event-name">
+                                            Event Name
+                                        </label>
+                                        <input
+                                            ref={eventNameInput}
+                                            id="event-name"
+                                            type="text"
+                                            placeholder="Eg. Math group study"
+                                            value={eventState?.name}
+                                            onChange={handleNameChange}
+                                        />
+                                        <div>
+                                            Share with invitees the link:{" "}
+                                            <strong>{`${BASE_URL}/events/${eventId}`}</strong>
+                                        </div>
+                                        <DaySelector eventId={eventId} />
+                                    </>
+                                )}
                             {/* TODO: remove flex container: */}
                             <div
                                 style={{ display: "flex", flexWrap: "nowrap" }}
