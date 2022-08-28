@@ -103,15 +103,24 @@ const EventPage: NextPage = () => {
                                 <strong>{`${BASE_URL}/events/${eventId}`}</strong>
                             </div>
                             <DaySelector eventId={eventId} />
-                            {/* Timetable for filling availabilities. */}
-                            <Timetable
-                                username={username}
-                                setUsername={setUsername}
-                                setPassword={setPassword}
-                                eventId={eventId}
-                            />
-                            {/* Timetable for showing the group's availabilities */}
-                            {/* <Timetable showGroupAvailability /> */}
+                            {/* TODO: remove flex container: */}
+                            <div
+                                style={{ display: "flex", flexWrap: "nowrap" }}
+                            >
+                                {/* Timetable for filling availabilities. */}
+                                <Timetable
+                                    username={username}
+                                    setUsername={setUsername}
+                                    setPassword={setPassword}
+                                    eventId={eventId}
+                                />
+                                {/* Timetable for showing the group's availabilities */}
+                                <Timetable
+                                    username={username}
+                                    eventId={eventId}
+                                    showGroupAvailability
+                                />
+                            </div>
                             <pre>
                                 {JSON.stringify(
                                     eventState || "Nothing",

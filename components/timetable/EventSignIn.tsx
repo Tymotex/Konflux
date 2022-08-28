@@ -1,17 +1,26 @@
+import { EventContext } from "contexts/event-context";
 import React, {
     Dispatch,
     FormEvent,
     SetStateAction,
     useCallback,
+    useContext,
     useRef,
 } from "react";
+import { spawnNotification } from "utils/notifications";
 
 interface Props {
+    eventId: string;
     setUsername: Dispatch<SetStateAction<string>>;
     setPassword: Dispatch<SetStateAction<string>>;
 }
 
-const EventSignIn: React.FC<Props> = ({ setUsername, setPassword }) => {
+const EventSignIn: React.FC<Props> = ({
+    eventId,
+    setUsername,
+    setPassword,
+}) => {
+    const { eventState, eventDispatch } = useContext(EventContext);
     const usernameInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
 
@@ -21,10 +30,45 @@ const EventSignIn: React.FC<Props> = ({ setUsername, setPassword }) => {
     const setCredentials = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
-            if (usernameInput.current) setUsername(usernameInput.current.value);
+            if (!eventId) {
+                spawnNotification(
+                    "error",
+                    "Event ID is empty! Can't create member.",
+                );
+                return;
+            }
+            if (usernameInput.current) {
+                const username = usernameInput.current.value;
+                setUsername(username);
+                console.log(eventState.members);
+                if (username in eventState.members) {
+                    eventDispatch({
+                        type: "SIGN_IN_MEMBER",
+                        payload: {
+                            eventId,
+                            username,
+                        },
+                    });
+                } else {
+                    eventDispatch({
+                        type: "SIGN_UP_MEMBER",
+                        payload: {
+                            eventId,
+                            username,
+                        },
+                    });
+                }
+            }
             if (passwordInput.current) setPassword(passwordInput.current.value);
         },
-        [setUsername, setPassword, usernameInput, passwordInput],
+        [
+            eventState,
+            eventId,
+            setUsername,
+            setPassword,
+            usernameInput,
+            passwordInput,
+        ],
     );
 
     return (
@@ -41,14 +85,14 @@ const EventSignIn: React.FC<Props> = ({ setUsername, setPassword }) => {
                     placeholder="Eg. Linus Torvalds"
                 />
             </div>
-            <div>
+            {/* <div>
                 <label htmlFor="event-password">Password (optional)</label>
                 <input
                     ref={passwordInput}
                     id="event-password"
                     type="password"
                 />
-            </div>
+            </div> */}
             <button type="submit">Submit</button>
         </form>
     );

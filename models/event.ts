@@ -10,6 +10,7 @@ export interface LocalEventMember {
     email?: string;
     profilePicUrl?: string;
     isOwner?: boolean;
+    placeholder?: boolean;
 }
 
 /**
@@ -164,4 +165,33 @@ export const updateEventName = async (
     } catch (err) {
         throw new Error(`Failed to update the event's name. Reason: ${err}`);
     }
+};
+
+/**
+ * Creates a new member in the given event.
+ * @param eventId
+ * @param user
+ */
+export const signUpMember = async (eventId: string, user: LocalEventMember) => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+    try {
+        const { username, ...userDetails } = user;
+        await set(
+            ref(getDatabase(), `events/${eventId}/members/${username}`),
+            userDetails,
+        );
+    } catch (err) {
+        throw new Error(`Failed to update the event's members. Reason: ${err}`);
+    }
+};
+
+/**
+ * Checks the given user's supplied details against their details in the remote
+ * event data.
+ * @param eventId
+ * @param user
+ */
+export const signInMember = async (eventId: string, username: string) => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+    // TODO: this would be where we need to check passwords.
 };

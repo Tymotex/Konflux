@@ -52,13 +52,24 @@ export const createIntervals = (
     return contiguousDays;
 };
 
+/**
+ * Returns an object containing the starting row and col and ending row and col
+ * from the given 2 time and date pairs. This is to help the caller skip the
+ * need to order them correctly.
+ * Assumes that the given times and dates are valid!
+ * @param time1
+ * @param time2
+ * @param date1
+ * @param date2
+ * @returns
+ */
 export const getStartAndEndRowsAndCols = (
     time1: number | undefined,
     time2: number | undefined,
     date1: string | undefined,
     date2: string | undefined,
 ) => {
-    if (!time1 || !time2 || !date1 || !date2)
+    if (time1 === undefined || time2 === undefined || !date1 || !date2)
         throw new Error(
             "Can't determine start and end rows and cols from invalid bounds.",
         );

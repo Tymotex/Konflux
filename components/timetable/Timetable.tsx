@@ -7,8 +7,8 @@ export type TimeInterval = string[];
 
 interface Props {
     username: string;
-    setUsername: Dispatch<SetStateAction<string>>;
-    setPassword: Dispatch<SetStateAction<string>>;
+    setUsername?: Dispatch<SetStateAction<string>>;
+    setPassword?: Dispatch<SetStateAction<string>>;
     eventId: string;
     showGroupAvailability?: boolean;
 }
@@ -22,8 +22,10 @@ const Timetable: React.FC<Props> = ({
 }) => {
     return (
         <>
-            {!username && (
+            {/* TODO: refactor event credentials management. */}
+            {!username && setUsername && setPassword && (
                 <EventSignIn
+                    eventId={eventId}
                     setUsername={setUsername}
                     setPassword={setPassword}
                 />
@@ -32,6 +34,7 @@ const Timetable: React.FC<Props> = ({
                 username={username}
                 eventId={eventId}
                 disabled={!username}
+                showGroupAvailability={showGroupAvailability}
             />
         </>
     );

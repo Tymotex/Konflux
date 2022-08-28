@@ -21,12 +21,14 @@ interface Props {
     disabled?: boolean;
     username: string;
     eventId: string;
+    showGroupAvailability?: boolean;
 }
 
 const TimetableGrid: React.FC<Props> = ({
     disabled = false,
     username,
     eventId,
+    showGroupAvailability = false,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
