@@ -50,17 +50,17 @@ $time-block-width: 80px;
             }
 
             .timeBlock {
-                background-color: $grey-200;
+                background-color: whitesmoke;
                 height: $time-block-height;
                 cursor: pointer;
 
                 &.selected {
-                    background: yellow;
+                    background: blue;
                     border: 1px solid black;
                 }
 
                 &.inSelectedArea {
-                    background: blue;
+                    background: orchid;
                     cursor: move;
                 }
 

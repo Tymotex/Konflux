@@ -17,14 +17,14 @@ const Home: NextPage = () => {
     const router = useRouter();
     const eventNameInput = useRef<HTMLInputElement>(null);
     const usernameInput = useRef<HTMLInputElement>(null);
-    const passwordInput = useRef<HTMLInputElement>(null);
+    // const passwordInput = useRef<HTMLInputElement>(null);
 
     // Handle the creation of an event.
     const handleEventCreation = useCallback(async (): Promise<void> => {
         if (
             eventNameInput.current === null ||
-            usernameInput.current === null ||
-            passwordInput.current === null
+            usernameInput.current === null
+            // passwordInput.current === null
         ) {
             spawnNotification("error", "Input element references detached!");
             return;
@@ -40,15 +40,15 @@ const Home: NextPage = () => {
 
         // Get and validate the username and password
         const formUsername = String(usernameInput.current.value);
-        const formPassword = String(passwordInput.current.value);
+        // const formPassword = String(passwordInput.current.value);
         if (formUsername.length === 0) {
             throw new Error("Username is required.");
         } else if (formUsername.length >= 255) {
             throw new Error("Username must be fewer than 255 characters.");
         }
-        if (formPassword.length >= 64) {
-            throw new Error("Password must be fewer than 64 characters.");
-        }
+        // if (formPassword.length >= 64) {
+        //     throw new Error("Password must be fewer than 64 characters.");
+        // }
 
         try {
             // Creating the event in Firebase realtime DB.
@@ -62,7 +62,7 @@ const Home: NextPage = () => {
                 pathname: `/events/${eventId}`,
                 query: {
                     username: formUsername,
-                    password: formPassword,
+                    // password: formPassword,
                 },
             });
         } catch (err) {
@@ -106,14 +106,14 @@ const Home: NextPage = () => {
                             placeholder="Eg. Linus Torvalds"
                         />
                     </div>
-                    <div>
+                    {/* <div>
                         <label htmlFor="password">(Optional) Password:</label>
                         <input
                             ref={passwordInput}
                             id="password"
                             type="password"
                         />
-                    </div>
+                    </div> */}
                     <Button
                         text="Start Planning"
                         shape="pill"

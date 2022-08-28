@@ -22,6 +22,7 @@ interface Props {
     username: string;
     eventId: string;
     showGroupAvailability?: boolean;
+    colourScale?: string[];
 }
 
 const TimetableGrid: React.FC<Props> = ({
@@ -29,6 +30,7 @@ const TimetableGrid: React.FC<Props> = ({
     username,
     eventId,
     showGroupAvailability = false,
+    colourScale,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
@@ -281,6 +283,24 @@ const TimetableGrid: React.FC<Props> = ({
         [],
     );
 
+    /**
+     *
+     */
+    const getTimeBlockColor = useCallback(
+        (date: string, timeBlockIndex: number) => {
+            if (!colourScale) return;
+            if (!(date in eventState.groupAvailabilities)) return;
+            if (!(timeBlockIndex in eventState.groupAvailabilities[date]))
+                return;
+
+            const numAvailable = Object.keys(
+                eventState.groupAvailabilities[date][timeBlockIndex],
+            ).length;
+            return colourScale[numAvailable];
+        },
+        [eventState, colourScale],
+    );
+
     return (
         <div className={`${styles.timetable} ${disabled && styles.disabled}`}>
             <div className={styles.timeBlockLabels}>
@@ -298,40 +318,74 @@ const TimetableGrid: React.FC<Props> = ({
                             <span className={styles.dateLabel}>
                                 {dayjs(date).format("Do MMM")}
                             </span>
-                            {[...Array(48)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={`${styles.timeBlock} ${
-                                        isSelected(date, i)
-                                            ? styles.selected
-                                            : styles.notSelected
-                                    } ${
-                                        isInAreaSelection(date, i)
-                                            ? styles.inSelectedArea
-                                            : ""
-                                    }`}
-                                    onClick={() =>
-                                        toggleTimeblockSelection(date, i)
-                                    }
-                                    onMouseDown={(e) =>
-                                        setPressedClass(e, true)
-                                    }
-                                    onMouseUp={(e) => {
-                                        setPressedClass(e, false);
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        setPressedClass(e, false);
-                                        beginSelectingArea(e, date, i);
-                                    }}
-                                    onMouseEnter={() => {
-                                        setSelectionAreaEnd(date, i);
-                                    }}
-                                ></div>
-                            ))}
+                            {!showGroupAvailability
+                                ? [...Array(48)].map((_, i) => (
+                                      // Showing the timetable for filling availabilities.
+                                      <div
+                                          key={i}
+                                          className={`${styles.timeBlock} ${
+                                              isSelected(date, i)
+                                                  ? styles.selected
+                                                  : styles.notSelected
+                                          } ${
+                                              isInAreaSelection(date, i)
+                                                  ? styles.inSelectedArea
+                                                  : ""
+                                          }`}
+                                          onClick={() =>
+                                              toggleTimeblockSelection(date, i)
+                                          }
+                                          onMouseDown={(e) =>
+                                              setPressedClass(e, true)
+                                          }
+                                          onMouseUp={(e) => {
+                                              setPressedClass(e, false);
+                                          }}
+                                          onMouseLeave={(e) => {
+                                              setPressedClass(e, false);
+                                              beginSelectingArea(e, date, i);
+                                          }}
+                                          onMouseEnter={() => {
+                                              setSelectionAreaEnd(date, i);
+                                          }}
+                                      ></div>
+                                  ))
+                                : [...Array(48)].map((_, i) => (
+                                      // Showing the timetable with group availabilities,
+                                      // not for filling in individual availabilities.
+                                      <div
+                                          key={i}
+                                          className={`${styles.timeBlock}`}
+                                          style={{
+                                              backgroundColor:
+                                                  getTimeBlockColor(date, i),
+                                          }}
+                                      ></div>
+                                  ))}
                         </div>
                     ))}
                 </div>
             ))}
+            {/* Colour scale */}
+            {showGroupAvailability && timeIntervals.length > 0 && (
+                <ol>
+                    {colourScale?.map((colour, i) => (
+                        <li>
+                            <div
+                                style={{
+                                    width: 100,
+                                    height: 100,
+                                    backgroundColor: colour,
+                                    border: "1px solid black",
+                                }}
+                            ></div>
+                            <div>{`${i}/${
+                                colourScale.length - 1
+                            } available`}</div>
+                        </li>
+                    ))}
+                </ol>
+            )}
         </div>
     );
 };
