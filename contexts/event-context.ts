@@ -8,7 +8,7 @@ import { createContext, Dispatch } from "react";
 import { spawnNotification } from "utils/notifications";
 
 /* --------------------------- Reducer and actions -------------------------- */
-type EventAction =
+export type EventAction =
     | { type: "SET_EVENT"; payload: { event: KonfluxEvent } }
     | {
           type: "SET_AVAILABILITIES";

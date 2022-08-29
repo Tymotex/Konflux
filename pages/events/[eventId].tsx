@@ -117,7 +117,11 @@ const EventPage: NextPage = () => {
                                             Share with invitees the link:{" "}
                                             <strong>{`${BASE_URL}/events/${eventId}`}</strong>
                                         </div>
-                                        <DaySelector eventId={eventId} />
+                                        <DaySelector
+                                            eventId={eventId}
+                                            eventState={eventState}
+                                            eventDispatch={eventDispatch}
+                                        />
                                     </>
                                 )}
                             {/* TODO: remove flex container: */}
@@ -127,8 +131,6 @@ const EventPage: NextPage = () => {
                                 {/* Timetable for filling availabilities. */}
                                 <Timetable
                                     username={username}
-                                    setUsername={setUsername}
-                                    setPassword={setPassword}
                                     eventId={eventId}
                                 />
                                 {/* Timetable for showing the group's availabilities */}

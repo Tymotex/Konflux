@@ -370,7 +370,7 @@ const TimetableGrid: React.FC<Props> = ({
             {showGroupAvailability && timeIntervals.length > 0 && (
                 <ol>
                     {colourScale?.map((colour, i) => (
-                        <li>
+                        <li key={colour}>
                             <div
                                 style={{
                                     width: 100,

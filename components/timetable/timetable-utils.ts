@@ -4,7 +4,7 @@ import {
 } from "components/day-selector/calendar-utils";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
-import { TimeInterval } from "./Timetable";
+import { TimeInterval } from "components/timetable/Timetable";
 
 const UNIVERSAL_ISO_PATTERN = /(\d{4})-(\d{1,2})-(\d{1,2})/;
 

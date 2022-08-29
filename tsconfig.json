@@ -18,7 +18,12 @@
         "isolatedModules": true,
         "jsx": "preserve",
         "incremental": true,
-        "baseUrl": "."
+        "baseUrl": ".",
+        "types": [
+            "cypress",
+            "node",
+            "jest"
+        ]
     },
     "include": [
         "next-env.d.ts",
@@ -26,6 +31,10 @@
         "**/*.tsx"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "**/*.spec.tsx",
+        "**/*.spec.ts",
+        "**/*.test.tsx",
+        "**/*.test.ts",
     ]
 }

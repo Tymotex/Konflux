@@ -63,6 +63,7 @@ const EventSignIn: React.FC<Props> = ({
         },
         [
             eventState,
+            eventDispatch,
             eventId,
             setUsername,
             setPassword,

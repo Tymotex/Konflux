@@ -1,6 +1,8 @@
-import { EventContext } from "contexts/event-context";
+import { EventAction, EventContext } from "contexts/event-context";
 import dayjs from "dayjs";
+import { KonfluxEvent } from "models/event";
 import React, {
+    Dispatch,
     useCallback,
     useContext,
     useEffect,
@@ -24,18 +26,27 @@ import { NO_SELECTION, rangeSelectionReducer } from "./range-selector-reducer";
 
 interface Props {
     eventId: string;
+    eventState: KonfluxEvent;
+    eventDispatch: Dispatch<EventAction>;
+    // Optionally override the initial display years and months.
+    initYear?: string;
+    initMonth?: string;
 }
 
-const DaySelector: React.FC<Props> = ({ eventId }) => {
-    const { eventState, eventDispatch } = useContext(EventContext);
-
+const DaySelector: React.FC<Props> = ({
+    eventId,
+    initYear = INITIAL_YEAR,
+    initMonth = INITIAL_MONTH,
+    eventState,
+    eventDispatch,
+}) => {
     // The days to be displayed on the calendar. By default, we start by showing
     // the days of the current month.
     const [days, setDays] = useState<Day[]>(
         getCalendarDays(INITIAL_YEAR, INITIAL_MONTH),
     );
-    const [displayYear, setDisplayYear] = useState<string>(INITIAL_YEAR);
-    const [displayMonth, setDislayMonth] = useState<string>(INITIAL_MONTH);
+    const [displayYear, setDisplayYear] = useState<string>(initYear);
+    const [displayMonth, setDislayMonth] = useState<string>(initMonth);
 
     /**
      * The user can select a range of days by pressing down on a starting day
@@ -232,7 +243,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
         <div className={styles.calendarMonth}>
             {/* Calendar header */}
             <section className={styles.header}>
-                <span onClick={renderPrevMonth}>
+                <span data-testid="prev-month" onClick={renderPrevMonth}>
                     <LeftIcon className={styles.prevMonthButton} />
                 </span>
                 <div className={styles.selectedMonth}>
@@ -240,7 +251,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                         "MMM YYYY",
                     )}
                 </div>
-                <span onClick={renderNextMonth}>
+                <span data-testid="next-month" onClick={renderNextMonth}>
                     <RightIcon className={styles.nextMonthButton} />
                 </span>
             </section>
@@ -258,6 +269,7 @@ const DaySelector: React.FC<Props> = ({ eventId }) => {
                     const dateStr = day.date.format("YYYY-MM-DD");
                     return (
                         <li
+                            data-testid={`date-${dateStr}`}
                             className={`${styles.day} ${
                                 !day.isCurrentMonth
                                     ? styles.notCurrentMonth
