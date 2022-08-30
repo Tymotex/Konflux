@@ -1,6 +1,8 @@
 @import "../../styles/variables.scss";
 
 .eventName {
+    margin: $spacing-xl;
+
     label {
         display: block;
         text-align: center;

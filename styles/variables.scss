@@ -156,3 +156,11 @@ $text-600: rgb(71 85 105);
 $text-700: rgb(51 65 85);
 $text-800: rgb(30 41 59);
 $text-900: rgb(15 23 42);
+
+// Day selector and timetable colours.
+$selected-bg-colour: $primary-500;
+$selected-text-colour: $text-100;
+$selection-indicator-bg-colour: $primary-300;
+$selection-indicator-text-colour: $text-700;
+$deselection-indicator-bg-colour: $grey-200;
+$deselection-indicator-text-colour: $text-700;

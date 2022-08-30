@@ -21,17 +21,8 @@ $default-bg-colour: white;
 $header-bg-colour: $grey-100;
 $header-btn-colour: $grey-400;
 $header-btn-hover-bg-colour: $grey-200;
-
 $days-of-week-colour: $grey-400;
-
 $day-hover-bg-colour: $primary-100;
-
-$selected-bg-colour: $primary-500;
-$selected-text-colour: $text-100;
-$selection-indicator-bg-colour: $primary-300;
-$selection-indiciator-text-colour: $text-700;
-$deselection-indiciator-bg-colour: $grey-200;
-$deselection-indiciator-text-colour: $text-700;
 $not-current-month-bg-colour: $grey-100;
 
 // Animation.
@@ -143,6 +134,7 @@ $hover-transition-duration: 70ms;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
 
             .day {
                 border-radius: 50%;
@@ -153,6 +145,7 @@ $hover-transition-duration: 70ms;
                 align-items: center;
                 justify-content: center;
                 transition: all $hover-transition-duration ease-in-out;
+                pointer-events: none;
             }
 
             // The calendar will render all days in the selected month, however
@@ -171,20 +164,18 @@ $hover-transition-duration: 70ms;
             // which days are part of that range.
             @mixin in-selection-range {
                 background-color: $selection-indicator-bg-colour !important;
-                color: $selection-indiciator-text-colour !important;
+                color: $selection-indicator-text-colour !important;
                 font-weight: bold;
             }
             @mixin in-deselection-range {
-                background-color: $deselection-indiciator-bg-colour !important;
-                color: $deselection-indiciator-text-colour !important;
+                background-color: $deselection-indicator-bg-colour !important;
+                color: $deselection-indicator-text-colour !important;
                 font-weight: bold;
             }
 
-            &.notSelected {
-                &.pressed > .day {
-                    @include in-selection-range;
-                    transform: scale(0.8);
-                }
+            &.pressed > .day {
+                @include in-selection-range;
+                transform: scale(0.8);
             }
 
             &.inSelectionRange > .day {

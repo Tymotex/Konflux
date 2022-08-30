@@ -304,6 +304,11 @@ const DaySelector: React.FC<Props> = ({
                                 const thisElem = e.target as HTMLUListElement;
                                 thisElem.classList.add(styles.pressed);
                             }}
+                            onMouseUp={(e) => {
+                                // Revoke the `pressed` class to this element.
+                                const thisElem = e.target as HTMLUListElement;
+                                thisElem.classList.remove(styles.pressed);
+                            }}
                             onMouseEnter={() => {
                                 selectionDispatch({
                                     type: "SET_SELECTION_END",

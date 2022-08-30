@@ -316,7 +316,12 @@ const TimetableGrid: React.FC<Props> = ({
                     {interval.map((date) => (
                         <div key={date} className={styles.column}>
                             <span className={styles.dateLabel}>
-                                {dayjs(date).format("Do MMM")}
+                                <span className={styles.date}>
+                                    {dayjs(date).format("Do MMM")}
+                                </span>
+                                <span className={styles.dayOfWeek}>
+                                    {dayjs(date).format("ddd")}
+                                </span>
                             </span>
                             {!showGroupAvailability
                                 ? [...Array(48)].map((_, i) => (
@@ -329,7 +334,9 @@ const TimetableGrid: React.FC<Props> = ({
                                                   : styles.notSelected
                                           } ${
                                               isInAreaSelection(date, i)
-                                                  ? styles.inSelectedArea
+                                                  ? selectionState.isSelectingArea
+                                                      ? styles.inSelectedArea
+                                                      : styles.inDeselectedArea
                                                   : ""
                                           }`}
                                           onClick={() =>
@@ -368,18 +375,32 @@ const TimetableGrid: React.FC<Props> = ({
             ))}
             {/* Colour scale */}
             {showGroupAvailability && timeIntervals.length > 0 && (
-                <ol>
+                <ol className={styles.availabilityLegend}>
                     {colourScale?.map((colour, i) => (
-                        <li key={colour}>
+                        <li key={colour} className={styles.availabilityChip}>
                             <div
                                 style={{
-                                    width: 100,
-                                    height: 100,
                                     backgroundColor: colour,
-                                    border: "1px solid black",
+                                }}
+                                className={styles.colour}
+                                onClick={(e) => {
+                                    // Apply the `pressed` class to this element.
+                                    const thisElem =
+                                        e.target as HTMLUListElement;
+                                    if (
+                                        thisElem.classList.contains(
+                                            styles.pressed,
+                                        )
+                                    ) {
+                                        thisElem.classList.remove(
+                                            styles.pressed,
+                                        );
+                                    } else {
+                                        thisElem.classList.add(styles.pressed);
+                                    }
                                 }}
                             ></div>
-                            <div>{`${i}/${
+                            <div className={styles.label}>{`${i}/${
                                 colourScale.length - 1
                             } available`}</div>
                         </li>
