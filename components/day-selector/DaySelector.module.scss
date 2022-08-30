@@ -1,62 +1,121 @@
 @import "../../styles/variables.scss";
 
-$grid-gap: 1px;
-$cell-min-height: 80px;
+// Sizing.
+$grid-gap-lg: 8px;
+$grid-padding-lg: $spacing-md;
+$cell-height-lg: 48px;
+$cell-width-lg: 48px;
 
-// Colours:
+$grid-gap-sm: 2px;
+$grid-padding-sm: 2px;
+$cell-height-sm: 32px;
+$cell-width-sm: 32px;
+
+$grid-gap-xs: 2px;
+$grid-padding-xs: 2px;
+$cell-height-xs: 24px;
+$cell-width-xs: 24px;
+
+// Colours.
 $default-bg-colour: white;
+$header-bg-colour: $grey-100;
+$header-btn-colour: $grey-400;
+$header-btn-hover-bg-colour: $grey-200;
+
+$days-of-week-colour: $grey-400;
+
+$day-hover-bg-colour: $primary-100;
+
 $selected-bg-colour: $primary-500;
 $selected-text-colour: $text-100;
 $selection-indicator-bg-colour: $primary-300;
-$selection-indiciator-text-colour: $text-200;
+$selection-indiciator-text-colour: $text-700;
 $deselection-indiciator-bg-colour: $grey-200;
 $deselection-indiciator-text-colour: $text-700;
 $not-current-month-bg-colour: $grey-100;
 
+// Animation.
+$hover-transition-duration: 70ms;
+
 .calendarMonth {
     position: relative;
-    background-color: $grey-100;
     user-select: none;
+    width: fit-content;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 36px 0px,
+        rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    overflow: auto;
 
     .header {
         display: flex;
-        justify-content: space-around;
+        justify-content: center;
         align-items: center;
-        background-color: $grey-200;
+        background-color: $header-bg-colour;
         padding: $spacing-sm;
 
         .selectedMonth {
             font-size: $font-size-md;
-            font-weight: bold;
+            line-height: $font-size-md;
+            margin-bottom: 2px;
             max-width: 150px;
             width: 100%;
             text-align: center;
+            color: $grey-600;
+        }
+
+        @mixin header-btn {
+            font-size: $font-size-sm;
+            cursor: pointer;
+            color: $header-btn-colour;
+            display: flex;
+            padding: $padding-xs;
+            border-radius: 50%;
+            transition: all $hover-transition-duration ease-in-out;
+
+            &:hover {
+                background: $header-btn-hover-bg-colour;
+                box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+                    rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+            }
+
+            &:active {
+                transform: scale(0.8);
+            }
         }
 
         .prevMonthButton {
-            font-size: $font-size-md;
-            cursor: pointer;
+            @include header-btn;
+            svg {
+                transform: translateX(-1px);
+            }
         }
+
         .nextMonthButton {
-            font-size: $font-size-md;
-            cursor: pointer;
+            @include header-btn;
+            svg {
+                transform: translateX(1px);
+            }
         }
     }
 
     .daysOfWeek {
-        color: $grey-700;
+        color: $days-of-week-colour;
         font-size: $font-size-sm;
-        background-color: $grey-50;
         padding: 10px 0 5px 0;
         list-style: none;
+        background-color: $header-bg-colour;
         margin: 0;
+        width: fit-content;
 
         // Show 7 equally sized columns for monday, tuesday, ...
         display: grid;
         grid-template-columns: repeat(7, 1fr);
+        grid-column-gap: $grid-gap-lg;
+        padding: $grid-padding-lg;
 
-        & > * {
+        li {
             text-align: center;
+            width: $cell-width-lg;
         }
     }
 
@@ -65,31 +124,35 @@ $not-current-month-bg-colour: $grey-100;
         // ... and so on.
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        grid-column-gap: $grid-gap;
-        grid-row-gap: $grid-gap;
+        grid-column-gap: $grid-gap-lg;
+        grid-row-gap: $grid-gap-lg;
         border-top: solid 1px $grey-200;
         margin: 0;
-        padding: 0;
+        width: fit-content;
+        padding: $grid-padding-lg;
 
         height: 100%;
         position: relative;
         list-style: none;
 
-        .day {
+        .dayCell {
             position: relative;
-            min-height: $cell-min-height;
+            height: $cell-height-lg;
+            width: $cell-width-lg;
             font-size: $font-size-sm;
-            background: $default-bg-colour;
-            border: 1px solid rgba($grey-500, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-            .number {
+            .day {
+                border-radius: 50%;
+                line-height: $font-size-sm;
                 display: flex;
-                justify-content: center;
+                height: 100%;
+                width: 100%;
                 align-items: center;
-                position: absolute;
-                right: 2px;
-                width: 20px;
-                height: 20px;
+                justify-content: center;
+                transition: all $hover-transition-duration ease-in-out;
             }
 
             // The calendar will render all days in the selected month, however
@@ -97,45 +160,125 @@ $not-current-month-bg-colour: $grey-100;
             // fill the first and last rows. This class is applied to those
             // filler days, not in the current month.
             &.notCurrentMonth {
-                background-color: $not-current-month-bg-colour;
+                color: $grey-500;
+            }
+
+            &:hover > .day {
+                background-color: $day-hover-bg-colour;
             }
 
             // When the user is attempted to select a range, we should show them
             // which days are part of that range.
             @mixin in-selection-range {
-                background-color: $selection-indicator-bg-colour;
-                color: $selection-indiciator-text-colour;
+                background-color: $selection-indicator-bg-colour !important;
+                color: $selection-indiciator-text-colour !important;
                 font-weight: bold;
             }
             @mixin in-deselection-range {
-                background-color: $deselection-indiciator-bg-colour;
-                color: $deselection-indiciator-text-colour;
+                background-color: $deselection-indiciator-bg-colour !important;
+                color: $deselection-indiciator-text-colour !important;
                 font-weight: bold;
             }
 
             &.notSelected {
-                &.pressed {
+                &.pressed > .day {
                     @include in-selection-range;
+                    transform: scale(0.8);
                 }
+            }
+
+            &.inSelectionRange > .day {
+                @include in-selection-range;
+                transform: scale(0.8);
+            }
+
+            &.inDeselectionRange > .day {
+                @include in-deselection-range;
+                transform: scale(0.8);
             }
 
             // When a day is selected for consideration:
             &.selected {
-                background-color: $selected-bg-colour;
-                color: $selected-text-colour;
+                .day {
+                    background-color: $selected-bg-colour;
+                    color: $selected-text-colour;
+                }
 
                 // When a selected day is clicked on:
-                &.pressed {
+                &.pressed > .day {
                     @include in-deselection-range;
                 }
             }
+        }
+    }
+}
 
-            &.inSelectionRange {
-                @include in-selection-range;
+@media screen and (max-width: $sm) {
+    .calendarMonth {
+        .daysOfWeek {
+            grid-column-gap: $grid-gap-sm;
+            padding: $grid-padding-sm;
+            position: relative;
+
+            li {
+                width: $cell-width-sm;
+                visibility: hidden;
+                overflow: hidden;
+
+                &:first-letter {
+                    padding-left: 8px;
+                    visibility: visible;
+                }
             }
+        }
+        .dayGrid {
+            padding: $grid-padding-sm;
+            grid-column-gap: $grid-gap-sm;
+            grid-row-gap: $grid-gap-sm;
 
-            &.inDeselectionRange {
-                @include in-deselection-range;
+            .dayCell {
+                width: $cell-width-sm;
+                height: $cell-height-sm;
+                font-size: small;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: $xs) {
+    .calendarMonth {
+        .header {
+            .selectedMonth {
+                width: 100px;
+                font-size: $font-size-sm;
+            }
+        }
+        .daysOfWeek {
+            grid-column-gap: $grid-gap-xs;
+            padding: $grid-padding-xs;
+            position: relative;
+            font-size: $font-size-xs;
+
+            li {
+                width: $cell-width-xs;
+                visibility: hidden;
+                overflow: hidden;
+
+                &:first-letter {
+                    padding-left: 8px;
+                    visibility: visible;
+                }
+            }
+        }
+        .dayGrid {
+            padding: $grid-padding-xs;
+            grid-column-gap: $grid-gap-xs;
+            grid-row-gap: $grid-gap-xs;
+
+            .dayCell {
+                width: $cell-width-xs;
+                height: $cell-height-xs;
+                font-size: small;
             }
         }
     }

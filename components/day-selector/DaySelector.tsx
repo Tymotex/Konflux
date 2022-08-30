@@ -10,8 +10,8 @@ import React, {
     useState,
 } from "react";
 import {
-    FaChevronCircleLeft as LeftIcon,
-    FaChevronCircleRight as RightIcon,
+    FaChevronLeft as LeftIcon,
+    FaChevronRight as RightIcon,
 } from "react-icons/fa";
 import { spawnNotification } from "utils/notifications";
 import {
@@ -224,7 +224,10 @@ const DaySelector: React.FC<Props> = ({
      */
     const isInRangeSelection = useCallback(
         (thisDate: string) => {
-            if (!(selectionState.startDate && selectionState.endDate))
+            if (
+                !selectionState.isSelectingRange &&
+                !selectionState.isDeselectingRange
+            )
                 return false;
             const earlierDate =
                 selectionState.startDate <= selectionState.endDate
@@ -243,16 +246,24 @@ const DaySelector: React.FC<Props> = ({
         <div className={styles.calendarMonth}>
             {/* Calendar header */}
             <section className={styles.header}>
-                <span data-testid="prev-month" onClick={renderPrevMonth}>
-                    <LeftIcon className={styles.prevMonthButton} />
+                <span
+                    data-testid="prev-month"
+                    className={styles.prevMonthButton}
+                    onClick={renderPrevMonth}
+                >
+                    <LeftIcon />
                 </span>
                 <div className={styles.selectedMonth}>
                     {dayjs(`${displayYear}-${displayMonth}-01`).format(
                         "MMM YYYY",
                     )}
                 </div>
-                <span data-testid="next-month" onClick={renderNextMonth}>
-                    <RightIcon className={styles.nextMonthButton} />
+                <span
+                    data-testid="next-month"
+                    className={styles.nextMonthButton}
+                    onClick={renderNextMonth}
+                >
+                    <RightIcon />
                 </span>
             </section>
 
@@ -270,7 +281,7 @@ const DaySelector: React.FC<Props> = ({
                     return (
                         <li
                             data-testid={`date-${dateStr}`}
-                            className={`${styles.day} ${
+                            className={`${styles.dayCell} ${
                                 !day.isCurrentMonth
                                     ? styles.notCurrentMonth
                                     : ""
@@ -300,7 +311,10 @@ const DaySelector: React.FC<Props> = ({
                                 });
                             }}
                         >
-                            <span className={styles.number}>
+                            <span
+                                aria-label={day.date.format("YYYY-MM-DD")}
+                                className={styles.day}
+                            >
                                 {day.date.format("D")}
                             </span>
                         </li>

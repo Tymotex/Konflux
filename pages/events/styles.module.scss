@@ -1,0 +1,20 @@
+@import "../../styles/variables.scss";
+
+.eventName {
+    label {
+        display: block;
+        text-align: center;
+    }
+    input {
+        margin: 0 auto;
+        display: block;
+    }
+}
+
+.calendarAndMapContainer {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}

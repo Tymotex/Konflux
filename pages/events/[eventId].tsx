@@ -1,5 +1,6 @@
 import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
+import styles from "./styles.module.scss";
 import { PageTransition } from "components/page-transition";
 import { Timetable } from "components/timetable";
 import { EventSignIn } from "components/event-credentials";
@@ -83,25 +84,25 @@ const EventPage: NextPage = () => {
 
     return (
         <PageTransition>
-            <Container>
-                <EventContext.Provider value={contextValue}>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                        >
-                            {/* TODO: refactor event credentials management. */}
-                            {!username && (
-                                <EventSignIn
-                                    eventId={eventId}
-                                    setUsername={setUsername}
-                                    setPassword={setPassword}
-                                />
-                            )}
-                            {username &&
-                                username in eventState.members &&
-                                eventState.members[username].isOwner && (
-                                    <>
+            <EventContext.Provider value={contextValue}>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                    >
+                        {/* TODO: refactor event credentials management. */}
+                        {!username && (
+                            <EventSignIn
+                                eventId={eventId}
+                                setUsername={setUsername}
+                                setPassword={setPassword}
+                            />
+                        )}
+                        {username &&
+                            username in eventState.members &&
+                            eventState.members[username].isOwner && (
+                                <>
+                                    <div className={styles.eventName}>
                                         <label htmlFor="event-name">
                                             Event Name
                                         </label>
@@ -113,44 +114,35 @@ const EventPage: NextPage = () => {
                                             value={eventState?.name}
                                             onChange={handleNameChange}
                                         />
-                                        <div>
-                                            Share with invitees the link:{" "}
-                                            <strong>{`${BASE_URL}/events/${eventId}`}</strong>
-                                        </div>
+                                    </div>
+                                    <div
+                                        className={
+                                            styles.calendarAndMapContainer
+                                        }
+                                    >
                                         <DaySelector
                                             eventId={eventId}
                                             eventState={eventState}
                                             eventDispatch={eventDispatch}
                                         />
-                                    </>
-                                )}
-                            {/* TODO: remove flex container: */}
-                            <div
-                                style={{ display: "flex", flexWrap: "nowrap" }}
-                            >
-                                {/* Timetable for filling availabilities. */}
-                                <Timetable
-                                    username={username}
-                                    eventId={eventId}
-                                />
-                                {/* Timetable for showing the group's availabilities */}
-                                <Timetable
-                                    username={username}
-                                    eventId={eventId}
-                                    showGroupAvailability
-                                />
-                            </div>
-                            <pre>
-                                {JSON.stringify(
-                                    eventState || "Nothing",
-                                    null,
-                                    4,
-                                )}
-                            </pre>
-                        </motion.div>
-                    </AnimatePresence>
-                </EventContext.Provider>
-            </Container>
+                                    </div>
+                                </>
+                            )}
+                        {/* Timetable for filling availabilities. */}
+                        <Timetable username={username} eventId={eventId} />
+                        {/* Timetable for showing the group's availabilities */}
+                        <Timetable
+                            username={username}
+                            eventId={eventId}
+                            showGroupAvailability
+                        />
+                        <div>
+                            Share with invitees the link:{" "}
+                            <strong>{`${BASE_URL}/events/${eventId}`}</strong>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+            </EventContext.Provider>
         </PageTransition>
     );
 };
