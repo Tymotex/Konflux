@@ -7,6 +7,12 @@ $time-block-width: 75px;
 
 // Colours.
 $selected-bg-colour: $primary-500;
+$default-bg-colour: white;
+
+:export {
+    defaultColour: $default-bg-colour;
+    selectedColour: $selected-bg-colour;
+}
 
 .timetable {
     .timetableGrid {
@@ -87,7 +93,7 @@ $selected-bg-colour: $primary-500;
                 }
 
                 .timeBlock {
-                    background: white;
+                    background: $default-bg-colour;
                     height: $time-block-height;
                     cursor: pointer;
                     box-sizing: border-box;

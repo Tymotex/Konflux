@@ -289,8 +289,8 @@ const TimetableGrid: React.FC<Props> = ({
         >
             <div className={styles.timeBlockLabels}>
                 {timeIntervals.length > 0 &&
-                    TIME_LABELS.map((label) => (
-                        <span key={label} className={styles.label}>
+                    TIME_LABELS.map((label, i) => (
+                        <span key={`${label}-${i}`} className={styles.label}>
                             {label}
                         </span>
                     ))}

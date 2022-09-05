@@ -4,7 +4,9 @@ import {
 } from "components/day-selector/calendar-utils";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
-import { TimeInterval } from "components/timetable/Timetable";
+
+/** Holds an array of contiguous dates. */
+export type TimeInterval = string[];
 
 const UNIVERSAL_ISO_PATTERN = /(\d{4})-(\d{1,2})-(\d{1,2})/;
 
