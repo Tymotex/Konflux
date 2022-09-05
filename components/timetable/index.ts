@@ -1,1 +1,2 @@
-export { default as Timetable } from "./Timetable";
+export { default as FillingTimetable } from "./FillingTimetable";
+export { default as GroupAvailabilityTimetable } from "./GroupAvailabilityTimetable";

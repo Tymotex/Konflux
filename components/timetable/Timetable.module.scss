@@ -9,115 +9,120 @@ $time-block-width: 75px;
 $selected-bg-colour: $primary-500;
 
 .timetable {
-    display: flex;
-    flex-direction: row;
-    width: fit-content;
-    margin: 0 auto;
-    column-gap: $spacing-md;
-    flex: 0 0 100%;
-    overflow: auto;
-    user-select: none;
-    padding-bottom: 24px;
-
-    &.disabled {
-        pointer-events: none;
-        filter: blur(3px);
-    }
-
-    .timeBlockLabels {
-        display: flex;
-        flex-direction: column;
-        padding-top: calc($time-block-height / 2);
-        text-align: right;
-        min-width: 100px;
-        color: $grey-500;
-        font-size: small;
-
-        &:first-child {
-            margin-top: calc($time-block-height + 38px);
-        }
-
-        .label {
-            &:nth-child(2n) {
-                visibility: hidden;
-            }
-            height: $time-block-height;
-        }
-    }
-
-    .columnGroup {
+    .timetableGrid {
         display: flex;
         flex-direction: row;
-        margin-top: $spacing-sm;
-        padding: $spacing-sm 0;
-        border-radius: 12px;
-        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
-            rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+        width: fit-content;
+        margin: 0 auto;
+        column-gap: $spacing-md;
+        flex: 0 0 100%;
+        overflow: auto;
+        user-select: none;
+        padding-bottom: 24px;
 
-        &:last-child {
-            margin-right: 10px;
+        &.disabled {
+            pointer-events: none;
+            filter: blur(3px);
         }
 
-        .column {
+        .timeBlockLabels {
             display: flex;
             flex-direction: column;
-            min-width: $time-block-width;
+            padding-top: calc($time-block-height / 2);
+            text-align: right;
+            min-width: 100px;
+            color: $grey-500;
+            font-size: $font-size-xs;
 
-            &:not(:last-child) {
-                .timeBlock {
-                    border-right: 1px solid rgba($color: #000000, $alpha: 0.05);
-                }
+            &:first-child {
+                margin-top: calc($time-block-height + 38px);
             }
 
-            .dateLabel {
-                text-align: center;
-                padding-bottom: $spacing-sm;
-                border-bottom: 1px solid rgba($color: #000000, $alpha: 0.1);
-
-                .date {
-                    display: block;
-                    font-size: small;
-                }
-                .dayOfWeek {
-                    font-weight: bold;
-                    display: block;
-                }
-            }
-
-            .timeBlock {
-                background: white;
-                height: $time-block-height;
-                cursor: pointer;
-                box-sizing: border-box;
-                transition: background 50ms ease-in-out;
-
-                &:hover {
-                    background: $primary-100;
-                }
-
-                &:nth-child(2n + 1) {
-                    border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.2);
-                }
+            .label {
                 &:nth-child(2n) {
-                    border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.1);
+                    visibility: hidden;
+                }
+                height: $time-block-height;
+            }
+        }
+
+        .columnGroup {
+            display: flex;
+            flex-direction: row;
+            margin-top: $spacing-sm;
+            padding: $spacing-sm 0;
+            border-radius: 12px;
+            box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+                rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+
+            &:last-child {
+                margin-right: 10px;
+            }
+
+            .column {
+                display: flex;
+                flex-direction: column;
+                min-width: $time-block-width;
+
+                &:not(:last-child) {
+                    .timeBlock {
+                        border-right: 1px solid
+                            rgba($color: #000000, $alpha: 0.05);
+                    }
                 }
 
-                &.selected {
-                    background: $selected-bg-colour;
+                .dateLabel {
+                    text-align: center;
+                    padding-bottom: $spacing-sm;
+                    border-bottom: 1px solid rgba($color: #000000, $alpha: 0.1);
+
+                    .date {
+                        display: block;
+                        font-size: small;
+                    }
+                    .dayOfWeek {
+                        font-weight: bold;
+                        display: block;
+                    }
                 }
 
-                &.inSelectedArea {
-                    background: $selection-indicator-bg-colour;
-                    cursor: move;
-                }
+                .timeBlock {
+                    background: white;
+                    height: $time-block-height;
+                    cursor: pointer;
+                    box-sizing: border-box;
+                    transition: background 50ms ease-in-out;
 
-                &.inDeselectedArea {
-                    background: $deselection-indicator-bg-colour;
-                    cursor: move;
-                }
+                    &:hover {
+                        background: $primary-100;
+                    }
 
-                &.pressed {
-                    background: $selection-indicator-bg-colour;
+                    &:nth-child(2n + 1) {
+                        border-bottom: 1px dashed
+                            rgba($color: #000000, $alpha: 0.2);
+                    }
+                    &:nth-child(2n) {
+                        border-bottom: 1px dashed
+                            rgba($color: #000000, $alpha: 0.1);
+                    }
+
+                    &.selected {
+                        background: $selected-bg-colour;
+                    }
+
+                    &.inSelectedArea {
+                        background: $selection-indicator-bg-colour;
+                        cursor: move;
+                    }
+
+                    &.inDeselectedArea {
+                        background: $deselection-indicator-bg-colour;
+                        cursor: move;
+                    }
+
+                    &.pressed {
+                        background: $selection-indicator-bg-colour;
+                    }
                 }
             }
         }
@@ -135,6 +140,13 @@ $selected-bg-colour: $primary-500;
             display: flex;
             align-items: center;
             column-gap: $spacing-sm;
+            cursor: pointer;
+
+            &.pressed {
+                .colour {
+                    transform: scale(1.25);
+                }
+            }
 
             .colour {
                 width: 32px;
@@ -142,25 +154,12 @@ $selected-bg-colour: $primary-500;
                 border-radius: 50%;
                 border: 1px solid rgba($color: #000000, $alpha: 0.1);
                 transition: all 100ms ease-in-out;
-                cursor: pointer;
-
-                &.pressed {
-                    transform: scale(1.15);
-                    box-shadow: rgba(0, 0, 0, 0.2) 0px 54px 55px,
-                        rgba(0, 0, 0, 0.1) 0px -12px 30px,
-                        rgba(0, 0, 0, 0.1) 0px 4px 6px,
-                        rgba(0, 0, 0, 0.1) 0px 12px 13px,
-                        rgba(0, 0, 0, 0.1) 0px -3px 5px;
-                }
-                &:not(.pressed) {
-                    &:hover {
-                        transform: scale(0.85);
-                    }
-                }
+                pointer-events: none;
             }
 
             .label {
                 color: $grey-600;
+                pointer-events: none;
             }
         }
     }

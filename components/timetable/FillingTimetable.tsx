@@ -1,3 +1,4 @@
+import styles from "./Timetable.module.scss";
 import chroma from "chroma-js";
 import { EventContext } from "contexts/event-context";
 import React, { useContext, useMemo } from "react";
@@ -12,7 +13,7 @@ interface Props {
     showGroupAvailability?: boolean;
 }
 
-const Timetable: React.FC<Props> = ({
+const FillingTimetable: React.FC<Props> = ({
     showGroupAvailability = false,
     username,
     eventId,
@@ -32,16 +33,15 @@ const Timetable: React.FC<Props> = ({
     }, [eventState.members]);
 
     return (
-        <>
+        <div className={styles.timetable}>
             <TimetableGrid
                 username={username}
                 eventId={eventId}
                 disabled={!username && !showGroupAvailability}
                 showGroupAvailability={showGroupAvailability}
-                colourScale={colourScale}
             />
-        </>
+        </div>
     );
 };
 
-export default Timetable;
+export default FillingTimetable;

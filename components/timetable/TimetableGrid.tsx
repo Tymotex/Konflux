@@ -22,7 +22,7 @@ interface Props {
     username: string;
     eventId: string;
     showGroupAvailability?: boolean;
-    colourScale?: string[];
+    getTimeBlockColour?: (date: string, timeBlockIndex: number) => string;
 }
 
 const TimetableGrid: React.FC<Props> = ({
@@ -30,7 +30,7 @@ const TimetableGrid: React.FC<Props> = ({
     username,
     eventId,
     showGroupAvailability = false,
-    colourScale,
+    getTimeBlockColour,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
@@ -283,26 +283,10 @@ const TimetableGrid: React.FC<Props> = ({
         [],
     );
 
-    /**
-     *
-     */
-    const getTimeBlockColor = useCallback(
-        (date: string, timeBlockIndex: number) => {
-            if (!colourScale) return;
-            if (!(date in eventState.groupAvailabilities)) return;
-            if (!(timeBlockIndex in eventState.groupAvailabilities[date]))
-                return;
-
-            const numAvailable = Object.keys(
-                eventState.groupAvailabilities[date][timeBlockIndex],
-            ).length;
-            return colourScale[numAvailable];
-        },
-        [eventState, colourScale],
-    );
-
     return (
-        <div className={`${styles.timetable} ${disabled && styles.disabled}`}>
+        <div
+            className={`${styles.timetableGrid} ${disabled && styles.disabled}`}
+        >
             <div className={styles.timeBlockLabels}>
                 {timeIntervals.length > 0 &&
                     TIME_LABELS.map((label) => (
@@ -313,7 +297,7 @@ const TimetableGrid: React.FC<Props> = ({
             </div>
             {timeIntervals.map((interval, i) => (
                 <div key={i} className={styles.columnGroup}>
-                    {interval.map((date) => (
+                    {interval.map((date: string) => (
                         <div key={date} className={styles.column}>
                             <span className={styles.dateLabel}>
                                 <span className={styles.date}>
@@ -365,7 +349,12 @@ const TimetableGrid: React.FC<Props> = ({
                                           className={`${styles.timeBlock}`}
                                           style={{
                                               backgroundColor:
-                                                  getTimeBlockColor(date, i),
+                                                  getTimeBlockColour
+                                                      ? getTimeBlockColour(
+                                                            date,
+                                                            i,
+                                                        )
+                                                      : "",
                                           }}
                                       ></div>
                                   ))}
@@ -373,40 +362,6 @@ const TimetableGrid: React.FC<Props> = ({
                     ))}
                 </div>
             ))}
-            {/* Colour scale */}
-            {showGroupAvailability && timeIntervals.length > 0 && (
-                <ol className={styles.availabilityLegend}>
-                    {colourScale?.map((colour, i) => (
-                        <li key={colour} className={styles.availabilityChip}>
-                            <div
-                                style={{
-                                    backgroundColor: colour,
-                                }}
-                                className={styles.colour}
-                                onClick={(e) => {
-                                    // Apply the `pressed` class to this element.
-                                    const thisElem =
-                                        e.target as HTMLUListElement;
-                                    if (
-                                        thisElem.classList.contains(
-                                            styles.pressed,
-                                        )
-                                    ) {
-                                        thisElem.classList.remove(
-                                            styles.pressed,
-                                        );
-                                    } else {
-                                        thisElem.classList.add(styles.pressed);
-                                    }
-                                }}
-                            ></div>
-                            <div className={styles.label}>{`${i}/${
-                                colourScale.length - 1
-                            } available`}</div>
-                        </li>
-                    ))}
-                </ol>
-            )}
         </div>
     );
 };

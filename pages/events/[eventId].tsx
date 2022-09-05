@@ -2,7 +2,10 @@ import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
 import styles from "./styles.module.scss";
 import { PageTransition } from "components/page-transition";
-import { Timetable } from "components/timetable";
+import {
+    FillingTimetable,
+    GroupAvailabilityTimetable,
+} from "components/timetable";
 import { EventSignIn } from "components/event-credentials";
 import { BASE_URL } from "constants/url";
 import { EventContext, eventReducer } from "contexts/event-context";
@@ -129,12 +132,14 @@ const EventPage: NextPage = () => {
                                 </>
                             )}
                         {/* Timetable for filling availabilities. */}
-                        <Timetable username={username} eventId={eventId} />
-                        {/* Timetable for showing the group's availabilities */}
-                        <Timetable
+                        <FillingTimetable
                             username={username}
                             eventId={eventId}
-                            showGroupAvailability
+                        />
+                        {/* Timetable for showing the group's availabilities */}
+                        <GroupAvailabilityTimetable
+                            username={username}
+                            eventId={eventId}
                         />
                         <div>
                             Share with invitees the link:{" "}
