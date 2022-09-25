@@ -20,3 +20,13 @@
     align-items: center;
     justify-content: center;
 }
+
+.timetableContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: $spacing-xl;
+    row-gap: $spacing-3xl;
+    align-items: flex-start;
+}

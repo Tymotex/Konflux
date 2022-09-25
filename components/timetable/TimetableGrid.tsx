@@ -285,83 +285,151 @@ const TimetableGrid: React.FC<Props> = ({
 
     return (
         <div
-            className={`${styles.timetableGrid} ${disabled && styles.disabled}`}
+            className={`${styles.grid} ${disabled && styles.disabled}`}
+            draggable={false}
         >
-            <div className={styles.timeBlockLabels}>
-                {timeIntervals.length > 0 &&
-                    TIME_LABELS.map((label, i) => (
-                        <span key={`${label}-${i}`} className={styles.label}>
-                            {label}
-                        </span>
-                    ))}
-            </div>
-            {timeIntervals.map((interval, i) => (
-                <div key={i} className={styles.columnGroup}>
-                    {interval.map((date: string) => (
-                        <div key={date} className={styles.column}>
-                            <span className={styles.dateLabel}>
-                                <span className={styles.date}>
-                                    {dayjs(date).format("Do MMM")}
+            {timeIntervals.map((interval, intervalIndex) => {
+                const displayTimeLabels = intervalIndex === 0;
+                return (
+                    <div
+                        key={intervalIndex}
+                        className={styles.columnGroup}
+                        onDragStart={(e) => e.preventDefault()}
+                    >
+                        {displayTimeLabels &&
+                            timeIntervals.length > 0 &&
+                            TIME_LABELS.map((label, i) => (
+                                <div
+                                    key={`${label}-${i}`}
+                                    className={styles.timeLabel}
+                                    style={{
+                                        gridColumnStart: 1,
+                                        gridRowStart: i + 2,
+                                    }}
+                                >
+                                    <span className={styles.text}>{label}</span>
+                                </div>
+                            ))}
+                        {interval.map((date: string, columnIndex) => (
+                            <>
+                                {/* TODO: Move this to a separate component. */}
+                                <span
+                                    className={styles.dateLabel}
+                                    style={{
+                                        gridRowStart: 1,
+                                        gridColumnStart:
+                                            columnIndex +
+                                            (displayTimeLabels ? 2 : 1),
+                                        gridColumnEnd: "span 1",
+                                    }}
+                                >
+                                    <span className={styles.date}>
+                                        {dayjs(date).format("Do MMM")}
+                                    </span>
+                                    <span className={styles.dayOfWeek}>
+                                        {dayjs(date).format("ddd")}
+                                    </span>
                                 </span>
-                                <span className={styles.dayOfWeek}>
-                                    {dayjs(date).format("ddd")}
-                                </span>
-                            </span>
-                            {!showGroupAvailability
-                                ? [...Array(48)].map((_, i) => (
-                                      // Showing the timetable for filling availabilities.
-                                      <div
-                                          key={i}
-                                          className={`${styles.timeBlock} ${
-                                              isSelected(date, i)
-                                                  ? styles.selected
-                                                  : styles.notSelected
-                                          } ${
-                                              isInAreaSelection(date, i)
-                                                  ? selectionState.isSelectingArea
-                                                      ? styles.inSelectedArea
-                                                      : styles.inDeselectedArea
-                                                  : ""
-                                          }`}
-                                          onClick={() =>
-                                              toggleTimeblockSelection(date, i)
-                                          }
-                                          onMouseDown={(e) =>
-                                              setPressedClass(e, true)
-                                          }
-                                          onMouseUp={(e) => {
-                                              setPressedClass(e, false);
-                                          }}
-                                          onMouseLeave={(e) => {
-                                              setPressedClass(e, false);
-                                              beginSelectingArea(e, date, i);
-                                          }}
-                                          onMouseEnter={() => {
-                                              setSelectionAreaEnd(date, i);
-                                          }}
-                                      ></div>
-                                  ))
-                                : [...Array(48)].map((_, i) => (
-                                      // Showing the timetable with group availabilities,
-                                      // not for filling in individual availabilities.
-                                      <div
-                                          key={i}
-                                          className={`${styles.timeBlock}`}
-                                          style={{
-                                              backgroundColor:
-                                                  getTimeBlockColour
-                                                      ? getTimeBlockColour(
-                                                            date,
-                                                            i,
-                                                        )
-                                                      : "",
-                                          }}
-                                      ></div>
-                                  ))}
-                        </div>
-                    ))}
-                </div>
-            ))}
+                                {!showGroupAvailability
+                                    ? [...Array(48)].map(
+                                          (_, timeBlockIndex) => (
+                                              // Showing the timetable for filling availabilities.
+                                              <div
+                                                  key={timeBlockIndex}
+                                                  className={`${
+                                                      styles.timeBlock
+                                                  } ${
+                                                      isSelected(
+                                                          date,
+                                                          timeBlockIndex,
+                                                      )
+                                                          ? styles.selected
+                                                          : styles.notSelected
+                                                  } ${
+                                                      isInAreaSelection(
+                                                          date,
+                                                          timeBlockIndex,
+                                                      )
+                                                          ? selectionState.isSelectingArea
+                                                              ? styles.inSelectedArea
+                                                              : styles.inDeselectedArea
+                                                          : ""
+                                                  }`}
+                                                  style={{
+                                                      height: "30px",
+                                                      gridRowStart:
+                                                          timeBlockIndex + 2,
+                                                      gridRowEnd: "span 1",
+                                                      gridColumnStart:
+                                                          columnIndex +
+                                                          (displayTimeLabels
+                                                              ? 2
+                                                              : 1),
+                                                      gridColumnEnd: "span 1",
+                                                  }}
+                                                  onClick={() =>
+                                                      toggleTimeblockSelection(
+                                                          date,
+                                                          timeBlockIndex,
+                                                      )
+                                                  }
+                                                  onMouseDown={(e) =>
+                                                      setPressedClass(e, true)
+                                                  }
+                                                  onMouseUp={(e) => {
+                                                      setPressedClass(e, false);
+                                                  }}
+                                                  onMouseLeave={(e) => {
+                                                      setPressedClass(e, false);
+                                                      beginSelectingArea(
+                                                          e,
+                                                          date,
+                                                          timeBlockIndex,
+                                                      );
+                                                  }}
+                                                  onMouseEnter={() => {
+                                                      setSelectionAreaEnd(
+                                                          date,
+                                                          timeBlockIndex,
+                                                      );
+                                                  }}
+                                              ></div>
+                                          ),
+                                      )
+                                    : [...Array(48)].map(
+                                          (_, timeBlockIndex) => (
+                                              // Showing the timetable with group availabilities,
+                                              // not for filling in individual availabilities.
+                                              <div
+                                                  key={timeBlockIndex}
+                                                  className={`${styles.timeBlock}`}
+                                                  style={{
+                                                      backgroundColor:
+                                                          getTimeBlockColour
+                                                              ? getTimeBlockColour(
+                                                                    date,
+                                                                    timeBlockIndex,
+                                                                )
+                                                              : "",
+                                                      height: "30px",
+                                                      gridRowStart:
+                                                          timeBlockIndex + 2,
+                                                      gridRowEnd: "span 1",
+                                                      gridColumnStart:
+                                                          columnIndex +
+                                                          (displayTimeLabels
+                                                              ? 2
+                                                              : 1),
+                                                      gridColumnEnd: "span 1",
+                                                  }}
+                                              ></div>
+                                          ),
+                                      )}
+                            </>
+                        ))}
+                    </div>
+                );
+            })}
         </div>
     );
 };

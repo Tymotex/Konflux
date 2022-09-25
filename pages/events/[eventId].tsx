@@ -131,16 +131,18 @@ const EventPage: NextPage = () => {
                                     </div>
                                 </>
                             )}
-                        {/* Timetable for filling availabilities. */}
-                        <FillingTimetable
-                            username={username}
-                            eventId={eventId}
-                        />
-                        {/* Timetable for showing the group's availabilities */}
-                        <GroupAvailabilityTimetable
-                            username={username}
-                            eventId={eventId}
-                        />
+                        <div className={styles.timetableContainer}>
+                            {/* Timetable for filling availabilities. */}
+                            <FillingTimetable
+                                username={username}
+                                eventId={eventId}
+                            />
+                            {/* Timetable for showing the group's availabilities */}
+                            <GroupAvailabilityTimetable
+                                username={username}
+                                eventId={eventId}
+                            />
+                        </div>
                         <div>
                             Share with invitees the link:{" "}
                             <strong>{`${BASE_URL}/events/${eventId}`}</strong>

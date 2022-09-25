@@ -1,7 +1,7 @@
 @import "../../styles/variables.scss";
 
 // Sizing.
-$time-block-height: 20px;
+$time-block-height: 30px;
 $time-block-row-gap: 2px;
 $time-block-width: 75px;
 
@@ -14,159 +14,127 @@ $default-bg-colour: white;
     selectedColour: $selected-bg-colour;
 }
 
-.timetable {
-    .timetableGrid {
-        display: flex;
-        flex-direction: row;
-        width: fit-content;
-        margin: 0 auto;
-        column-gap: $spacing-md;
-        flex: 0 0 100%;
-        overflow: auto;
-        user-select: none;
-        padding-bottom: 24px;
+.grid {
+    display: flex;
+    flex-direction: row;
+    column-gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 32px;
 
-        &.disabled {
-            pointer-events: none;
-            filter: blur(3px);
-        }
+    &.disabled {
+        pointer-events: none;
+        filter: blur(3px);
+    }
 
-        .timeBlockLabels {
-            display: flex;
-            flex-direction: column;
-            padding-top: calc($time-block-height / 2);
-            text-align: right;
-            min-width: 100px;
-            color: $grey-500;
-            font-size: $font-size-xs;
+    .timeLabel {
+        position: relative;
 
-            &:first-child {
-                margin-top: calc($time-block-height + 38px);
-            }
-
-            .label {
-                &:nth-child(2n) {
-                    visibility: hidden;
-                }
-                height: $time-block-height;
-            }
-        }
-
-        .columnGroup {
-            display: flex;
-            flex-direction: row;
-            margin-top: $spacing-sm;
-            padding: $spacing-sm 0;
-            border-radius: 12px;
-            box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
-                rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-
-            &:last-child {
-                margin-right: 10px;
-            }
-
-            .column {
-                display: flex;
-                flex-direction: column;
-                min-width: $time-block-width;
-
-                &:not(:last-child) {
-                    .timeBlock {
-                        border-right: 1px solid
-                            rgba($color: #000000, $alpha: 0.05);
-                    }
-                }
-
-                .dateLabel {
-                    text-align: center;
-                    padding-bottom: $spacing-sm;
-                    border-bottom: 1px solid rgba($color: #000000, $alpha: 0.1);
-
-                    .date {
-                        display: block;
-                        font-size: small;
-                    }
-                    .dayOfWeek {
-                        font-weight: bold;
-                        display: block;
-                    }
-                }
-
-                .timeBlock {
-                    background: $default-bg-colour;
-                    height: $time-block-height;
-                    cursor: pointer;
-                    box-sizing: border-box;
-                    transition: background 50ms ease-in-out;
-
-                    &:hover {
-                        background: $primary-100;
-                    }
-
-                    &:nth-child(2n + 1) {
-                        border-bottom: 1px dashed
-                            rgba($color: #000000, $alpha: 0.2);
-                    }
-                    &:nth-child(2n) {
-                        border-bottom: 1px dashed
-                            rgba($color: #000000, $alpha: 0.1);
-                    }
-
-                    &.selected {
-                        background: $selected-bg-colour;
-                    }
-
-                    &.inSelectedArea {
-                        background: $selection-indicator-bg-colour;
-                        cursor: move;
-                    }
-
-                    &.inDeselectedArea {
-                        background: $deselection-indicator-bg-colour;
-                        cursor: move;
-                    }
-
-                    &.pressed {
-                        background: $selection-indicator-bg-colour;
-                    }
-                }
-            }
+        .text {
+            color: grey;
+            position: absolute;
+            transform: translateY(-50%);
+            right: 10px;
         }
     }
 
-    .availabilityLegend {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        row-gap: $spacing-sm;
-        justify-content: center;
+    .columnGroup {
+        display: grid;
+        grid-template-rows: repeat($time-block-height, 49);
+        grid-auto-columns: minmax(50px, 100px);
+        grid-row-gap: 0;
+        grid-column-gap: 0;
 
-        .availabilityChip {
-            display: flex;
-            align-items: center;
-            column-gap: $spacing-sm;
+        // Date labels.
+        &:first-child {
+            grid-template-columns: minmax(80px, 100px);
+        }
+
+        .dateLabel {
+            text-align: center;
+            user-select: none;
+
+            .date {
+                display: block;
+                font-size: small;
+            }
+            .dayOfWeek {
+                font-weight: bold;
+                display: block;
+            }
+        }
+
+        .timeBlock {
+            background: $default-bg-colour;
+            // height: $time-block-height;
             cursor: pointer;
+            box-sizing: border-box;
+            transition: background 50ms ease-in-out;
+
+            &:hover {
+                background: $primary-100;
+            }
+
+            // &:nth-child(2n + 1) {
+            //     border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.2);
+            // }
+            // &:nth-child(2n) {
+            //     border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.1);
+            // }
+
+            &.selected {
+                background: $selected-bg-colour;
+            }
+
+            &.inSelectedArea {
+                background: $selection-indicator-bg-colour;
+                cursor: move;
+            }
+
+            &.inDeselectedArea {
+                background: $deselection-indicator-bg-colour;
+                cursor: move;
+            }
 
             &.pressed {
-                .colour {
-                    transform: scale(1.25);
-                }
+                background: $selection-indicator-bg-colour;
             }
+            border: 1px solid rgba(0, 0, 0, 0.249);
+        }
+    }
+}
 
+.availabilityLegend {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: $spacing-sm;
+    justify-content: center;
+
+    .availabilityChip {
+        display: flex;
+        align-items: center;
+        column-gap: $spacing-sm;
+        cursor: pointer;
+
+        &.pressed {
             .colour {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                border: 1px solid rgba($color: #000000, $alpha: 0.1);
-                transition: all 100ms ease-in-out;
-                pointer-events: none;
+                transform: scale(1.25);
             }
+        }
 
-            .label {
-                color: $grey-600;
-                pointer-events: none;
-            }
+        .colour {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba($color: #000000, $alpha: 0.1);
+            transition: all 100ms ease-in-out;
+            pointer-events: none;
+        }
+
+        .label {
+            color: $grey-600;
+            pointer-events: none;
         }
     }
 }
