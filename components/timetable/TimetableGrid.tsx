@@ -51,7 +51,8 @@ const TimetableGrid: React.FC<Props> = ({
     // When the user is deselecting, we go by the same logic as above, except we
     // remove time blocks from `selectedBlocks` instead of adding.
     useEffect(() => {
-        const commitAreaSelection = () => {
+        const commitAreaSelection = (e: Event) => {
+            e.preventDefault();
             if (
                 !selectionState.isSelectingArea &&
                 !selectionState.isDeselectingArea
@@ -59,12 +60,14 @@ const TimetableGrid: React.FC<Props> = ({
                 return;
 
             try {
+                console.log("SElection dispatch");
                 selectionDispatch({
                     type: "COMMIT_SELECTION",
                     payload: {
                         availabilities: eventState.groupAvailabilities,
                         username,
                         onCommit: (newAvailabilities) => {
+                            console.log("Dispatching");
                             eventDispatch({
                                 type: "SET_AVAILABILITIES",
                                 payload: {
@@ -238,7 +241,7 @@ const TimetableGrid: React.FC<Props> = ({
                 selectionState.isSelectingArea ||
                 selectionState.isDeselectingArea
             );
-            if (isLeftClicking && notTrackingAreaSelection)
+            if (isLeftClicking && notTrackingAreaSelection) {
                 selectionDispatch({
                     type: "BEGIN_SELECTION",
                     payload: {
@@ -247,6 +250,7 @@ const TimetableGrid: React.FC<Props> = ({
                         startDate: date,
                     },
                 });
+            }
         },
         [selectionState, selectionDispatch, isSelected],
     );

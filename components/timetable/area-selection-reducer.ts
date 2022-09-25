@@ -1,6 +1,12 @@
 import { KonfluxEvent } from "models/event";
 import { createNewAvailabilitiesAfterSelection } from "./timetable-utils";
 
+let prevStartTime: number | undefined;
+let prevEndTime: number | undefined;
+let prevStartDate: string | undefined;
+let prevEndDate: string | undefined;
+let prevIsSelectingArea: boolean | undefined;
+
 /**
  * Executes the given action on the given state, returning the next state.
  * @param state the original selection state
@@ -40,6 +46,24 @@ export const areaSelectionReducer = (
                 isSelectingArea,
                 isDeselectingArea,
             } = state;
+
+            if (
+                startTime === prevStartTime &&
+                endTime === prevEndTime &&
+                startDate === prevStartDate &&
+                endDate === prevEndDate &&
+                prevIsSelectingArea === isSelectingArea
+            ) {
+                return NO_SELECTION;
+            } else {
+                // TODO Account for selecting/deselecting.
+                prevStartTime = startTime;
+                prevEndTime = endTime;
+                prevStartDate = startDate;
+                prevEndDate = endDate;
+                prevIsSelectingArea = isSelectingArea;
+            }
+
             const newAvailabilities = createNewAvailabilitiesAfterSelection(
                 availabilities,
                 username,
@@ -50,6 +74,11 @@ export const areaSelectionReducer = (
                 isSelectingArea,
                 isDeselectingArea,
             );
+            console.log("==== Committing ====");
+            console.log(`StartTime=${startTime}`);
+            console.log(`EndTime=${endTime}`);
+            console.log(`StartDate=${startDate}`);
+            console.log(`EndDate=${endDate}`);
             onCommit(newAvailabilities);
             return NO_SELECTION;
         }
