@@ -1,32 +1,31 @@
 import { Button } from "components/button";
+import { TextField } from "components/form";
 import { PageTransition } from "components/page-transition";
+import { TopNav } from "components/top-nav";
 import { createEvent } from "models/event";
 import type { NextPage } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import Logo from "public/logo.svg";
 import { useCallback, useRef } from "react";
-import { AiOutlineArrowRight as ArrowRight } from "react-icons/ai";
-import {
-    spawnNotification,
-    spawnPromiseNotification,
-} from "utils/notifications";
+import { spawnNotification } from "utils/notifications";
+import ArrowDownIcon from "./arrow-down.svg";
+import Check from "./check.svg";
 import styles from "./index.module.scss";
 
 const Home: NextPage = () => {
     const router = useRouter();
     const eventNameInput = useRef<HTMLInputElement>(null);
     const usernameInput = useRef<HTMLInputElement>(null);
-    // const passwordInput = useRef<HTMLInputElement>(null);
+    const passwordInput = useRef<HTMLInputElement>(null);
 
     // Handle the creation of an event.
     const handleEventCreation = useCallback(async (): Promise<void> => {
         if (
             eventNameInput.current === null ||
-            usernameInput.current === null
-            // passwordInput.current === null
+            usernameInput.current === null ||
+            passwordInput.current === null
         ) {
             spawnNotification("error", "Input element references detached!");
+            spawnNotification("error", `${eventNameInput.current === null}`);
             return;
         }
 
@@ -40,21 +39,19 @@ const Home: NextPage = () => {
 
         // Get and validate the username and password
         const formUsername = String(usernameInput.current.value);
-        // const formPassword = String(passwordInput.current.value);
+        const formPassword = String(passwordInput.current.value);
         if (formUsername.length === 0) {
             throw new Error("Username is required.");
         } else if (formUsername.length >= 255) {
             throw new Error("Username must be fewer than 255 characters.");
         }
-        // if (formPassword.length >= 64) {
-        //     throw new Error("Password must be fewer than 64 characters.");
-        // }
+        if (formPassword.length >= 64) {
+            throw new Error("Password must be fewer than 64 characters.");
+        }
 
         try {
             // Creating the event in Firebase realtime DB.
             const eventId = await createEvent(formEventName, formUsername);
-
-            // TODO: push to localstorage the event. Write a simple API for this.
 
             // Transmit username and password to the event details page so that it
             // need not be fetched and verified.
@@ -62,7 +59,7 @@ const Home: NextPage = () => {
                 pathname: `/events/${eventId}`,
                 query: {
                     username: formUsername,
-                    // password: formPassword,
+                    password: formPassword,
                 },
             });
         } catch (err) {
@@ -73,66 +70,56 @@ const Home: NextPage = () => {
 
     return (
         <PageTransition>
-            <h1 className={styles.heading}>
-                <span aria-label="Application name" className={styles.appName}>
-                    Konflux
-                </span>{" "}
-                <Logo className={styles.logo} />
-            </h1>
-            <aside className={styles.slogan}>Painless meetup planning.</aside>
-            <aside className={styles.featureRequest}>
-                <Link scroll={false} href="/feature-request">
-                    Request a feature.
-                </Link>
-            </aside>
-            <div className={styles.callToAction}>
-                <div>
-                    <h2>Start Planning</h2>
-                    <div>
-                        <label htmlFor="event-name">Event Name:</label>
-                        <input
-                            ref={eventNameInput}
-                            id="event-name"
-                            type="text"
-                            placeholder="Eg. Dinner with Linus Torvalds"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="username">Your name:</label>
-                        <input
-                            ref={usernameInput}
-                            id="username"
-                            type="text"
-                            placeholder="Eg. Linus Torvalds"
-                        />
-                    </div>
-                    {/* <div>
-                        <label htmlFor="password">(Optional) Password:</label>
-                        <input
-                            ref={passwordInput}
-                            id="password"
-                            type="password"
-                        />
-                    </div> */}
-                    <Button
-                        text="Start Planning"
-                        shape="pill"
-                        size="md"
-                        icon={<ArrowRight />}
-                        iconInset
-                        onClick={() =>
-                            spawnPromiseNotification(handleEventCreation, {
-                                pendingMessage: "Creating a new event.",
-                                successMessage: "Created a new event.",
-                            })
-                        }
-                    />
+            <TopNav />
+            <header className={styles.header}>
+                <h2 className={styles.tagline}>
+                    A minimal web app for planning meetups.
+                </h2>
+                <ul className={styles.features}>
+                    <li>
+                        <Check className={styles.check} /> Plan meetups in 1
+                        minute.
+                    </li>
+                    <li>
+                        <Check className={styles.check} />
+                        100% free service.
+                    </li>
+                    <li>
+                        <Check className={styles.check} />
+                        <strong>No registration required</strong>
+                    </li>
+                </ul>
+            </header>
+            <div className={styles.main}>
+                <div className={styles.callToAction}>
+                    <h2>Start Here</h2>
+                    <ArrowDownIcon className={styles.arrowIcon} />
                 </div>
-                <Button
-                    text="See Your Events"
-                    colour="secondary"
-                    shape="pill"
+                <TextField
+                    refHandle={eventNameInput}
+                    id={"event-name"}
+                    placeholder={"Dinner with Linus Torvalds"}
+                    required
+                    label={"Event Name"}
                 />
+                <TextField
+                    refHandle={usernameInput}
+                    id={"username"}
+                    placeholder={"Linus Torvalds"}
+                    required
+                    label={"Username"}
+                    infoText={"A name that others can recognise you by."}
+                />
+                <TextField
+                    refHandle={passwordInput}
+                    id={"password"}
+                    type={"password"}
+                    label={"Password"}
+                    infoText={
+                        "An optional password you can set so that only you can modify the event."
+                    }
+                />
+                <Button onClick={handleEventCreation}>Start</Button>
             </div>
         </PageTransition>
     );

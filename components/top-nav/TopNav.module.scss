@@ -1,0 +1,83 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.topnav {
+    background: #fafafa;
+    padding: $padding-xs;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+
+    .navContentsContainer {
+        max-width: $md;
+        width: 100%;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .brand {
+            display: flex;
+            align-items: center;
+            margin: 0;
+
+            .brandIcon {
+            }
+            .brandName {
+            }
+        }
+
+        .utilitiesContainer {
+            display: flex;
+            align-items: center;
+
+            .login,
+            .register {
+                @include reset-button;
+
+                color: $grey-500;
+            }
+        }
+    }
+}
+
+@media screen and (min-width: $xs) {
+    .topnav {
+        .brand {
+            column-gap: 5px;
+            .brandName {
+                font-size: large;
+            }
+
+            .brandIcon {
+                width: $font-size-md;
+                height: $font-size-md;
+            }
+        }
+
+        .utilitiesContainer {
+            column-gap: $spacing-md;
+            font-size: $font-size-sm;
+        }
+    }
+}
+
+@media screen and (max-width: $xs) {
+    .topnav {
+        .brand {
+            .brandName {
+                font-size: $font-size-xs;
+            }
+            .brandIcon {
+                height: $font-size-sm !important;
+                width: $font-size-sm !important;
+            }
+        }
+        .utilitiesContainer {
+            column-gap: $spacing-xs;
+
+            font-size: $font-size-sm;
+        }
+    }
+}

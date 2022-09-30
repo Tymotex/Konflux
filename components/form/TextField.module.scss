@@ -1,0 +1,61 @@
+@import "../../styles/variables.scss";
+
+.inputContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+
+    .textFieldContainer {
+        display: flex;
+        align-items: center;
+        column-gap: $spacing-xs;
+
+        .textField {
+            padding: $spacing-md;
+            border: 1px solid rgba(128, 128, 128, 0.3);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 280px;
+
+            &:required {
+                background: white;
+            }
+
+            &::placeholder {
+                color: $grey-350;
+            }
+
+            &:focus {
+                box-shadow: rgba($primary-500, 0.16) 0px 10px 36px 0px,
+                    rgba($primary-500, 0.06) 0px 0px 0px 1px;
+                outline: 1px solid $primary-500;
+            }
+        }
+        .info {
+            height: $font-size-sm;
+            width: $font-size-sm;
+            fill: $primary-500;
+
+            margin-left: auto;
+            cursor: pointer;
+        }
+    }
+
+    .label {
+        display: flex;
+        flex-direction: row;
+        column-gap: 5px;
+        align-items: center;
+
+        .labelText {
+            color: $grey-500;
+            font-size: small;
+        }
+        .asterisk {
+            height: $font-size-sm;
+            width: $font-size-sm;
+            fill: $grey-400;
+        }
+    }
+}

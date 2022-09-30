@@ -1,46 +1,67 @@
 @import "../styles/variables.scss";
+@import "../styles/mixins.scss";
 
-.heading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    column-gap: $spacing-lg;
-    height: 100px;
+.header {
+    text-align: center;
+    margin-top: $margin-3xl;
+    padding: $spacing-md;
 
-    .appName {
-        display: block;
-        height: fit-content;
-        font-size: $font-size-lg;
+    .tagline {
+        font-size: large;
+        font-weight: normal;
+        color: $grey-500;
+    }
+
+    .features {
+        @include reset-list;
+
+        margin: $margin-xl auto 0 auto;
+        width: fit-content;
+        text-align: left;
+
+        color: $grey-500;
         font-weight: lighter;
+
+        li {
+            display: flex;
+            align-items: center;
+            column-gap: $spacing-xs;
+
+            &:not(:last-child) {
+                margin-bottom: $margin-sm;
+            }
+
+            .check {
+                width: $font-size-sm;
+                height: $font-size-sm;
+                fill: $primary-500;
+            }
+        }
     }
-
-    .logo {
-        height: $font-size-lg;
-        width: auto;
-    }
 }
 
-.slogan {
-    text-align: center;
-    color: $grey-500;
-    font-size: $font-size-md;
-    font-weight: lighter;
-}
-
-.featureRequest {
-    color: $primary-400;
-    margin: $spacing-lg auto;
-    width: fit-content;
-    text-align: center;
-    border-bottom: 1px dotted $primary-300;
-}
-
-.callToAction {
+.main {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     row-gap: $spacing-md;
 
-    margin-top: $margin-6xl;
+    padding: $spacing-md;
+    margin-top: $margin-3xl;
+
+    .callToAction {
+        display: flex;
+        align-items: center;
+
+        h2 {
+            font-size: $font-size-md;
+        }
+
+        .arrowIcon {
+            height: $font-size-xl;
+            width: $font-size-xl;
+            position: relative;
+        }
+    }
 }
