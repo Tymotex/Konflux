@@ -22,7 +22,11 @@ function MyApp({ Component, pageProps }: AppProps) {
                 >
                     <Component {...pageProps} key={router.route} />
                 </AnimatePresence>
-                <ToastContainer theme="dark" position="top-center" />
+                <ToastContainer
+                    position="top-center"
+                    hideProgressBar
+                    pauseOnFocusLoss={false}
+                />
             </PageLayout>
         </>
     );
