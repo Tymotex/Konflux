@@ -2,6 +2,7 @@ import React, { RefObject } from "react";
 import styles from "./TextField.module.scss";
 import Asterisk from "./asterisk.svg";
 import Info from "./info.svg";
+import { Tooltip } from "@reach/tooltip";
 
 interface Props {
     id: string;
@@ -40,7 +41,13 @@ const TextField: React.FC<Props> = ({
                     placeholder={placeholder}
                     autoComplete={"off"}
                 />
-                {infoText && <Info className={styles.info} />}
+                {infoText && (
+                    <Tooltip label={infoText} aria-label={infoText}>
+                        <button className={styles.infoBtn}>
+                            <Info />
+                        </button>
+                    </Tooltip>
+                )}
             </div>
         </div>
     );

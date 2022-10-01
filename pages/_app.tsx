@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.scss";
 import { TopNav } from "components/top-nav";
 import { PageLayout } from "components/layout";
+import "@reach/tooltip/styles.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();

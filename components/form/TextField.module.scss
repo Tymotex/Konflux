@@ -1,4 +1,5 @@
 @import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
 
 .inputContainer {
     display: flex;
@@ -32,13 +33,17 @@
                 outline: 1px solid $primary-500;
             }
         }
-        .info {
-            height: $font-size-sm;
-            width: $font-size-sm;
-            fill: $primary-500;
+        .infoBtn {
+            @include reset-button;
 
-            margin-left: auto;
-            cursor: pointer;
+            svg {
+                height: $font-size-sm;
+                width: $font-size-sm;
+                fill: $primary-500;
+
+                margin-left: auto;
+                cursor: pointer;
+            }
         }
     }
 
