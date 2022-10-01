@@ -5,8 +5,18 @@
     @include reset-button;
 
     background: $primary-500;
-    padding: $padding-xs $padding-md;
+    padding: $padding-sm $padding-lg;
     border-radius: 100px;
     color: $grey-100;
+    font-weight: bold;
+    font-family: "Montserrat", sans-serif;
     cursor: pointer;
+
+    transition: 0.2s all ease-in-out;
+
+    &:hover {
+        transform: scale(1.05);
+        color: $primary-700;
+        background: $primary-200;
+    }
 }

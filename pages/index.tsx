@@ -8,6 +8,29 @@ import { spawnNotification } from "utils/notifications";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
+import { motion } from "framer-motion";
+
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            delay: 1,
+            delayChildren: 1,
+            staggerChildren: 0.5,
+        },
+    },
+};
+
+const item = {
+    hidden: { opacity: 0, x: -100 },
+    show: { opacity: 1, x: 0 },
+};
+
+const entryAnimVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 1 } },
+};
 
 const Home: NextPage = () => {
     const router = useRouter();
@@ -69,7 +92,12 @@ const Home: NextPage = () => {
     return (
         <>
             <div className={styles.container}>
-                <header className={styles.header}>
+                <motion.header
+                    className={styles.header}
+                    variants={entryAnimVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
                     <h2 className={styles.tagline}>
                         A minimal web app for planning meetups.
                     </h2>
@@ -87,37 +115,81 @@ const Home: NextPage = () => {
                             <strong>No registration required</strong>
                         </li>
                     </ul>
-                </header>
+                </motion.header>
                 <main className={styles.main}>
-                    <div className={styles.callToAction}>
+                    <motion.div
+                        className={styles.callToAction}
+                        initial="hidden"
+                        animate="visible"
+                        variants={entryAnimVariants}
+                    >
                         <h2>Start Here</h2>
-                        <ArrowDownIcon className={styles.arrowIcon} />
-                    </div>
-                    <TextField
-                        refHandle={eventNameInput}
-                        id={"event-name"}
-                        placeholder={"Dinner with Linus Torvalds"}
-                        required
-                        label={"Event Name"}
-                    />
-                    <TextField
-                        refHandle={usernameInput}
-                        id={"username"}
-                        placeholder={"Linus Torvalds"}
-                        required
-                        label={"Username"}
-                        infoText={"A name that others can recognise you by."}
-                    />
-                    <TextField
-                        refHandle={passwordInput}
-                        id={"password"}
-                        type={"password"}
-                        label={"Password"}
-                        infoText={
-                            "An optional password you can set so that only you can modify the event."
-                        }
-                    />
-                    <Button onClick={handleEventCreation}>Start</Button>
+                        <motion.span
+                            animate={{ y: [0, 4, 0, -4, 0] }}
+                            transition={{
+                                ease: "linear",
+                                duration: 0.75,
+                                delay: 2.5,
+                                repeat: 2,
+                            }}
+                        >
+                            <ArrowDownIcon className={styles.arrowIcon} />
+                        </motion.span>
+                    </motion.div>
+                    <motion.form
+                        className={styles.startForm}
+                        variants={container}
+                        initial={"hidden"}
+                        animate="show"
+                    >
+                        <motion.div
+                            variants={item}
+                            transition={{ duration: 1 }}
+                        >
+                            <TextField
+                                refHandle={eventNameInput}
+                                id={"event-name"}
+                                placeholder={"Dinner with Linus Torvalds"}
+                                required
+                                label={"Event Name"}
+                            />
+                        </motion.div>
+                        <motion.div
+                            variants={item}
+                            transition={{ duration: 1 }}
+                        >
+                            <TextField
+                                refHandle={usernameInput}
+                                id={"username"}
+                                placeholder={"Linus Torvalds"}
+                                required
+                                label={"Username"}
+                                infoText={
+                                    "A name that others can recognise you by."
+                                }
+                            />
+                        </motion.div>
+                        <motion.div
+                            variants={item}
+                            transition={{ duration: 1 }}
+                        >
+                            <TextField
+                                refHandle={passwordInput}
+                                id={"password"}
+                                type={"password"}
+                                label={"Password"}
+                                infoText={
+                                    "An optional password you can set so that only you can modify the event."
+                                }
+                            />
+                        </motion.div>
+                    </motion.form>
+                    <Button
+                        onClick={handleEventCreation}
+                        style={{ marginTop: "24px" }}
+                    >
+                        Begin
+                    </Button>
                 </main>
             </div>
         </>

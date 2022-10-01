@@ -25,7 +25,7 @@
     "chroma-js": "^2.4.2",
     "dayjs": "^1.11.5",
     "firebase": "^9.9.3",
-    "framer-motion": "^7.2.0",
+    "framer-motion": "^7.5.1",
     "identity-obj-proxy": "^3.0.0",
     "next": "12.2.5",
     "react": "18.2.0",
