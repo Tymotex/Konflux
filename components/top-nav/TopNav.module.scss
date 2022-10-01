@@ -5,7 +5,7 @@
     background: #fafafa;
     padding: $padding-xs;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-    height: 56px;
+    height: $topnav-height;
     display: flex;
     align-items: center;
 
@@ -23,8 +23,10 @@
             margin: 0;
 
             .brandIcon {
+                cursor: pointer;
             }
             .brandName {
+                cursor: pointer;
             }
         }
 

@@ -1,14 +1,12 @@
 import { Button } from "components/button";
 import { TextField } from "components/form";
-import { PageTransition } from "components/page-transition";
-import { TopNav } from "components/top-nav";
 import { createEvent } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useRef } from "react";
 import { spawnNotification } from "utils/notifications";
 import ArrowDownIcon from "./arrow-down.svg";
-import Check from "./check.svg";
+import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
 
 const Home: NextPage = () => {
@@ -69,59 +67,60 @@ const Home: NextPage = () => {
     }, [router]);
 
     return (
-        <PageTransition>
-            <TopNav />
-            <header className={styles.header}>
-                <h2 className={styles.tagline}>
-                    A minimal web app for planning meetups.
-                </h2>
-                <ul className={styles.features}>
-                    <li>
-                        <Check className={styles.check} /> Plan meetups in 1
-                        minute.
-                    </li>
-                    <li>
-                        <Check className={styles.check} />
-                        100% free service.
-                    </li>
-                    <li>
-                        <Check className={styles.check} />
-                        <strong>No registration required</strong>
-                    </li>
-                </ul>
-            </header>
-            <div className={styles.main}>
-                <div className={styles.callToAction}>
-                    <h2>Start Here</h2>
-                    <ArrowDownIcon className={styles.arrowIcon} />
-                </div>
-                <TextField
-                    refHandle={eventNameInput}
-                    id={"event-name"}
-                    placeholder={"Dinner with Linus Torvalds"}
-                    required
-                    label={"Event Name"}
-                />
-                <TextField
-                    refHandle={usernameInput}
-                    id={"username"}
-                    placeholder={"Linus Torvalds"}
-                    required
-                    label={"Username"}
-                    infoText={"A name that others can recognise you by."}
-                />
-                <TextField
-                    refHandle={passwordInput}
-                    id={"password"}
-                    type={"password"}
-                    label={"Password"}
-                    infoText={
-                        "An optional password you can set so that only you can modify the event."
-                    }
-                />
-                <Button onClick={handleEventCreation}>Start</Button>
+        <>
+            <div className={styles.container}>
+                <header className={styles.header}>
+                    <h2 className={styles.tagline}>
+                        A minimal web app for planning meetups.
+                    </h2>
+                    <ul className={styles.features}>
+                        <li>
+                            <CheckIcon className={styles.check} /> Plan meetups
+                            in 1 minute.
+                        </li>
+                        <li>
+                            <CheckIcon className={styles.check} />
+                            100% free service.
+                        </li>
+                        <li>
+                            <CheckIcon className={styles.check} />
+                            <strong>No registration required</strong>
+                        </li>
+                    </ul>
+                </header>
+                <main className={styles.main}>
+                    <div className={styles.callToAction}>
+                        <h2>Start Here</h2>
+                        <ArrowDownIcon className={styles.arrowIcon} />
+                    </div>
+                    <TextField
+                        refHandle={eventNameInput}
+                        id={"event-name"}
+                        placeholder={"Dinner with Linus Torvalds"}
+                        required
+                        label={"Event Name"}
+                    />
+                    <TextField
+                        refHandle={usernameInput}
+                        id={"username"}
+                        placeholder={"Linus Torvalds"}
+                        required
+                        label={"Username"}
+                        infoText={"A name that others can recognise you by."}
+                    />
+                    <TextField
+                        refHandle={passwordInput}
+                        id={"password"}
+                        type={"password"}
+                        label={"Password"}
+                        infoText={
+                            "An optional password you can set so that only you can modify the event."
+                        }
+                    />
+                    <Button onClick={handleEventCreation}>Start</Button>
+                </main>
             </div>
-        </PageTransition>
+        </>
     );
 };
 

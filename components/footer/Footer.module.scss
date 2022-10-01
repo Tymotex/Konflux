@@ -1,0 +1,30 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.footer {
+    margin-top: auto;
+    padding: $spacing-xs;
+
+    .footerItems {
+        @include reset-list;
+
+        display: flex;
+        flex-direction: row;
+        column-gap: $spacing-xs;
+        justify-content: center;
+
+        li {
+            color: $grey-400;
+
+            a {
+                &:hover {
+                    border-bottom: 1px dashed $grey-700;
+                }
+            }
+        }
+
+        .divider {
+            filter: brightness(250%);
+        }
+    }
+}

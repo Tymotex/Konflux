@@ -7,18 +7,22 @@ import { useRouter } from "next/router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.scss";
+import { TopNav } from "components/top-nav";
+import { PageLayout } from "components/layout";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
     return (
         <>
-            <AnimatePresence
-                mode="wait"
-                onExitComplete={() => window.scrollTo(0, 0)}
-            >
-                <Component {...pageProps} key={router.route} />
-            </AnimatePresence>
-            <ToastContainer theme="dark" position="top-center" />
+            <PageLayout>
+                <AnimatePresence
+                    mode="wait"
+                    onExitComplete={() => window.scrollTo(0, 0)}
+                >
+                    <Component {...pageProps} key={router.route} />
+                </AnimatePresence>
+                <ToastContainer theme="dark" position="top-center" />
+            </PageLayout>
         </>
     );
 }
