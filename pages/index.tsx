@@ -9,6 +9,7 @@ import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
 import { motion } from "framer-motion";
+import { useDarkMode } from "contexts/ThemeProvider";
 
 const container = {
     hidden: { opacity: 0 },
@@ -24,7 +25,7 @@ const container = {
 
 const item = {
     hidden: { opacity: 0, x: -100 },
-    show: { opacity: 1, x: 0 },
+    show: { opacity: 1, x: 0, transition: { duration: 1 } },
 };
 
 const entryAnimVariants = {
@@ -37,6 +38,8 @@ const Home: NextPage = () => {
     const eventNameInput = useRef<HTMLInputElement>(null);
     const usernameInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
+
+    const isDarkMode = useDarkMode();
 
     // Handle the creation of an event.
     const handleEventCreation = useCallback(async (): Promise<void> => {
@@ -93,7 +96,9 @@ const Home: NextPage = () => {
         <>
             <div className={styles.container}>
                 <motion.header
-                    className={styles.header}
+                    className={`${styles.header} ${
+                        isDarkMode ? styles.dark : ""
+                    }`}
                     variants={entryAnimVariants}
                     initial="hidden"
                     animate="visible"
@@ -133,7 +138,11 @@ const Home: NextPage = () => {
                                 repeat: 2,
                             }}
                         >
-                            <ArrowDownIcon className={styles.arrowIcon} />
+                            <ArrowDownIcon
+                                className={`${styles.arrowIcon} ${
+                                    isDarkMode ? styles.dark : ""
+                                }`}
+                            />
                         </motion.span>
                     </motion.div>
                     <motion.form
@@ -142,10 +151,7 @@ const Home: NextPage = () => {
                         initial={"hidden"}
                         animate="show"
                     >
-                        <motion.div
-                            variants={item}
-                            transition={{ duration: 1 }}
-                        >
+                        <motion.div variants={item}>
                             <TextField
                                 refHandle={eventNameInput}
                                 id={"event-name"}
@@ -154,10 +160,7 @@ const Home: NextPage = () => {
                                 label={"Event Name"}
                             />
                         </motion.div>
-                        <motion.div
-                            variants={item}
-                            transition={{ duration: 1 }}
-                        >
+                        <motion.div variants={item}>
                             <TextField
                                 refHandle={usernameInput}
                                 id={"username"}
@@ -169,10 +172,7 @@ const Home: NextPage = () => {
                                 }
                             />
                         </motion.div>
-                        <motion.div
-                            variants={item}
-                            transition={{ duration: 1 }}
-                        >
+                        <motion.div variants={item}>
                             <TextField
                                 refHandle={passwordInput}
                                 id={"password"}
@@ -183,13 +183,13 @@ const Home: NextPage = () => {
                                 }
                             />
                         </motion.div>
+                        <motion.div
+                            variants={item}
+                            style={{ textAlign: "center", marginTop: "32px" }}
+                        >
+                            <Button onClick={handleEventCreation}>Begin</Button>
+                        </motion.div>
                     </motion.form>
-                    <Button
-                        onClick={handleEventCreation}
-                        style={{ marginTop: "24px" }}
-                    >
-                        Begin
-                    </Button>
                 </main>
             </div>
         </>

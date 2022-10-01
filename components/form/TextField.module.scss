@@ -7,6 +7,8 @@
     width: 100%;
     max-width: 300px;
 
+    margin-bottom: $margin-md;
+
     .textFieldContainer {
         display: flex;
         align-items: center;
@@ -18,10 +20,11 @@
             border-radius: 12px;
             max-width: 220px;
             width: 100%;
-            // max-width: $xs;
+            background: white;
 
-            &:required {
-                background: white;
+            &.dark {
+                background: $grey-700;
+                color: $grey-50;
             }
 
             &::placeholder {

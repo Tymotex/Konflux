@@ -9,6 +9,12 @@
     display: flex;
     align-items: center;
 
+    transition: 0.2s all ease-in-out;
+    &.dark {
+        background: $grey-700;
+        color: $grey-100;
+    }
+
     .navContentsContainer {
         max-width: $md;
         width: 100%;
@@ -33,12 +39,17 @@
         .utilitiesContainer {
             display: flex;
             align-items: center;
+            color: $grey-500;
+
+            &.dark {
+                color: $grey-300;
+            }
 
             .login,
             .register {
                 @include reset-button;
 
-                color: $grey-500;
+                cursor: pointer;
             }
         }
     }

@@ -3,6 +3,7 @@ import styles from "./TextField.module.scss";
 import Asterisk from "./asterisk.svg";
 import Info from "./info.svg";
 import { Tooltip } from "@reach/tooltip";
+import { useDarkMode } from "contexts/ThemeProvider";
 
 interface Props {
     id: string;
@@ -23,6 +24,8 @@ const TextField: React.FC<Props> = ({
     required = false,
     infoText,
 }) => {
+    const isDarkMode = useDarkMode();
+
     return (
         <div className={styles.inputContainer}>
             <div className={styles.label}>
@@ -34,7 +37,9 @@ const TextField: React.FC<Props> = ({
             <div className={styles.textFieldContainer}>
                 <input
                     id={id}
-                    className={styles.textField}
+                    className={`${styles.textField} ${
+                        isDarkMode ? styles.dark : ""
+                    }`}
                     ref={refHandle}
                     required={required}
                     type={type}

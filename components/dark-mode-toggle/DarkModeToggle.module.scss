@@ -1,8 +1,23 @@
 @import "../.././styles/variables.scss";
+@import "../.././styles/mixins.scss";
 
-.icon {
+.btn {
+    @include reset-button;
+
     height: 20px;
     width: 20px;
-    cursor: pointer;
-    margin-right: $spacing-xs;
+
+    .icon {
+        height: 20px;
+        width: 20px;
+        cursor: pointer;
+        margin-right: $spacing-xs;
+        transition: 0.2 all ease-in-out;
+
+        &.dark {
+            * {
+                fill: white !important;
+            }
+        }
+    }
 }

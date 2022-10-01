@@ -10,24 +10,27 @@ import "../styles/globals.scss";
 import { TopNav } from "components/top-nav";
 import { PageLayout } from "components/layout";
 import "@reach/tooltip/styles.css";
+import { ThemeProvider } from "contexts/ThemeProvider";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
     return (
         <>
-            <PageLayout>
-                <AnimatePresence
-                    mode="wait"
-                    onExitComplete={() => window.scrollTo(0, 0)}
-                >
-                    <Component {...pageProps} key={router.route} />
-                </AnimatePresence>
-                <ToastContainer
-                    position="top-center"
-                    hideProgressBar
-                    pauseOnFocusLoss={false}
-                />
-            </PageLayout>
+            <ThemeProvider>
+                <PageLayout>
+                    <AnimatePresence
+                        mode="wait"
+                        onExitComplete={() => window.scrollTo(0, 0)}
+                    >
+                        <Component {...pageProps} key={router.route} />
+                    </AnimatePresence>
+                    <ToastContainer
+                        position="top-center"
+                        hideProgressBar
+                        pauseOnFocusLoss={false}
+                    />
+                </PageLayout>
+            </ThemeProvider>
         </>
     );
 }

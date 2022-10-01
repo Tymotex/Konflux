@@ -4,14 +4,16 @@ import styles from "./TopNav.module.scss";
 import { DarkModeToggle } from "components/dark-mode-toggle";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useDarkMode } from "contexts/ThemeProvider";
 
 interface Props {}
 
 const TopNav: React.FC<Props> = () => {
     const router = useRouter();
+    const isDarkMode = useDarkMode();
 
     return (
-        <nav className={styles.topnav}>
+        <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
             <div className={styles.navContentsContainer}>
                 <h1 className={styles.brand}>
                     <Logo
@@ -27,7 +29,11 @@ const TopNav: React.FC<Props> = () => {
                         </a>
                     </Link>
                 </h1>
-                <div className={styles.utilitiesContainer}>
+                <div
+                    className={`${styles.utilitiesContainer} ${
+                        isDarkMode ? styles.dark : ""
+                    }`}
+                >
                     <DarkModeToggle />
                     <button className={styles.login}>Login</button>
                     <button className={styles.register}>Register</button>

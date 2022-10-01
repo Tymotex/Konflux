@@ -5,11 +5,15 @@
     text-align: center;
     margin-top: $margin-3xl;
     padding: $spacing-md;
+    color: $grey-500;
+
+    &.dark {
+        color: $grey-300;
+    }
 
     .tagline {
         font-size: large;
         font-weight: normal;
-        color: $grey-500;
     }
 
     .features {
@@ -19,7 +23,6 @@
         width: fit-content;
         text-align: left;
 
-        color: $grey-500;
         font-weight: lighter;
 
         li {
@@ -62,6 +65,13 @@
             height: $font-size-xl;
             width: $font-size-xl;
             position: relative;
+
+            &.dark {
+                stroke: white;
+                path {
+                    fill: white;
+                }
+            }
         }
     }
 
