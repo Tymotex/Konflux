@@ -1,6 +1,9 @@
 import { KonfluxEvent } from "models/event";
 import { createNewAvailabilitiesAfterSelection } from "./timetable-utils";
 
+// Global variables recording the last highlighted area's boundaries. This
+// is part of a workaround to prevent "Maximum update depth exceeded". See
+// issue #30.
 let prevStartTime: number | undefined;
 let prevEndTime: number | undefined;
 let prevStartDate: string | undefined;
@@ -74,11 +77,6 @@ export const areaSelectionReducer = (
                 isSelectingArea,
                 isDeselectingArea,
             );
-            console.log("==== Committing ====");
-            console.log(`StartTime=${startTime}`);
-            console.log(`EndTime=${endTime}`);
-            console.log(`StartDate=${startDate}`);
-            console.log(`EndDate=${endDate}`);
             onCommit(newAvailabilities);
             return NO_SELECTION;
         }

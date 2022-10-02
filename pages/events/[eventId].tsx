@@ -118,6 +118,7 @@ const EventPage: NextPage = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1 }}
+                        style={{ padding: "24px" }}
                     >
                         {/* TODO: refactor event credentials management. */}
                         {!username && (
@@ -195,9 +196,9 @@ const EventPage: NextPage = () => {
                                 link={`${BASE_URL}/events/${eventId}`}
                             />
 
-                            <h2 style={{ marginTop: "56px" }}>
+                            {/* <h2 style={{ marginTop: "56px" }}>
                                 How was the planning experience?
-                            </h2>
+                            </h2> */}
                             <h2 style={{ marginTop: "56px" }}>
                                 Want to see a new feature?
                             </h2>

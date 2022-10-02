@@ -1,4 +1,5 @@
 import { EventAction, EventContext } from "contexts/event-context";
+import { useDarkMode } from "contexts/ThemeProvider";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 import React, {
@@ -47,6 +48,8 @@ const DaySelector: React.FC<Props> = ({
     );
     const [displayYear, setDisplayYear] = useState<string>(initYear);
     const [displayMonth, setDislayMonth] = useState<string>(initMonth);
+
+    const isDarkMode = useDarkMode();
 
     /**
      * The user can select a range of days by pressing down on a starting day
@@ -243,7 +246,18 @@ const DaySelector: React.FC<Props> = ({
     );
 
     return (
-        <div className={styles.calendarMonth}>
+        <div
+            className={`${styles.calendarMonth} ${
+                isDarkMode ? styles.dark : ""
+            }`}
+            style={{
+                cursor:
+                    selectionState.isSelectingRange ||
+                    selectionState.isDeselectingRange
+                        ? "move"
+                        : "",
+            }}
+        >
             {/* Calendar header */}
             <section className={styles.header}>
                 <span
@@ -314,6 +328,13 @@ const DaySelector: React.FC<Props> = ({
                                     type: "SET_SELECTION_END",
                                     payload: { endDate: dateStr },
                                 });
+                            }}
+                            style={{
+                                cursor:
+                                    selectionState.isDeselectingRange ||
+                                    selectionState.isSelectingRange
+                                        ? "move"
+                                        : "pointer",
                             }}
                         >
                             <span

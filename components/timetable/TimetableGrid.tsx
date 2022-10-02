@@ -60,14 +60,12 @@ const TimetableGrid: React.FC<Props> = ({
                 return;
 
             try {
-                console.log("SElection dispatch");
                 selectionDispatch({
                     type: "COMMIT_SELECTION",
                     payload: {
                         availabilities: eventState.groupAvailabilities,
                         username,
                         onCommit: (newAvailabilities) => {
-                            console.log("Dispatching");
                             eventDispatch({
                                 type: "SET_AVAILABILITIES",
                                 payload: {

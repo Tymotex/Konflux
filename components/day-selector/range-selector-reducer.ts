@@ -1,6 +1,13 @@
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 
+// Global variables recording the last highlighted range's boundaries. This
+// is part of a workaround to prevent "Maximum update depth exceeded". See
+// issue #30.
+let prevStartDate: string | undefined;
+let prevEndDate: string | undefined;
+let prevIsSelectingRange: boolean | undefined;
+
 /**
  * Executes the given action on the given state, returning the next state.
  * @param state the original state
@@ -35,6 +42,18 @@ export const rangeSelectionReducer = (
             const newAvailabilities = {
                 ...availabilities,
             };
+
+            if (
+                startDate === prevStartDate &&
+                endDate === prevEndDate &&
+                isSelectingRange === prevIsSelectingRange
+            ) {
+                return NO_SELECTION;
+            } else {
+                prevStartDate = startDate;
+                prevEndDate = endDate;
+                prevIsSelectingRange = isSelectingRange;
+            }
 
             const endDay = dayjs(endDate >= startDate ? endDate : startDate);
             let currDay = dayjs(startDate <= endDate ? startDate : endDate);

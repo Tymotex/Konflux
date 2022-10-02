@@ -6,23 +6,26 @@ $grid-padding-lg: $spacing-md;
 $cell-height-lg: 48px;
 $cell-width-lg: 48px;
 
-$grid-gap-sm: 2px;
-$grid-padding-sm: 2px;
-$cell-height-sm: 32px;
-$cell-width-sm: 32px;
+$grid-gap-sm: 6px;
+$grid-padding-sm: $spacing-sm;
+$cell-height-sm: 36px;
+$cell-width-sm: 36px;
 
-$grid-gap-xs: 2px;
-$grid-padding-xs: 2px;
-$cell-height-xs: 24px;
-$cell-width-xs: 24px;
+$grid-gap-xs: 4px;
+$grid-padding-xs: $spacing-xs;
+$cell-height-xs: 27px;
+$cell-width-xs: 27px;
 
 // Colours.
 $default-bg-colour: white;
-$header-bg-colour: $grey-100;
+$default-bg-colour-dark: $grey-700;
+$header-bg-colour: $grey-50;
+$header-bg-colour-dark: $grey-600;
 $header-btn-colour: $grey-400;
 $header-btn-hover-bg-colour: $grey-200;
 $days-of-week-colour: $grey-400;
-$day-hover-bg-colour: $primary-100;
+$day-hover-bg-colour: $grey-300;
+$day-hover-bg-colour-dark: $grey-600;
 $not-current-month-bg-colour: $grey-100;
 
 // Animation.
@@ -30,11 +33,12 @@ $hover-transition-duration: 70ms;
 
 .calendarMonth {
     position: relative;
+    background-color: $default-bg-colour;
     user-select: none;
     width: fit-content;
     border-radius: 12px;
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 36px 0px,
-        rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    box-shadow: rgba(0, 0, 0, 0.015) 0px 1px 3px 0px,
+        rgba(27, 31, 35, 0.1) 0px 0px 0px 1px;
     overflow: auto;
 
     .header {
@@ -65,8 +69,10 @@ $hover-transition-duration: 70ms;
 
             &:hover {
                 background: $header-btn-hover-bg-colour;
-                box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
-                    rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+                // box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+                //     rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+                box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+                    rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
             }
 
             &:active {
@@ -97,6 +103,8 @@ $hover-transition-duration: 70ms;
         background-color: $header-bg-colour;
         margin: 0;
         width: fit-content;
+        border-bottom: solid 1px $grey-200;
+        font-family: "Montserrat", sans-serif;
 
         // Show 7 equally sized columns for monday, tuesday, ...
         display: grid;
@@ -117,10 +125,10 @@ $hover-transition-duration: 70ms;
         grid-template-columns: repeat(7, 1fr);
         grid-column-gap: $grid-gap-lg;
         grid-row-gap: $grid-gap-lg;
-        border-top: solid 1px $grey-200;
         margin: 0;
         width: fit-content;
         padding: $grid-padding-lg;
+        font-family: "Montserrat", sans-serif;
 
         height: 100%;
         position: relative;
@@ -134,7 +142,6 @@ $hover-transition-duration: 70ms;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
 
             .day {
                 border-radius: 50%;
@@ -198,6 +205,33 @@ $hover-transition-duration: 70ms;
                 // When a selected day is clicked on:
                 &.pressed > .day {
                     @include in-deselection-range;
+                }
+            }
+        }
+    }
+
+    // Dark mode colours.
+    &.dark {
+        background-color: $default-bg-colour-dark;
+        .header {
+            background-color: $header-bg-colour-dark;
+            .selectedMonth {
+                color: $grey-50;
+            }
+        }
+        .daysOfWeek {
+            background-color: $header-bg-colour-dark;
+            border-bottom: solid 1px $grey-500;
+        }
+        .dayGrid {
+            .dayCell {
+                &:hover > .day {
+                    background-color: $day-hover-bg-colour-dark;
+                }
+                &.selected {
+                    .day {
+                        background-color: $selected-bg-colour-dark;
+                    }
                 }
             }
         }
