@@ -9,7 +9,11 @@ body,
     margin: 0;
     font-family: "Source Sans 3", sans-serif;
     background: #f8f8f8;
-    height: 100%;
+}
+
+body {
+    padding-top: 56px;
+    height: calc(100% - 56px);
 }
 
 h1,
@@ -19,6 +23,13 @@ h4,
 h5,
 h6 {
     font-family: "Montserrat", sans-serif;
+    margin-top: $spacing-lg;
+    margin-bottom: $spacing-xs;
+}
+
+p {
+    margin-top: $spacing-xs;
+    margin-bottom: $spacing-lg;
 }
 
 a {

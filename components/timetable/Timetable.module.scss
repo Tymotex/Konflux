@@ -14,6 +14,10 @@ $default-bg-colour: white;
     selectedColour: $selected-bg-colour;
 }
 
+.header {
+    text-align: center;
+}
+
 .grid {
     display: flex;
     flex-direction: row;

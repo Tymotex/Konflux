@@ -14,7 +14,14 @@ const FillingTimetable: React.FC<Props> = ({
     eventId,
 }) => {
     return (
-        <div className={styles.timetable}>
+        <div>
+            <div className={styles.header}>
+                <h2>Your availabilities.</h2>
+                <p>
+                    Fill in your availabilities by clicking and dragging the
+                    time slots below.
+                </p>
+            </div>
             <TimetableGrid
                 username={username}
                 eventId={eventId}

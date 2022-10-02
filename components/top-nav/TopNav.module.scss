@@ -9,7 +9,12 @@
     display: flex;
     align-items: center;
 
-    transition: 0.2s all ease-in-out;
+    position: fixed;
+    width: 100vw;
+    z-index: 100;
+    top: 0;
+
+    transition: 0.2s background ease-in-out, 0.2s color ease-in-out;
     &.dark {
         background: $grey-700;
         color: $grey-100;

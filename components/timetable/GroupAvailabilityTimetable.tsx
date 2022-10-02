@@ -56,7 +56,14 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
     );
 
     return (
-        <div className={styles.timetable}>
+        <div>
+            <div className={styles.header}>
+                <h2>The group's availabilities.</h2>
+                <p>
+                    These are the current availabilities filled by other
+                    attendees.
+                </p>
+            </div>
             <TimetableGrid
                 username={username}
                 eventId={eventId}

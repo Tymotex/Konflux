@@ -25,6 +25,7 @@ import { spawnNotification } from "utils/notifications";
 import { TextField } from "components/form";
 import { SyncStatus } from "components/sync-status";
 import { Status } from "components/sync-status/SyncStatus";
+import { ShareableLink } from "components/shareable-link";
 
 const EventPage: NextPage = () => {
     const router = useRouter();
@@ -144,6 +145,16 @@ const EventPage: NextPage = () => {
                                     <SyncStatus
                                         status={updateEventNameStatus}
                                     />
+                                    <div className={styles.heading}>
+                                        <h2>
+                                            What days could the event happen?
+                                        </h2>
+                                        <p>
+                                            Click and drag the dates below to
+                                            select which days to consider
+                                            scheduling the event on.
+                                        </p>
+                                    </div>
                                     <div
                                         className={
                                             styles.calendarAndMapContainer
@@ -169,10 +180,28 @@ const EventPage: NextPage = () => {
                                 eventId={eventId}
                             />
                         </div>
-                        <div>
-                            Share with invitees the link:{" "}
-                            <strong>{`${BASE_URL}/events/${eventId}`}</strong>
-                        </div>
+                        <section
+                            className={styles.heading}
+                            style={{ marginBottom: "56px" }}
+                        >
+                            <h2>Share this link with others.</h2>
+                            <p>
+                                Wait for them to fill in their availabilities
+                                and then pick the time that works best.
+                            </p>
+
+                            <ShareableLink
+                                link={`${BASE_URL}/events/${eventId}`}
+                            />
+
+                            <h3 style={{ marginTop: "56px" }}>
+                                How was the planning experience?
+                            </h3>
+                            <h3 style={{ marginTop: "56px" }}>
+                                Want to see a new feature?
+                            </h3>
+                            <p>Request one in less than 1 minute.</p>
+                        </section>
                     </motion.div>
                 </AnimatePresence>
             </EventContext.Provider>

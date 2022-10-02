@@ -1,0 +1,59 @@
+@import "../../styles/variables.scss";
+
+.linkContainer {
+    width: 100%;
+    max-width: $xs;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    column-gap: $spacing-xs;
+    background: $grey-300;
+    padding: 5px;
+    border-radius: 100px;
+    color: $grey-700;
+
+    .linkField {
+        width: 100%;
+        padding: $padding-sm;
+        border-radius: 100px;
+        border: none;
+        background: $grey-50;
+    }
+
+    .copyBtn {
+        background: $grey-50;
+        border-radius: 100px;
+        padding: $padding-sm;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px;
+        cursor: pointer;
+
+        height: 40px;
+        width: 40px;
+        position: relative;
+
+        .icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            fill: $grey-700;
+        }
+    }
+
+    &.dark {
+        background: $grey-600;
+
+        .linkField {
+            background: $grey-700;
+            color: $primary-300;
+        }
+
+        .copyBtn {
+            background: $grey-700;
+
+            .icon {
+                fill: $primary-300;
+            }
+        }
+    }
+}
