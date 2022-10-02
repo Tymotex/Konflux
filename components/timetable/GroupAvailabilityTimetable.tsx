@@ -1,5 +1,6 @@
 import chroma from "chroma-js";
 import { EventContext } from "contexts/event-context";
+import { useDarkMode } from "contexts/ThemeProvider";
 import React, { useCallback, useContext, useMemo, useState } from "react";
 import AvailabilityLegend from "./AvailabilityLegend";
 import styles from "./Timetable.module.scss";
@@ -12,6 +13,7 @@ interface Props {
 
 const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
+    const isDarkMode = useDarkMode();
 
     // A set of the x/y availabilities to be shown. If the set consists of the
     // number 2, then all availabilities with 2 people will be shown.
@@ -25,9 +27,12 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
     // in this event.
     const colourScale = useMemo(() => {
         return chroma
-            .scale([styles.defaultColour, styles.selectedColour])
+            .scale([
+                isDarkMode ? styles.defaultColourDark : styles.defaultColour,
+                styles.selectedColour,
+            ])
             .colors(Object.keys(eventState.members).length + 1);
-    }, [eventState.members]);
+    }, [eventState.members, isDarkMode]);
 
     /**
      * Gets the colour that should be assigned to the time block.
@@ -58,7 +63,7 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
     return (
         <div>
             <div className={styles.header}>
-                <h2>The group's availabilities.</h2>
+                <h2>The group&apos;s availabilities.</h2>
                 <p>
                     These are the current availabilities filled by other
                     attendees.

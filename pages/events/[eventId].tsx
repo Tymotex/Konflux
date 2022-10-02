@@ -107,7 +107,7 @@ const EventPage: NextPage = () => {
                     setUpdateEventNameStatus("failure");
                 });
         },
-        [eventId, setUpdateEventNameStatus],
+        [eventId, setUpdateEventNameStatus, eventState],
     );
 
     return (
@@ -184,7 +184,7 @@ const EventPage: NextPage = () => {
                         </div>
                         <section
                             className={styles.heading}
-                            style={{ marginBottom: "56px" }}
+                            style={{ margin: "56px 0" }}
                         >
                             <h2>Share this link with others.</h2>
                             <p>

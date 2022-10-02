@@ -3,7 +3,7 @@ import { TextField } from "components/form";
 import { createEvent } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useCallback, useRef } from "react";
+import { MouseEvent, useCallback, useRef } from "react";
 import { spawnNotification } from "utils/notifications";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
@@ -44,7 +44,7 @@ const Home: NextPage = () => {
 
     // Handle the creation of an event.
     const handleEventCreation = useCallback(
-        async (e: Event): Promise<void> => {
+        async (e: MouseEvent): Promise<void> => {
             e.preventDefault();
             if (
                 eventNameInput.current === null ||
@@ -201,7 +201,9 @@ const Home: NextPage = () => {
                             variants={item}
                             style={{ textAlign: "center", marginTop: "32px" }}
                         >
-                            <Button onClick={handleEventCreation}>Begin</Button>
+                            <Button onClick={(e) => handleEventCreation(e)}>
+                                Begin
+                            </Button>
                         </motion.div>
                     </motion.form>
                 </main>

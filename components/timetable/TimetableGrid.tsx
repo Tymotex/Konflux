@@ -1,4 +1,5 @@
 import { EventContext } from "contexts/event-context";
+import { useDarkMode } from "contexts/ThemeProvider";
 import dayjs from "dayjs";
 import React, {
     useCallback,
@@ -44,6 +45,8 @@ const TimetableGrid: React.FC<Props> = ({
         () => createIntervals(eventState?.groupAvailabilities),
         [eventState],
     );
+
+    const isDarkMode = useDarkMode();
 
     // When the user is selecting an area and lifts up their finger anywhere on
     // the <body>, add the selected time blocks to the `selectedBlocks`.
@@ -285,9 +288,82 @@ const TimetableGrid: React.FC<Props> = ({
         [],
     );
 
+    /**
+     * Gets the style properties that should be set for this time block.
+     * - If the timeblock is for showing the group's availabilities, then time
+     *   blocks take a colour corresponding to availabilities.
+     * - All corners of the complete are rounded.
+     * @param timeBlockIndex current row index of this time block.
+     * @param columnIndex current column index of this time block. Should
+     * satisfy: 0 <= columnIndex <= intervalLength.
+     * @param date universal ISO date string YYYY-MM-DD.
+     * @param intervalLength number of columns in this interval.
+     * @param displayTimeLabels whether time labels are displayed in this grid.
+     * This is needed to correctly offset the timeblock one column forward since
+     * the date labels occupy the first column.
+     * @param mode whether the timetable is meant for filling or for showing
+     * the group's availabilities.
+     */
+    const getTimeBlockStyles = useCallback(
+        (
+            timeBlockIndex: number,
+            columnIndex: number,
+            date: string,
+            intervalLength: number,
+            displayTimeLabels: boolean,
+            mode: "individual" | "group",
+        ): React.CSSProperties => {
+            const borderColour = isDarkMode
+                ? "rgba(255, 255, 255, 0.3)"
+                : "lightgrey";
+            const solidBorder = `1px solid ${borderColour}`;
+            const dottedBorder = `1px dotted ${borderColour}`;
+            const styles: React.CSSProperties = {
+                height: "30px",
+                // If the time block is positioned at a corner, give it a rounded corner.
+                borderTopLeftRadius:
+                    timeBlockIndex === 0 && columnIndex === 0 ? "12px" : "0",
+                borderTopRightRadius:
+                    timeBlockIndex === 0 && columnIndex === intervalLength - 1
+                        ? "12px"
+                        : "0",
+                borderBottomRightRadius:
+                    timeBlockIndex === 48 - 1 &&
+                    columnIndex === intervalLength - 1
+                        ? "12px"
+                        : "0",
+                borderBottomLeftRadius:
+                    timeBlockIndex === 48 - 1 && columnIndex === 0
+                        ? "12px"
+                        : "0",
+                gridRowStart: timeBlockIndex + 2,
+                gridRowEnd: "span 1",
+                gridColumnStart: columnIndex + (displayTimeLabels ? 2 : 1),
+                gridColumnEnd: "span 1",
+                borderTop:
+                    timeBlockIndex % 2 === 0 ? solidBorder : dottedBorder,
+                borderLeft: solidBorder,
+                borderBottom: timeBlockIndex === 48 - 1 ? solidBorder : "",
+                borderRight:
+                    columnIndex === intervalLength - 1 ? solidBorder : "",
+            };
+
+            // Apply group availabilities legend colouring to the time block.
+            if (mode === "group") {
+                styles.backgroundColor = getTimeBlockColour
+                    ? getTimeBlockColour(date, timeBlockIndex)
+                    : "";
+            }
+            return styles;
+        },
+        [isDarkMode, getTimeBlockColour],
+    );
+
     return (
         <div
-            className={`${styles.grid} ${disabled && styles.disabled}`}
+            className={`${styles.grid} ${disabled && styles.disabled} ${
+                isDarkMode ? styles.dark : ""
+            }`}
             draggable={false}
         >
             {timeIntervals.map((interval, intervalIndex) => {
@@ -295,7 +371,7 @@ const TimetableGrid: React.FC<Props> = ({
                 return (
                     <div
                         key={intervalIndex}
-                        className={styles.columnGroup}
+                        className={styles.interval}
                         onDragStart={(e) => e.preventDefault()}
                     >
                         {displayTimeLabels &&
@@ -357,18 +433,14 @@ const TimetableGrid: React.FC<Props> = ({
                                                               : styles.inDeselectedArea
                                                           : ""
                                                   }`}
-                                                  style={{
-                                                      height: "30px",
-                                                      gridRowStart:
-                                                          timeBlockIndex + 2,
-                                                      gridRowEnd: "span 1",
-                                                      gridColumnStart:
-                                                          columnIndex +
-                                                          (displayTimeLabels
-                                                              ? 2
-                                                              : 1),
-                                                      gridColumnEnd: "span 1",
-                                                  }}
+                                                  style={getTimeBlockStyles(
+                                                      timeBlockIndex,
+                                                      columnIndex,
+                                                      date,
+                                                      interval.length,
+                                                      displayTimeLabels,
+                                                      "individual",
+                                                  )}
                                                   onClick={() =>
                                                       toggleTimeblockSelection(
                                                           date,
@@ -405,25 +477,14 @@ const TimetableGrid: React.FC<Props> = ({
                                               <div
                                                   key={timeBlockIndex}
                                                   className={`${styles.timeBlock}`}
-                                                  style={{
-                                                      backgroundColor:
-                                                          getTimeBlockColour
-                                                              ? getTimeBlockColour(
-                                                                    date,
-                                                                    timeBlockIndex,
-                                                                )
-                                                              : "",
-                                                      height: "30px",
-                                                      gridRowStart:
-                                                          timeBlockIndex + 2,
-                                                      gridRowEnd: "span 1",
-                                                      gridColumnStart:
-                                                          columnIndex +
-                                                          (displayTimeLabels
-                                                              ? 2
-                                                              : 1),
-                                                      gridColumnEnd: "span 1",
-                                                  }}
+                                                  style={getTimeBlockStyles(
+                                                      timeBlockIndex,
+                                                      columnIndex,
+                                                      date,
+                                                      interval.length,
+                                                      displayTimeLabels,
+                                                      "group",
+                                                  )}
                                               ></div>
                                           ),
                                       )}
