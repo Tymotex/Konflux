@@ -1,19 +1,20 @@
 // Initialises the Firebase SDK for use.
 import "utils/firebaseInit";
 
+import "@reach/tooltip/styles.css";
+import { PageLayout } from "components/layout";
+import { NotificationContainer } from "components/notification";
+import { ThemeContext, ThemeProvider } from "contexts/ThemeProvider";
 import { AnimatePresence } from "framer-motion";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { ToastContainer } from "react-toastify";
+import { useContext } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.scss";
-import { TopNav } from "components/top-nav";
-import { PageLayout } from "components/layout";
-import "@reach/tooltip/styles.css";
-import { ThemeProvider } from "contexts/ThemeProvider";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
+
     return (
         <>
             <ThemeProvider>
@@ -24,11 +25,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                     >
                         <Component {...pageProps} key={router.route} />
                     </AnimatePresence>
-                    <ToastContainer
-                        position="top-center"
-                        hideProgressBar
-                        pauseOnFocusLoss={false}
-                    />
+                    <NotificationContainer />
                 </PageLayout>
             </ThemeProvider>
         </>

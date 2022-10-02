@@ -26,6 +26,7 @@ import { TextField } from "components/form";
 import { SyncStatus } from "components/sync-status";
 import { Status } from "components/sync-status/SyncStatus";
 import { ShareableLink } from "components/shareable-link";
+import { Button } from "components/button";
 
 const EventPage: NextPage = () => {
     const router = useRouter();
@@ -194,13 +195,18 @@ const EventPage: NextPage = () => {
                                 link={`${BASE_URL}/events/${eventId}`}
                             />
 
-                            <h3 style={{ marginTop: "56px" }}>
+                            <h2 style={{ marginTop: "56px" }}>
                                 How was the planning experience?
-                            </h3>
-                            <h3 style={{ marginTop: "56px" }}>
+                            </h2>
+                            <h2 style={{ marginTop: "56px" }}>
                                 Want to see a new feature?
-                            </h3>
+                            </h2>
                             <p>Request one in less than 1 minute.</p>
+                            <Button
+                                onClick={() => router.push("/feature-request")}
+                            >
+                                Request Feature
+                            </Button>
                         </section>
                     </motion.div>
                 </AnimatePresence>
