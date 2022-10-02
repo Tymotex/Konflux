@@ -1,0 +1,45 @@
+@import "../../styles/variables.scss";
+
+.statusContainer {
+    display: flex;
+    align-items: center;
+    column-gap: 4px;
+
+    .icon {
+        height: 20px;
+        width: 20px;
+    }
+
+    &.success {
+        .icon {
+            * {
+                fill: $green-300;
+            }
+        }
+        .statusMessage {
+            color: $green-300;
+        }
+    }
+
+    &.failure {
+        .icon {
+            * {
+                fill: $red-400;
+            }
+        }
+        .statusMessage {
+            color: $red-400;
+        }
+    }
+
+    &.pending {
+        .icon {
+            * {
+                fill: $grey-500;
+            }
+        }
+        .statusMessage {
+            color: $grey-500;
+        }
+    }
+}

@@ -10,14 +10,15 @@ import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
 import { motion } from "framer-motion";
 import { useDarkMode } from "contexts/ThemeProvider";
+import { PageTransition } from "components/page-transition";
 
 const container = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
         transition: {
-            delay: 1,
-            delayChildren: 1,
+            delay: 0.75,
+            delayChildren: 0.75,
             staggerChildren: 0.5,
         },
     },
@@ -42,58 +43,71 @@ const Home: NextPage = () => {
     const isDarkMode = useDarkMode();
 
     // Handle the creation of an event.
-    const handleEventCreation = useCallback(async (): Promise<void> => {
-        if (
-            eventNameInput.current === null ||
-            usernameInput.current === null ||
-            passwordInput.current === null
-        ) {
-            spawnNotification("error", "Input element references detached!");
-            spawnNotification("error", `${eventNameInput.current === null}`);
-            return;
-        }
+    const handleEventCreation = useCallback(
+        async (e: Event): Promise<void> => {
+            e.preventDefault();
+            if (
+                eventNameInput.current === null ||
+                usernameInput.current === null ||
+                passwordInput.current === null
+            ) {
+                spawnNotification(
+                    "error",
+                    "Input element references detached!",
+                );
+                spawnNotification(
+                    "error",
+                    `${eventNameInput.current === null}`,
+                );
+                return;
+            }
 
-        // Get and validate the event name.
-        const formEventName = String(eventNameInput.current.value);
-        if (formEventName.length === 0) {
-            throw new Error("Event name must not be empty.");
-        } else if (formEventName.length >= 255) {
-            throw new Error("Event name must be fewer than 255 characters.");
-        }
+            // Get and validate the event name.
+            const formEventName = String(eventNameInput.current.value);
+            if (formEventName.length === 0) {
+                throw new Error("Event name must not be empty.");
+            } else if (formEventName.length >= 255) {
+                throw new Error(
+                    "Event name must be fewer than 255 characters.",
+                );
+            }
 
-        // Get and validate the username and password
-        const formUsername = String(usernameInput.current.value);
-        const formPassword = String(passwordInput.current.value);
-        if (formUsername.length === 0) {
-            throw new Error("Username is required.");
-        } else if (formUsername.length >= 255) {
-            throw new Error("Username must be fewer than 255 characters.");
-        }
-        if (formPassword.length >= 64) {
-            throw new Error("Password must be fewer than 64 characters.");
-        }
+            // Get and validate the username and password
+            const formUsername = String(usernameInput.current.value);
+            const formPassword = String(passwordInput.current.value);
+            if (formUsername.length === 0) {
+                throw new Error("Username is required.");
+            } else if (formUsername.length >= 255) {
+                throw new Error("Username must be fewer than 255 characters.");
+            }
+            if (formPassword.length >= 64) {
+                throw new Error("Password must be fewer than 64 characters.");
+            }
 
-        try {
-            // Creating the event in Firebase realtime DB.
-            const eventId = await createEvent(formEventName, formUsername);
+            try {
+                // Creating the event in Firebase realtime DB.
+                const eventId = await createEvent(formEventName, formUsername);
 
-            // Transmit username and password to the event details page so that it
-            // need not be fetched and verified.
-            router.push({
-                pathname: `/events/${eventId}`,
-                query: {
-                    username: formUsername,
-                    password: formPassword,
-                },
-            });
-        } catch (err) {
-            if (err instanceof Error) spawnNotification("error", err.message);
-            else throw err;
-        }
-    }, [router]);
+                // Transmit username and password to the event details page so that it
+                // need not be fetched and verified.
+                router.push({
+                    pathname: `/events/${eventId}`,
+                    query: {
+                        username: formUsername,
+                        password: formPassword,
+                    },
+                });
+            } catch (err) {
+                if (err instanceof Error)
+                    spawnNotification("error", err.message);
+                else throw err;
+            }
+        },
+        [router],
+    );
 
     return (
-        <>
+        <PageTransition>
             <div className={styles.container}>
                 <motion.header
                     className={`${styles.header} ${
@@ -192,7 +206,7 @@ const Home: NextPage = () => {
                     </motion.form>
                 </main>
             </div>
-        </>
+        </PageTransition>
     );
 };
 

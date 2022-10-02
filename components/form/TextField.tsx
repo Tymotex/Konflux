@@ -13,6 +13,9 @@ interface Props {
     placeholder?: string;
     required?: boolean;
     infoText?: string;
+    value?: string;
+    onChange?: React.ChangeEventHandler<HTMLInputElement>;
+    isTitle?: boolean;
 }
 
 const TextField: React.FC<Props> = ({
@@ -23,28 +26,35 @@ const TextField: React.FC<Props> = ({
     placeholder = "",
     required = false,
     infoText,
+    value,
+    onChange,
+    isTitle,
 }) => {
     const isDarkMode = useDarkMode();
 
     return (
-        <div className={styles.inputContainer}>
-            <div className={styles.label}>
+        <div
+            className={`${styles.inputContainer} ${
+                isTitle ? styles.title : ""
+            }`}
+        >
+            <div className={`${styles.label} ${isTitle ? styles.title : ""}`}>
                 {required && <Asterisk className={styles.asterisk} />}
-                <label htmlFor={id} className={styles.labelText}>
-                    {label}
-                </label>
+                <label htmlFor={id}>{label}</label>
             </div>
             <div className={styles.textFieldContainer}>
                 <input
                     id={id}
                     className={`${styles.textField} ${
-                        isDarkMode ? styles.dark : ""
-                    }`}
+                        isTitle ? styles.title : ""
+                    } ${isDarkMode ? styles.dark : ""}`}
                     ref={refHandle}
                     required={required}
                     type={type}
                     placeholder={placeholder}
                     autoComplete={"off"}
+                    value={value}
+                    onChange={onChange}
                 />
                 {infoText && (
                     <Tooltip label={infoText} aria-label={infoText}>

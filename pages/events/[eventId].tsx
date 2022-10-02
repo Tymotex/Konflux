@@ -1,6 +1,6 @@
 import { Container } from "components/container";
 import { DaySelector } from "components/day-selector";
-import styles from "./styles.module.scss";
+import styles from "./[eventId].module.scss";
 import { PageTransition } from "components/page-transition";
 import {
     FillingTimetable,
@@ -22,6 +22,9 @@ import React, {
     useState,
 } from "react";
 import { spawnNotification } from "utils/notifications";
+import { TextField } from "components/form";
+import { SyncStatus } from "components/sync-status";
+import { Status } from "components/sync-status/SyncStatus";
 
 const EventPage: NextPage = () => {
     const router = useRouter();
@@ -38,6 +41,10 @@ const EventPage: NextPage = () => {
     // User credentials, localised just to this event.
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+
+    // Sync status of each input component.
+    const [updateEventNameStatus, setUpdateEventNameStatus] =
+        useState<Status>(null);
 
     // Get the event's ID from the route.
     const eventId = useMemo(
@@ -78,11 +85,27 @@ const EventPage: NextPage = () => {
      */
     const handleNameChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            updateEventName(eventId, e.target.value).catch((err) =>
-                spawnNotification("error", err.message),
-            );
+            setUpdateEventNameStatus("pending");
+            eventDispatch({
+                type: "SET_EVENT",
+                payload: { event: { ...eventState, name: e.target.value } },
+            });
+
+            if (!e.target.value) {
+                spawnNotification("error", "Event name must not be empty.");
+                setUpdateEventNameStatus("failure");
+                return;
+            }
+            updateEventName(eventId, e.target.value)
+                .then(() => {
+                    setUpdateEventNameStatus("success");
+                })
+                .catch((err) => {
+                    spawnNotification("error", err.message);
+                    setUpdateEventNameStatus("failure");
+                });
         },
-        [eventId],
+        [eventId, setUpdateEventNameStatus],
     );
 
     return (
@@ -92,6 +115,7 @@ const EventPage: NextPage = () => {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
+                        transition={{ duration: 1 }}
                     >
                         {/* TODO: refactor event credentials management. */}
                         {!username && (
@@ -105,19 +129,21 @@ const EventPage: NextPage = () => {
                             username in eventState.members &&
                             eventState.members[username].isOwner && (
                                 <>
-                                    <div className={styles.eventName}>
-                                        <label htmlFor="event-name">
-                                            Event Name
-                                        </label>
-                                        <input
-                                            ref={eventNameInput}
+                                    <div className={styles.eventNameContainer}>
+                                        <TextField
                                             id="event-name"
-                                            type="text"
-                                            placeholder="Eg. Math group study"
+                                            refHandle={eventNameInput}
+                                            required
+                                            label="Event Name"
+                                            placeholder="Dinner with Linus Torvalds"
                                             value={eventState?.name}
                                             onChange={handleNameChange}
+                                            isTitle
                                         />
                                     </div>
+                                    <SyncStatus
+                                        status={updateEventNameStatus}
+                                    />
                                     <div
                                         className={
                                             styles.calendarAndMapContainer

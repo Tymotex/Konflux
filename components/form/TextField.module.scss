@@ -9,6 +9,11 @@
 
     margin-bottom: $margin-md;
 
+    &.title {
+        max-width: 300px;
+        margin: $spacing-xl auto 0 auto;
+    }
+
     .textFieldContainer {
         display: flex;
         align-items: center;
@@ -21,6 +26,10 @@
             max-width: 220px;
             width: 100%;
             background: white;
+
+            &.title {
+                max-width: 300px;
+            }
 
             &.dark {
                 background: $grey-700;
@@ -56,11 +65,25 @@
         flex-direction: row;
         column-gap: 5px;
         align-items: center;
+        color: $grey-500;
+        font-size: small;
 
-        .labelText {
-            color: $grey-500;
-            font-size: small;
+        &.title {
+            font-size: large;
+
+            label {
+                position: relative;
+                left: 50%;
+                transform: translateX(-50%);
+                font-family: "Montserrat", sans-serif;
+                margin-bottom: $spacing-sm;
+            }
+
+            .asterisk {
+                display: none;
+            }
         }
+
         .asterisk {
             height: $font-size-sm;
             width: $font-size-sm;

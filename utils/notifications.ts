@@ -16,6 +16,7 @@ export const spawnNotification = (
             break;
         case "error":
             toast.error(message);
+            console.error(message);
             break;
         default:
             throw new Error(`Unknown notification type: '${type}'`);

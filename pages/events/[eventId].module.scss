@@ -1,17 +1,9 @@
 @import "../../styles/variables.scss";
 
-.eventName {
-    margin: $spacing-xl;
-
-    label {
-        display: block;
-        text-align: center;
-    }
-    input {
-        margin: 0 auto;
-        display: block;
-    }
-}
+// .eventNameContainer {
+//     width: fit-content;
+//     margin: 0 auto;
+// }
 
 .calendarAndMapContainer {
     display: flex;
