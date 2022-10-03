@@ -81,24 +81,13 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
                     // When a state is explicitly provided, set the state instead of
                     // toggling.
                     if (state !== undefined) {
-                        if (state) {
-                            if (!thisElem.classList.contains(styles.pressed))
-                                thisElem.classList.add(styles.pressed);
-                            newAvailabilityNumsToShow.add(numAvailable);
-                        } else {
-                            if (thisElem.classList.contains(styles.pressed))
-                                thisElem.classList.remove(styles.pressed);
-                            newAvailabilityNumsToShow.delete(numAvailable);
-                        }
+                        if (state) newAvailabilityNumsToShow.add(numAvailable);
+                        else newAvailabilityNumsToShow.delete(numAvailable);
                     } else {
                         // Toggle.
-                        if (thisElem.classList.contains(styles.pressed)) {
-                            thisElem.classList.remove(styles.pressed);
+                        if (newAvailabilityNumsToShow.has(numAvailable))
                             newAvailabilityNumsToShow.delete(numAvailable);
-                        } else {
-                            thisElem.classList.add(styles.pressed);
-                            newAvailabilityNumsToShow.add(numAvailable);
-                        }
+                        else newAvailabilityNumsToShow.add(numAvailable);
                     }
                     return newAvailabilityNumsToShow;
                 },
@@ -129,6 +118,7 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
                 eventId={eventId}
                 showGroupAvailability
                 getTimeBlockColour={getTimeBlockColour}
+                gridClassName="group"
             />
         </div>
     );

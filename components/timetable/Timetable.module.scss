@@ -96,14 +96,9 @@ $default-bg-colour-dark: $grey-700;
 
         .timeBlock {
             background: $default-bg-colour;
-            // height: $time-block-height;
             cursor: pointer;
             box-sizing: border-box;
             transition: background 50ms ease-in-out;
-
-            &:hover {
-                background: $primary-100 !important;
-            }
 
             &.selected {
                 background: $selected-bg-colour !important;
@@ -125,6 +120,27 @@ $default-bg-colour-dark: $grey-700;
         }
     }
 
+    // Styles specifically targeting the individual timetable.
+    &.individual {
+        .interval .timeBlock {
+            &:hover {
+                background: $primary-200 !important;
+                border: 3px solid $primary-600 !important;
+            }
+        }
+    }
+
+    // Styles specifically targeting the group timetable.
+    &.group {
+        .interval .timeBlock {
+            &:hover {
+                // border: 3px solid $grey-600 !important;
+                background: $grey-200 !important;
+            }
+        }
+    }
+
+    // Dark timetable styles.
     &.dark {
         .timeLabel {
             .text {

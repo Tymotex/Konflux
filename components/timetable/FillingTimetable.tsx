@@ -32,6 +32,7 @@ const FillingTimetable: React.FC<Props> = ({
                 eventId={eventId}
                 disabled={!username && !showGroupAvailability}
                 showGroupAvailability={showGroupAvailability}
+                gridClassName="individual"
             />
         </div>
     );

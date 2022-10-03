@@ -24,6 +24,7 @@ interface Props {
     eventId: string;
     showGroupAvailability?: boolean;
     getTimeBlockColour?: (date: string, timeBlockIndex: number) => string;
+    gridClassName: "individual" | "group";
 }
 
 const TimetableGrid: React.FC<Props> = ({
@@ -32,6 +33,7 @@ const TimetableGrid: React.FC<Props> = ({
     eventId,
     showGroupAvailability = false,
     getTimeBlockColour,
+    gridClassName,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
@@ -361,9 +363,11 @@ const TimetableGrid: React.FC<Props> = ({
 
     return (
         <div
-            className={`${styles.grid} ${disabled && styles.disabled} ${
-                isDarkMode ? styles.dark : ""
-            }`}
+            className={`${styles.grid} ${
+                gridClassName === "individual"
+                    ? styles.individual
+                    : styles.group
+            } ${disabled && styles.disabled} ${isDarkMode ? styles.dark : ""}`}
             draggable={false}
         >
             {timeIntervals.map((interval, intervalIndex) => {
