@@ -1,0 +1,72 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.container {
+    margin-left: $time-label-width;
+    margin-bottom: $spacing-md;
+
+    .availabilityLegend {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: flex-start;
+        column-gap: $spacing-sm;
+        row-gap: $spacing-sm;
+        background-color: $grey-200;
+        padding: $spacing-xs $spacing-lg;
+        border-radius: 100px;
+        width: fit-content;
+        margin: 0 auto;
+
+        .availabilityChip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            column-gap: $spacing-sm;
+            cursor: pointer;
+
+            &:hover {
+                .colour {
+                    transform: scale(1.1);
+                    box-shadow: rgba(20, 20, 120, 0.4) 0px 3px 8px;
+                }
+            }
+
+            .colour {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                border: 1px solid rgba($color: #000000, $alpha: 0.1);
+                transition: all 100ms ease-in-out;
+                pointer-events: none;
+
+                .pinIcon {
+                    position: relative;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    height: $font-size-sm;
+                    width: $font-size-sm;
+                    fill: $grey-200;
+                    stroke: $grey-700;
+                    stroke-width: 5px;
+                }
+            }
+
+            .label {
+                color: $grey-600;
+                pointer-events: none;
+            }
+        }
+
+        &.dark {
+            background-color: $grey-600;
+            .availabilityChip {
+                .label {
+                    color: $grey-50;
+                }
+            }
+        }
+    }
+}

@@ -1,34 +1,34 @@
+import { useDarkMode } from "contexts/ThemeProvider";
 import React, { MouseEvent } from "react";
-import styles from "./Timetable.module.scss";
+import AvailabilityItem from "./AvailabilityItem";
+import styles from "./AvailabilityLegend.module.scss";
 
 interface Props {
     colourScale: string[];
-    onItemClick: (
-        event: MouseEvent<HTMLLIElement>,
+    showFilter: (
+        event: MouseEvent,
         numAvailable: number,
+        state?: boolean,
     ) => void;
 }
 
-const AvailabilityLegend: React.FC<Props> = ({ colourScale, onItemClick }) => {
+const AvailabilityLegend: React.FC<Props> = ({ colourScale, showFilter }) => {
+    const isDarkMode = useDarkMode();
+
     return (
-        <div>
-            <ol className={styles.availabilityLegend}>
+        <div className={styles.container}>
+            <ol
+                className={`${styles.availabilityLegend} ${
+                    isDarkMode ? styles.dark : ""
+                }`}
+            >
                 {colourScale?.map((colour, i) => (
-                    <li
-                        key={colour}
-                        className={styles.availabilityChip}
-                        onClick={(e) => onItemClick(e, i)}
-                    >
-                        <div
-                            style={{
-                                backgroundColor: colour,
-                            }}
-                            className={styles.colour}
-                        ></div>
-                        <div className={styles.label}>{`${i}/${
-                            colourScale.length - 1
-                        } available`}</div>
-                    </li>
+                    <AvailabilityItem
+                        colour={colour}
+                        numAvailable={i}
+                        totalAvailable={colourScale.length - 1}
+                        showFilter={showFilter}
+                    />
                 ))}
             </ol>
         </div>

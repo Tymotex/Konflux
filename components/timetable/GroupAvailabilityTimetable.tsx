@@ -1,7 +1,14 @@
 import chroma from "chroma-js";
 import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, {
+    MouseEvent,
+    useCallback,
+    useContext,
+    useMemo,
+    useState,
+} from "react";
+import { spawnNotification } from "utils/notifications";
 import AvailabilityLegend from "./AvailabilityLegend";
 import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
@@ -60,6 +67,45 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
         [eventState, colourScale, availabilitiesToShow],
     );
 
+    const showSpecificNumAvailable = useCallback(
+        (event: MouseEvent, numAvailable: number, state?: boolean) => {
+            setAvailabilitiesToShow(
+                (oldAvailabilitiesToShow: Set<number>): Set<number> => {
+                    // Apply the `pressed` class to this element.
+                    const thisElem = event.target as HTMLUListElement;
+                    const newAvailabilityNumsToShow = new Set(
+                        oldAvailabilitiesToShow,
+                    );
+
+                    // When a state is explicitly provided, set the state instead of
+                    // toggling.
+                    if (state !== undefined) {
+                        if (state) {
+                            if (!thisElem.classList.contains(styles.pressed))
+                                thisElem.classList.add(styles.pressed);
+                            newAvailabilityNumsToShow.add(numAvailable);
+                        } else {
+                            if (thisElem.classList.contains(styles.pressed))
+                                thisElem.classList.remove(styles.pressed);
+                            newAvailabilityNumsToShow.delete(numAvailable);
+                        }
+                    } else {
+                        // Toggle.
+                        if (thisElem.classList.contains(styles.pressed)) {
+                            thisElem.classList.remove(styles.pressed);
+                            newAvailabilityNumsToShow.delete(numAvailable);
+                        } else {
+                            thisElem.classList.add(styles.pressed);
+                            newAvailabilityNumsToShow.add(numAvailable);
+                        }
+                    }
+                    return newAvailabilityNumsToShow;
+                },
+            );
+        },
+        [setAvailabilitiesToShow, availabilitiesToShow],
+    );
+
     return (
         <div>
             <div className={styles.header}>
@@ -69,29 +115,15 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
                     attendees.
                 </p>
             </div>
+            <AvailabilityLegend
+                colourScale={colourScale}
+                showFilter={showSpecificNumAvailable}
+            />
             <TimetableGrid
                 username={username}
                 eventId={eventId}
                 showGroupAvailability
                 getTimeBlockColour={getTimeBlockColour}
-            />
-            <AvailabilityLegend
-                colourScale={colourScale}
-                onItemClick={(e, i) => {
-                    // Apply the `pressed` class to this element.
-                    const thisElem = e.target as HTMLUListElement;
-                    const newAvailabilityNumsToShow = new Set(
-                        availabilitiesToShow,
-                    );
-                    if (thisElem.classList.contains(styles.pressed)) {
-                        thisElem.classList.remove(styles.pressed);
-                        newAvailabilityNumsToShow.delete(i);
-                    } else {
-                        thisElem.classList.add(styles.pressed);
-                        newAvailabilityNumsToShow.add(i);
-                    }
-                    setAvailabilitiesToShow(newAvailabilityNumsToShow);
-                }}
             />
         </div>
     );
