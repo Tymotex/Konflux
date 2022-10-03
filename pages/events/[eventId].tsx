@@ -170,7 +170,7 @@ const EventPage: NextPage = () => {
                                     <SyncStatus
                                         status={updateEventNameStatus}
                                     />
-                                    <div className={styles.heading}>
+                                    <div className={styles.header}>
                                         <h2>
                                             What days could the event happen?
                                         </h2>

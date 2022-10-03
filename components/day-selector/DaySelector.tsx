@@ -1,11 +1,10 @@
-import { EventAction, EventContext } from "contexts/event-context";
+import { EventAction } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 import React, {
     Dispatch,
     useCallback,
-    useContext,
     useEffect,
     useReducer,
     useState,

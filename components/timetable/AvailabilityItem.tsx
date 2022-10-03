@@ -69,6 +69,9 @@ const AvailabilityItem: React.FC<Props> = ({
                     border: pinned
                         ? `3px solid ${isDarkMode ? "white" : "darkslategrey"}`
                         : "",
+                    boxShadow: pinned
+                        ? "rgba(20, 20, 120, 0.4) 0px 3px 8px"
+                        : "",
                 }}
                 className={styles.colour}
             >

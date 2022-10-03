@@ -318,8 +318,9 @@ const TimetableGrid: React.FC<Props> = ({
             const borderColour = isDarkMode
                 ? "rgba(255, 255, 255, 0.3)"
                 : "lightgrey";
-            const solidBorder = `1px solid ${borderColour}`;
-            const dottedBorder = `1px dotted ${borderColour}`;
+            const hourBorder = `2px solid ${borderColour}`;
+            const halfHourBorder = `2px dotted ${borderColour}`;
+
             const styles: React.CSSProperties = {
                 height: "30px",
                 // If the time block is positioned at a corner, give it a rounded corner.
@@ -343,11 +344,11 @@ const TimetableGrid: React.FC<Props> = ({
                 gridColumnStart: columnIndex + (displayTimeLabels ? 2 : 1),
                 gridColumnEnd: "span 1",
                 borderTop:
-                    timeBlockIndex % 2 === 0 ? solidBorder : dottedBorder,
-                borderLeft: solidBorder,
-                borderBottom: timeBlockIndex === 48 - 1 ? solidBorder : "",
+                    timeBlockIndex % 2 === 0 ? hourBorder : halfHourBorder,
+                borderLeft: hourBorder,
+                borderBottom: timeBlockIndex === 48 - 1 ? hourBorder : "",
                 borderRight:
-                    columnIndex === intervalLength - 1 ? solidBorder : "",
+                    columnIndex === intervalLength - 1 ? hourBorder : "",
             };
 
             // Apply group availabilities legend colouring to the time block.

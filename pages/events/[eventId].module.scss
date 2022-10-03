@@ -4,8 +4,13 @@
     margin-bottom: $margin-3xl;
 }
 
-.heading {
+.header {
     text-align: center;
+
+    p {
+        max-width: 24em;
+        margin: 0 auto;
+    }
 }
 
 .calendarAndMapContainer {

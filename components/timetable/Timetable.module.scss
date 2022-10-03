@@ -23,6 +23,10 @@ $default-bg-colour-dark: $grey-700;
     // of the grid.
     margin-left: $time-label-width;
     margin-bottom: $margin-lg;
+
+    p {
+        max-width: 24em;
+    }
 }
 
 .grid {
