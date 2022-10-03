@@ -27,6 +27,7 @@ $days-of-week-colour: $grey-400;
 $day-hover-bg-colour: $grey-300;
 $day-hover-bg-colour-dark: $grey-600;
 $not-current-month-bg-colour: $grey-100;
+$today-border-colour: $primary-400;
 
 // Animation.
 $hover-transition-duration: 70ms;
@@ -153,6 +154,10 @@ $hover-transition-duration: 70ms;
                 justify-content: center;
                 transition: all $hover-transition-duration ease-in-out;
                 pointer-events: none;
+
+                &.today {
+                    border: 4px solid $today-border-colour;
+                }
             }
 
             // The calendar will render all days in the selected month, however

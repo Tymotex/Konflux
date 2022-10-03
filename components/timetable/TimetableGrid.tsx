@@ -351,8 +351,10 @@ const TimetableGrid: React.FC<Props> = ({
                     columnIndex === intervalLength - 1 ? hourBorder : "",
             };
 
-            // Apply group availabilities legend colouring to the time block.
             if (mode === "group") {
+                styles.cursor = "default";
+
+                // Apply group availabilities legend colouring to the time block.
                 styles.backgroundColor = getTimeBlockColour
                     ? getTimeBlockColour(date, timeBlockIndex)
                     : "";

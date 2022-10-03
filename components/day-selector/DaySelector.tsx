@@ -50,6 +50,8 @@ const DaySelector: React.FC<Props> = ({
 
     const isDarkMode = useDarkMode();
 
+    const dateToday = dayjs().format("YYYY-MM-DD");
+
     /**
      * The user can select a range of days by pressing down on a starting day
      * then dragging their mouse and lifting up on an ending day on the
@@ -337,8 +339,10 @@ const DaySelector: React.FC<Props> = ({
                             }}
                         >
                             <span
-                                aria-label={day.date.format("YYYY-MM-DD")}
-                                className={styles.day}
+                                aria-label={dateStr}
+                                className={`${styles.day} ${
+                                    dateStr === dateToday ? styles.today : ""
+                                }`}
                             >
                                 {day.date.format("D")}
                             </span>

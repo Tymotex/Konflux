@@ -221,13 +221,13 @@ const EventPage: NextPage = () => {
                             )}
                         </div>
                         <section
-                            className={styles.heading}
+                            className={styles.header}
                             style={{ margin: "56px 0" }}
                         >
                             {dateSelected && (
                                 <>
                                     <h2>Share this link with others.</h2>
-                                    <p>
+                                    <p style={{ marginBottom: "24px" }}>
                                         Wait for them to fill in their
                                         availabilities and then pick the time
                                         that works best.
@@ -239,15 +239,17 @@ const EventPage: NextPage = () => {
                                 </>
                             )}
 
-                            {/* <h2 style={{ marginTop: "56px" }}>
+                            {/* <h2 style={{ marginTop: "24px" }}>
                                 How was the planning experience?
                             </h2> */}
                         </section>
                         <section
-                            className={`${styles.heading} ${styles.featureRequest}`}
+                            className={`${styles.header} ${styles.featureRequest}`}
                         >
                             <h2>Want to see a new feature?</h2>
-                            <p>Request one in less than 1 minute.</p>
+                            <p style={{ marginBottom: "24px" }}>
+                                Request one in less than 1 minute.
+                            </p>
                             <Button
                                 onClick={() => router.push("/feature-request")}
                             >
