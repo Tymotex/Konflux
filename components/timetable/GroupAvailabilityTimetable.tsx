@@ -9,6 +9,7 @@ import React, {
     useState,
 } from "react";
 import { spawnNotification } from "utils/notifications";
+import { syncHeaderHeight } from "utils/timetable";
 import AvailabilityLegend from "./AvailabilityLegend";
 import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
@@ -108,17 +109,21 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
 
     return (
         <div>
-            <div className={styles.header}>
+            <div
+                id="group-timetable"
+                className={`${styles.header} ${styles.timetableHeader}`}
+                style={{ height: syncHeaderHeight() }}
+            >
                 <h2>The group&apos;s availabilities.</h2>
                 <p>
                     These are the current availabilities filled by other
                     attendees.
                 </p>
+                <AvailabilityLegend
+                    colourScale={colourScale}
+                    showFilter={showSpecificNumAvailable}
+                />
             </div>
-            <AvailabilityLegend
-                colourScale={colourScale}
-                showFilter={showSpecificNumAvailable}
-            />
             <TimetableGrid
                 username={username}
                 eventId={eventId}

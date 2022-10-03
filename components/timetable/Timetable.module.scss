@@ -22,6 +22,7 @@ $default-bg-colour-dark: $grey-700;
     // This is equal to the width of the time labels occupying the first column
     // of the grid.
     margin-left: $time-label-width;
+    margin-bottom: $margin-lg;
 }
 
 .grid {

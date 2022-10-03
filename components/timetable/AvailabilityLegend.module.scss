@@ -2,9 +2,6 @@
 @import "../../styles/mixins.scss";
 
 .container {
-    margin-left: $time-label-width;
-    margin-bottom: $spacing-md;
-
     .availabilityLegend {
         list-style: none;
         padding: 0;

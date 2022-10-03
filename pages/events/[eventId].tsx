@@ -172,6 +172,7 @@ const EventPage: NextPage = () => {
                             )}
                         <div className={styles.timetableContainer}>
                             {/* Timetable for filling availabilities. */}
+
                             <FillingTimetable
                                 username={username}
                                 eventId={eventId}

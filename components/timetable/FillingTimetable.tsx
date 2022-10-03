@@ -1,4 +1,5 @@
 import React from "react";
+import { syncHeaderHeight } from "utils/timetable";
 import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
 
@@ -15,7 +16,11 @@ const FillingTimetable: React.FC<Props> = ({
 }) => {
     return (
         <div>
-            <div className={styles.header}>
+            <div
+                id="individual-timetable"
+                className={`${styles.header} ${styles.timetableHeader}`}
+                style={{ height: syncHeaderHeight() }}
+            >
                 <h2>Your availabilities.</h2>
                 <p>
                     Fill in your availabilities by clicking and dragging the
