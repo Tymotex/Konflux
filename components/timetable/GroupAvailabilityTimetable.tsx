@@ -3,13 +3,14 @@ import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import React, {
     MouseEvent,
+    MutableRefObject,
     useCallback,
     useContext,
+    useLayoutEffect,
     useMemo,
     useState,
 } from "react";
-import { spawnNotification } from "utils/notifications";
-import { syncHeaderHeight } from "utils/timetable";
+import { getHeaderHeight } from "utils/timetable";
 import AvailabilityLegend from "./AvailabilityLegend";
 import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
@@ -93,15 +94,22 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
                 },
             );
         },
-        [setAvailabilitiesToShow, availabilitiesToShow],
+        [setAvailabilitiesToShow],
     );
+
+    // Synchronise the height of this timetable's header with the other
+    // timetable's header.
+    useLayoutEffect(() => {
+        const elem = document.getElementById("individual-timetable");
+        if (!elem) return;
+        elem.style.height = getHeaderHeight();
+    }, []);
 
     return (
         <div>
             <div
                 id="group-timetable"
                 className={`${styles.header} ${styles.timetableHeader}`}
-                style={{ height: syncHeaderHeight() }}
             >
                 <h2>The group&apos;s availabilities.</h2>
                 <p>

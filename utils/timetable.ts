@@ -4,14 +4,17 @@
  * aligned with each other.
  * @returns height that the header should be.
  */
-export const syncHeaderHeight = () => {
+export const getHeaderHeight = (): string => {
     const individualTimetable = document.getElementById("individual-timetable");
     const groupTimetable = document.getElementById("group-timetable");
-    if (!individualTimetable || !groupTimetable) return;
+    if (!individualTimetable || !groupTimetable) return "0px";
 
     const targetHeight = Math.max(
         individualTimetable.offsetHeight,
         groupTimetable.offsetHeight,
     );
-    return targetHeight;
+    console.log(
+        `header1 = ${individualTimetable.offsetHeight} header2 = ${groupTimetable.offsetHeight}`,
+    );
+    return String(targetHeight + "px");
 };

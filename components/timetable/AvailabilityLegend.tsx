@@ -24,6 +24,7 @@ const AvailabilityLegend: React.FC<Props> = ({ colourScale, showFilter }) => {
             >
                 {colourScale?.map((colour, i) => (
                     <AvailabilityItem
+                        key={colour}
                         colour={colour}
                         numAvailable={i}
                         totalAvailable={colourScale.length - 1}

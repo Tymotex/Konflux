@@ -48,7 +48,7 @@ const AvailabilityItem: React.FC<Props> = ({
                 showFilter(e, numAvailable, false);
             }
         },
-        [pinned, showFilter],
+        [pinned, showFilter, numAvailable],
     );
 
     return (

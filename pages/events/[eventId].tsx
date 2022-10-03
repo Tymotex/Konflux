@@ -1,12 +1,17 @@
-import { Container } from "components/container";
+import { Button } from "components/button";
+import { Callout } from "components/callout";
 import { DaySelector } from "components/day-selector";
-import styles from "./[eventId].module.scss";
+import { EventSignIn } from "components/event-credentials";
+import { TextField } from "components/form";
+import InfoIcon from "components/form/info.svg";
 import { PageTransition } from "components/page-transition";
+import { ShareableLink } from "components/shareable-link";
+import { SyncStatus } from "components/sync-status";
+import { Status } from "components/sync-status/SyncStatus";
 import {
     FillingTimetable,
     GroupAvailabilityTimetable,
 } from "components/timetable";
-import { EventSignIn } from "components/event-credentials";
 import { BASE_URL } from "constants/url";
 import { EventContext, eventReducer } from "contexts/event-context";
 import { AnimatePresence, motion } from "framer-motion";
@@ -22,14 +27,11 @@ import React, {
     useState,
 } from "react";
 import { spawnNotification } from "utils/notifications";
-import { TextField } from "components/form";
-import { SyncStatus } from "components/sync-status";
-import { Status } from "components/sync-status/SyncStatus";
-import { ShareableLink } from "components/shareable-link";
-import { Button } from "components/button";
+import styles from "./[eventId].module.scss";
 
 const EventPage: NextPage = () => {
     const router = useRouter();
+
     const eventNameInput = useRef<HTMLInputElement>(null);
 
     // Using context and reducer together to allow for descendants to cleanly
@@ -52,6 +54,22 @@ const EventPage: NextPage = () => {
     const eventId = useMemo(
         () => (router.query.eventId ? String(router.query.eventId) : ""),
         [router],
+    );
+
+    // At least one date has been selected.
+    const dateSelected = useMemo(
+        () =>
+            eventState?.groupAvailabilities &&
+            Object.keys(eventState.groupAvailabilities).length > 0,
+        [eventState],
+    );
+
+    const isOwner = useMemo(
+        () =>
+            username &&
+            username in eventState.members &&
+            eventState.members[username].isOwner,
+        [username, eventState],
     );
 
     // Fetch and listen for changes to the remote Event data object.
@@ -118,19 +136,24 @@ const EventPage: NextPage = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1 }}
-                        style={{ padding: "24px" }}
+                        style={{
+                            padding: "24px",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            minHeight: "calc(100vh - 56px - 38px)",
+                        }}
                     >
-                        {/* TODO: refactor event credentials management. */}
-                        {!username && (
-                            <EventSignIn
-                                eventId={eventId}
-                                setUsername={setUsername}
-                                setPassword={setPassword}
-                            />
-                        )}
-                        {username &&
-                            username in eventState.members &&
-                            eventState.members[username].isOwner && (
+                        <div>
+                            {/* TODO: refactor event credentials management. */}
+                            {!username && (
+                                <EventSignIn
+                                    eventId={eventId}
+                                    setUsername={setUsername}
+                                    setPassword={setPassword}
+                                />
+                            )}
+                            {isOwner && (
                                 <>
                                     <div className={styles.eventNameContainer}>
                                         <TextField
@@ -168,41 +191,62 @@ const EventPage: NextPage = () => {
                                             eventDispatch={eventDispatch}
                                         />
                                     </div>
+                                    {!dateSelected && (
+                                        <Callout Icon={InfoIcon}>
+                                            Please select at least 1 date to
+                                            begin.
+                                        </Callout>
+                                    )}
                                 </>
                             )}
-                        <div className={styles.timetableContainer}>
-                            {/* Timetable for filling availabilities. */}
-
-                            <FillingTimetable
-                                username={username}
-                                eventId={eventId}
-                            />
-                            {/* Timetable for showing the group's availabilities */}
-                            <GroupAvailabilityTimetable
-                                username={username}
-                                eventId={eventId}
-                            />
+                            {dateSelected && (
+                                <div className={styles.timetableContainer}>
+                                    {/* Timetable for filling availabilities. */}
+                                    <FillingTimetable
+                                        username={username}
+                                        eventId={eventId}
+                                    />
+                                    {/* Timetable for showing the group's availabilities */}
+                                    <GroupAvailabilityTimetable
+                                        username={username}
+                                        eventId={eventId}
+                                    />
+                                </div>
+                            )}
+                            {!dateSelected && !isOwner && (
+                                <Callout Icon={InfoIcon}>
+                                    Hmm... the organiser hasn&apos;t picked any
+                                    days yet. Try again later.
+                                </Callout>
+                            )}
                         </div>
                         <section
                             className={styles.heading}
                             style={{ margin: "56px 0" }}
                         >
-                            <h2>Share this link with others.</h2>
-                            <p>
-                                Wait for them to fill in their availabilities
-                                and then pick the time that works best.
-                            </p>
+                            {dateSelected && (
+                                <>
+                                    <h2>Share this link with others.</h2>
+                                    <p>
+                                        Wait for them to fill in their
+                                        availabilities and then pick the time
+                                        that works best.
+                                    </p>
 
-                            <ShareableLink
-                                link={`${BASE_URL}/events/${eventId}`}
-                            />
+                                    <ShareableLink
+                                        link={`${BASE_URL}/events/${eventId}`}
+                                    />
+                                </>
+                            )}
 
                             {/* <h2 style={{ marginTop: "56px" }}>
                                 How was the planning experience?
                             </h2> */}
-                            <h2 style={{ marginTop: "56px" }}>
-                                Want to see a new feature?
-                            </h2>
+                        </section>
+                        <section
+                            className={`${styles.heading} ${styles.featureRequest}`}
+                        >
+                            <h2>Want to see a new feature?</h2>
                             <p>Request one in less than 1 minute.</p>
                             <Button
                                 onClick={() => router.push("/feature-request")}

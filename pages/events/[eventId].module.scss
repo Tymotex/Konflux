@@ -14,8 +14,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-top: $margin-2xl;
-    margin-bottom: $margin-3xl;
+    margin-top: $margin-xl;
 }
 
 .timetableContainer {
@@ -27,4 +26,9 @@
     column-gap: $spacing-xl;
     row-gap: $spacing-3xl;
     align-items: flex-start;
+    margin-top: $margin-2xl;
+}
+
+.featureRequest {
+    margin: 64px 0 32px 0;
 }

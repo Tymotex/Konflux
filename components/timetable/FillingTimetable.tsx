@@ -1,5 +1,5 @@
-import React from "react";
-import { syncHeaderHeight } from "utils/timetable";
+import React, { MutableRefObject, useEffect, useLayoutEffect } from "react";
+import { getHeaderHeight } from "utils/timetable";
 import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
 
@@ -14,12 +14,19 @@ const FillingTimetable: React.FC<Props> = ({
     username,
     eventId,
 }) => {
+    // Synchronise the height of this timetable's header with the other
+    // timetable's header.
+    useLayoutEffect(() => {
+        const elem = document.getElementById("individual-timetable");
+        if (!elem) return;
+        elem.style.height = getHeaderHeight();
+    }, []);
+
     return (
         <div>
             <div
                 id="individual-timetable"
                 className={`${styles.header} ${styles.timetableHeader}`}
-                style={{ height: syncHeaderHeight() }}
             >
                 <h2>Your availabilities.</h2>
                 <p>

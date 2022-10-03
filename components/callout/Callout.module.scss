@@ -1,0 +1,36 @@
+@import "../../styles/variables.scss";
+
+.callout {
+    border-left: 8px solid $primary-400;
+    border-radius: 8px;
+    padding: $padding-md;
+    background: $grey-200;
+    color: $grey-600;
+    width: fit-content;
+    max-width: $sm;
+    margin: $spacing-xs auto;
+    font-size: $font-size-sm;
+
+    display: flex;
+    flex-direction: row;
+    column-gap: $spacing-sm;
+    align-items: center;
+
+    .icon {
+        display: block;
+        min-height: $font-size-sm;
+        min-width: $font-size-sm;
+        max-height: $font-size-sm;
+        max-width: $font-size-sm;
+        fill: $primary-600;
+    }
+
+    &.dark {
+        background: $grey-700;
+        color: $grey-200;
+
+        .icon {
+            fill: $blue-200;
+        }
+    }
+}
