@@ -13,13 +13,18 @@
     }
 }
 
+.main {
+    display: flex;
+    flex-direction: column;
+    row-gap: $spacing-xl;
+}
+
 .calendarAndMapContainer {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-top: $margin-xl;
 }
 
 .timetableContainer {
@@ -31,9 +36,8 @@
     column-gap: $spacing-xl;
     row-gap: $spacing-3xl;
     align-items: flex-start;
-    margin-top: $margin-2xl;
 }
 
 .featureRequest {
-    margin: $spacing-lg 0 $spacing-lg 0;
+    margin: $spacing-5xl 0 $spacing-lg 0;
 }

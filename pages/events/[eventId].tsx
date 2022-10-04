@@ -144,7 +144,7 @@ const EventPage: NextPage = () => {
                             minHeight: "calc(100vh - 56px - 38px)",
                         }}
                     >
-                        <div>
+                        <div className={styles.main}>
                             {/* TODO: refactor event credentials management. */}
                             {!username && (
                                 <EventSignIn
@@ -154,7 +154,7 @@ const EventPage: NextPage = () => {
                                 />
                             )}
                             {isOwner && (
-                                <>
+                                <div>
                                     <div className={styles.eventNameContainer}>
                                         <TextField
                                             id="event-name"
@@ -197,7 +197,7 @@ const EventPage: NextPage = () => {
                                             begin.
                                         </Callout>
                                     )}
-                                </>
+                                </div>
                             )}
                             {dateSelected && (
                                 <div className={styles.timetableContainer}>
@@ -219,30 +219,27 @@ const EventPage: NextPage = () => {
                                     days yet. Try again later.
                                 </Callout>
                             )}
-                        </div>
-                        <section
-                            className={styles.header}
-                            style={{ margin: "56px 0" }}
-                        >
-                            {dateSelected && (
-                                <>
-                                    <h2>Share this link with others.</h2>
-                                    <p style={{ marginBottom: "24px" }}>
-                                        Wait for them to fill in their
-                                        availabilities and then pick the time
-                                        that works best.
-                                    </p>
+                            <section className={styles.header}>
+                                {dateSelected && (
+                                    <>
+                                        <h2>Share this link with others.</h2>
+                                        <p style={{ marginBottom: "24px" }}>
+                                            Wait for them to fill in their
+                                            availabilities and then pick the
+                                            time that works best.
+                                        </p>
 
-                                    <ShareableLink
-                                        link={`${BASE_URL}/events/${eventId}`}
-                                    />
-                                </>
-                            )}
+                                        <ShareableLink
+                                            link={`${BASE_URL}/events/${eventId}`}
+                                        />
+                                    </>
+                                )}
 
-                            {/* <h2 style={{ marginTop: "24px" }}>
+                                {/* <h2 style={{ marginTop: "24px" }}>
                                 How was the planning experience?
                             </h2> */}
-                        </section>
+                            </section>
+                        </div>
                         <section
                             className={`${styles.header} ${styles.featureRequest}`}
                         >
