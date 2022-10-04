@@ -29,7 +29,7 @@ const FillingTimetable: React.FC<Props> = ({
             if (!elem) return;
             elem.style.height = getHeaderHeight();
         }
-    }, []);
+    }, [widthLessThanXs]);
 
     const handleTimeRangeChange = useCallback(
         (minVal: number, maxVal: number) => {

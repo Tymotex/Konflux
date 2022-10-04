@@ -136,6 +136,8 @@ const TimetableGrid: React.FC<Props> = ({
         eventDispatch,
         selectionState,
         selectionDispatch,
+        maxRows,
+        startRow,
     ]);
 
     /**
@@ -174,7 +176,7 @@ const TimetableGrid: React.FC<Props> = ({
                 },
             });
         },
-        [eventState, eventDispatch, username, eventId],
+        [eventState, eventDispatch, username, eventId, startRow],
     );
 
     /**
@@ -241,7 +243,7 @@ const TimetableGrid: React.FC<Props> = ({
                 date <= endCol
             );
         },
-        [selectionState],
+        [selectionState, maxRows],
     );
     /**
      * Begin selecting/deselecting an area of blocks when the user's mouse

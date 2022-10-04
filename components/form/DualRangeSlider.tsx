@@ -33,13 +33,13 @@ const DualRangeSlider: React.FC<Props> = ({
         if (rightSliderVal < leftSliderVal + minGap) {
             setLeftSliderVal(Math.max(leftSliderVal - minGap, 0));
         }
-    }, [leftSliderVal, rightSliderVal, setLeftSliderVal]);
+    }, [leftSliderVal, rightSliderVal, setLeftSliderVal, minGap]);
 
     const pushMaxIfPast = useCallback(() => {
         if (leftSliderVal > rightSliderVal - minGap) {
             setRightSliderVal(Math.min(rightSliderVal + minGap, totalVals));
         }
-    }, [leftSliderVal, rightSliderVal, setRightSliderVal]);
+    }, [leftSliderVal, rightSliderVal, setRightSliderVal, minGap, totalVals]);
 
     useEffect(() => {
         pushMinIfPast();
@@ -48,7 +48,7 @@ const DualRangeSlider: React.FC<Props> = ({
 
     useEffect(() => {
         onChange(leftSliderVal, rightSliderVal);
-    }, [leftSliderVal, rightSliderVal]);
+    }, [leftSliderVal, rightSliderVal, onChange]);
 
     return (
         <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>

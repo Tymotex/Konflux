@@ -12,6 +12,10 @@ $label-offset: 28px;
 .container {
     position: relative;
     height: $slider-height;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 
     // Make space at the top for the floating labels.
     margin-top: $label-offset;
