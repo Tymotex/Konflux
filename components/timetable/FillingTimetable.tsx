@@ -1,3 +1,4 @@
+import DualRangeSlider from "components/form/DualRangeSlider";
 import React, { MutableRefObject, useEffect, useLayoutEffect } from "react";
 import { getHeaderHeight } from "utils/timetable";
 import styles from "./Timetable.module.scss";
@@ -33,6 +34,7 @@ const FillingTimetable: React.FC<Props> = ({
                     Fill in your availabilities by clicking and dragging the
                     time slots below.
                 </p>
+                <DualRangeSlider />
             </div>
             <TimetableGrid
                 username={username}

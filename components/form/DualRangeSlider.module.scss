@@ -1,0 +1,160 @@
+@import "../../styles/variables.scss";
+
+$slider-height: 48px;
+$background-height: 8px;
+$thumb-size: 20px;
+$label-offset: 28px;
+
+:export {
+    labelOffset: $label-offset;
+}
+
+.container {
+    position: relative;
+    height: $slider-height;
+
+    // Make space at the top for the floating labels.
+    margin-top: $label-offset;
+
+    .background {
+        position: absolute;
+        height: $background-height;
+        background: $grey-300;
+        width: calc(100% - $thumb-size);
+        top: calc($slider-height / 2 - $background-height / 2);
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: $background-height;
+        z-index: 2;
+    }
+
+    .progress {
+        position: absolute;
+        height: $background-height;
+        background: $primary-300;
+        top: calc($slider-height / 2 - $background-height / 2);
+        z-index: 2;
+    }
+
+    .minLabel,
+    .maxLabel {
+        position: absolute;
+        transform: translateX(calc(-50% + $thumb-size / 2));
+        z-index: 100;
+
+        white-space: nowrap;
+        background: $grey-100;
+        filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2));
+        padding: $spacing-xs;
+        border-radius: 12px;
+        font-family: "Montserrat", sans-serif;
+        font-size: small;
+
+        // Tooltip triangle:
+        &:not(.inverted) {
+            top: -$label-offset;
+
+            &::before {
+                content: "";
+                position: absolute;
+                border-top: solid 5px $grey-100;
+                border-left: solid 5px transparent;
+                border-right: solid 5px transparent;
+                top: 100%;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                width: 0;
+                height: 0;
+            }
+        }
+        &.inverted {
+            bottom: -$label-offset;
+
+            &::before {
+                content: "";
+                position: absolute;
+                border-left: solid 5px transparent;
+                border-right: solid 5px transparent;
+                border-bottom: solid 5px $grey-100;
+                top: 0%;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                width: 0;
+                height: 0;
+                transform: translateY(-100%);
+            }
+        }
+    }
+
+    .slider {
+        box-sizing: border-box;
+        appearance: none;
+        height: $slider-height;
+        margin: 0;
+        padding: 0 2px;
+        overflow: hidden;
+        border: 0;
+        background: inherit;
+        pointer-events: none;
+        width: 100%;
+
+        &::-webkit-slider-thumb {
+            height: $thumb-size;
+            width: $thumb-size;
+            border-radius: $thumb-size;
+            background-color: rgba($grey-100, 1);
+            position: relative;
+            z-index: 100;
+
+            cursor: pointer;
+            appearance: none;
+            pointer-events: all;
+
+            margin: 5px 0;
+            box-shadow: 0 1px 4px 0.5px rgba(0, 0, 0, 0.25);
+
+            &::before {
+                content: " ";
+                display: block;
+                position: absolute;
+                top: 13px;
+                left: 100%;
+                width: 2000px;
+                height: 2px;
+            }
+        }
+
+        &:nth-child(2) {
+            position: absolute;
+            transform: translateX(-100%);
+            z-index: 100;
+        }
+    }
+
+    &.dark {
+        .background {
+            background: $grey-600;
+        }
+        .progress {
+            background: $primary-500;
+        }
+        .minLabel,
+        .maxLabel {
+            background: $grey-600;
+
+            &:not(.inverted)::before {
+                border-top-color: $grey-600 !important;
+            }
+            &.inverted::before {
+                border-bottom-color: $grey-600 !important;
+            }
+        }
+        .slider {
+            &::-webkit-slider-thumb {
+                background: $grey-400;
+            }
+        }
+    }
+}
