@@ -41,3 +41,9 @@
 .featureRequest {
     margin: $spacing-5xl 0 $spacing-lg 0;
 }
+
+@media screen and (max-width: $sm) {
+    .timetableContainer {
+        justify-content: flex-start;
+    }
+}

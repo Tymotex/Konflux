@@ -9,83 +9,102 @@ import styles from "./DualRangeSlider.module.scss";
 import { TIME_LABELS } from "components/timetable/timetable-utils";
 import { useDarkMode } from "contexts/ThemeProvider";
 
-interface Props {}
+interface Props {
+    defaultMinVal: number;
+    defaultMaxVal: number;
+    totalVals: number;
+    minGap?: number;
+    onChange: (minVal: number, maxVal: number) => void;
+}
 
-const DualRangeSlider: React.FC<Props> = () => {
-    const [minVal, setMinVal] = useState<number>(18);
-    const [maxVal, setMaxVal] = useState<number>(34);
-    const minTimeGap = useMemo(() => 1, []);
+const DualRangeSlider: React.FC<Props> = ({
+    defaultMinVal,
+    defaultMaxVal,
+    totalVals,
+    minGap = 2,
+    onChange,
+}) => {
+    const [leftSliderVal, setLeftSliderVal] = useState<number>(defaultMinVal);
+    const [rightSliderVal, setRightSliderVal] = useState<number>(defaultMaxVal);
 
     const isDarkMode = useDarkMode();
 
     const pushMinIfPast = useCallback(() => {
-        if (maxVal < minVal + minTimeGap) {
-            setMinVal(Math.max(minVal - minTimeGap, 0));
+        if (rightSliderVal < leftSliderVal + minGap) {
+            setLeftSliderVal(Math.max(leftSliderVal - minGap, 0));
         }
-    }, [minVal, maxVal, setMinVal]);
+    }, [leftSliderVal, rightSliderVal, setLeftSliderVal]);
 
     const pushMaxIfPast = useCallback(() => {
-        if (minVal > maxVal - minTimeGap) {
-            setMaxVal(Math.min(maxVal + minTimeGap, 48));
+        if (leftSliderVal > rightSliderVal - minGap) {
+            setRightSliderVal(Math.min(rightSliderVal + minGap, totalVals));
         }
-    }, [minVal, maxVal, setMaxVal]);
+    }, [leftSliderVal, rightSliderVal, setRightSliderVal]);
 
     useEffect(() => {
         pushMinIfPast();
         pushMaxIfPast();
     }, [pushMinIfPast, pushMaxIfPast]);
 
+    useEffect(() => {
+        onChange(leftSliderVal, rightSliderVal);
+    }, [leftSliderVal, rightSliderVal]);
+
     return (
         <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
             <input
                 type="range"
                 min={0}
-                max={48}
-                value={minVal}
+                max={totalVals}
+                value={leftSliderVal}
                 className={styles.slider}
                 id="lower"
-                onChange={(e) => setMinVal(parseInt(e.target.value))}
+                onChange={(e) => setLeftSliderVal(parseInt(e.target.value))}
             />
             <input
                 type="range"
                 min={0}
-                max={48}
-                value={maxVal}
+                max={totalVals}
+                value={rightSliderVal}
                 className={styles.slider}
                 id="upper"
-                onChange={(e) => setMaxVal(parseInt(e.target.value))}
+                onChange={(e) => setRightSliderVal(parseInt(e.target.value))}
             />
             <div className={styles.background} aria-hidden />
             <div
                 aria-hidden
                 className={styles.progress}
                 style={{
-                    width: `calc(${((maxVal - minVal) / 48) * 95}%)`,
-                    left: `calc(${(minVal / 48) * 95}% + 10px)`,
+                    width: `calc(${
+                        ((rightSliderVal - leftSliderVal) / totalVals) * 95
+                    }%)`,
+                    left: `calc(${(leftSliderVal / totalVals) * 95}% + 10px)`,
                 }}
             />
             <span
                 className={styles.minLabel}
                 style={{
-                    left: `${(minVal / 48) * 95.7}%`, // Visually fine-tuned percentage.
+                    left: `${(leftSliderVal / totalVals) * 95.7}%`, // Visually fine-tuned percentage.
                 }}
                 aria-label={"Earliest time"}
             >
-                {TIME_LABELS[minVal]}
+                {TIME_LABELS[leftSliderVal]}
             </span>
             <span
                 // When the two sliders and within a small enough distance,
                 // invert the position of the max label so they don't
                 // overlap.
                 className={`${styles.maxLabel} ${
-                    Math.abs(maxVal - minVal) < 12 ? styles.inverted : ""
+                    Math.abs(rightSliderVal - leftSliderVal) < 12
+                        ? styles.inverted
+                        : ""
                 }`}
                 aria-label={"Latest time"}
                 style={{
-                    left: `${(maxVal / 48) * 95.7}%`,
+                    left: `${(rightSliderVal / totalVals) * 95.7}%`,
                 }}
             >
-                {TIME_LABELS[maxVal]}
+                {TIME_LABELS[rightSliderVal]}
             </span>
         </div>
     );

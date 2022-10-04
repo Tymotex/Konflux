@@ -40,7 +40,13 @@ export const areaSelectionReducer = (
             };
         }
         case "COMMIT_SELECTION": {
-            const { availabilities, username, onCommit } = action.payload;
+            const {
+                availabilities,
+                username,
+                earliestTimeIndex,
+                maxRows,
+                onCommit,
+            } = action.payload;
             const {
                 startTime,
                 endTime,
@@ -74,6 +80,8 @@ export const areaSelectionReducer = (
                 endTime,
                 startDate,
                 endDate,
+                earliestTimeIndex,
+                maxRows,
                 isSelectingArea,
                 isDeselectingArea,
             );
@@ -121,6 +129,8 @@ export type AreaSelectionAction =
           payload: {
               availabilities: KonfluxEvent["groupAvailabilities"];
               username: string;
+              earliestTimeIndex: number;
+              maxRows: number;
               onCommit: (
                   newAvailabilities: KonfluxEvent["groupAvailabilities"],
               ) => void;

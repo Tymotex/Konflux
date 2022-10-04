@@ -168,6 +168,33 @@ export const updateEventName = async (
 };
 
 /**
+ * Sets the starting and ending time index for the event.
+ * @param eventId
+ * @param earliestTimeIndex
+ * @param latestTimeIndex
+ */
+export const updateEventTimeRange = async (
+    eventId: string,
+    earliestTimeIndex: number,
+    latestTimeIndex: number,
+): Promise<void> => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+    try {
+        const writeEarliest = set(
+            ref(getDatabase(), `events/${eventId}/earliest`),
+            earliestTimeIndex,
+        );
+        const writeLatest = set(
+            ref(getDatabase(), `events/${eventId}/latest`),
+            latestTimeIndex,
+        );
+        await Promise.all([writeEarliest, writeLatest]);
+    } catch (err) {
+        throw new Error(`Failed to update the event's name. Reason: ${err}`);
+    }
+};
+
+/**
  * Creates a new member in the given event.
  * @param eventId
  * @param user

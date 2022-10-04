@@ -22,18 +22,28 @@ interface Props {
     disabled?: boolean;
     username: string;
     eventId: string;
+    id?: string;
     showGroupAvailability?: boolean;
     getTimeBlockColour?: (date: string, timeBlockIndex: number) => string;
     gridClassName: "individual" | "group";
+    startRow?: number;
+    endRow?: number;
+    maxRows?: number;
+    onScroll?: React.UIEventHandler<HTMLDivElement>;
 }
 
 const TimetableGrid: React.FC<Props> = ({
     disabled = false,
     username,
     eventId,
+    id,
     showGroupAvailability = false,
     getTimeBlockColour,
     gridClassName,
+    startRow = 18,
+    endRow = 34,
+    maxRows = 48,
+    onScroll,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
@@ -70,6 +80,8 @@ const TimetableGrid: React.FC<Props> = ({
                     payload: {
                         availabilities: eventState.groupAvailabilities,
                         username,
+                        earliestTimeIndex: startRow,
+                        maxRows,
                         onCommit: (newAvailabilities) => {
                             eventDispatch({
                                 type: "SET_AVAILABILITIES",
@@ -129,7 +141,7 @@ const TimetableGrid: React.FC<Props> = ({
     /**
      * Toggles the selection of the time block with the given index and date.
      * @param date universal ISO formatted string
-     * @param timeBlockIndex a number from 0 to 48
+     * @param timeBlockIndex a number from `startRow` to `endRow`
      */
     const toggleTimeblockSelection = useCallback(
         (date: string, timeBlockIndex: number): void => {
@@ -141,11 +153,14 @@ const TimetableGrid: React.FC<Props> = ({
                 return;
             }
             const newAvailabilities = { ...eventState.groupAvailabilities };
-            const timeBlock = newAvailabilities[date][timeBlockIndex];
+            const timeBlock =
+                newAvailabilities[date][timeBlockIndex + startRow];
             if (timeBlock && username in timeBlock) {
-                delete newAvailabilities[date][timeBlockIndex][username];
+                delete newAvailabilities[date][timeBlockIndex + startRow][
+                    username
+                ];
             } else {
-                newAvailabilities[date][timeBlockIndex] = {
+                newAvailabilities[date][timeBlockIndex + startRow] = {
                     ...timeBlock,
                     [username]: { placeholder: true },
                 };
@@ -166,7 +181,7 @@ const TimetableGrid: React.FC<Props> = ({
      * Determines whether the time block at the given date and time block index
      * is selected.
      * @param date universal ISO formatted string
-     * @param timeBlockIndex a number from 0 to 48
+     * @param timeBlockIndex a number from `startRow` to `endRow`
      * @returns whether the time block is selected.
      */
     const isSelected = useCallback(
@@ -176,12 +191,14 @@ const TimetableGrid: React.FC<Props> = ({
                 eventState.groupAvailabilities[date]
             ) {
                 const timeBlock =
-                    eventState.groupAvailabilities[date][timeBlockIndex];
+                    eventState.groupAvailabilities[date][
+                        timeBlockIndex + startRow
+                    ];
                 return timeBlock && username in timeBlock;
             }
             return false;
         },
-        [eventState, username],
+        [eventState, username, startRow],
     );
 
     /**
@@ -192,7 +209,7 @@ const TimetableGrid: React.FC<Props> = ({
      *   ending row:   `selectionEndTime`
      *   ending col:   `selectionEndTime`
      * @param date universal ISO formatted string
-     * @param timeBlockIndex a number from 0 to 48
+     * @param timeBlockIndex a number from `startRow` to `endRow`
      * @returns whether the given time block is in the selection area drawn by
      * the user.
      */
@@ -204,6 +221,7 @@ const TimetableGrid: React.FC<Props> = ({
                     selectionState.endTime,
                     selectionState.startDate,
                     selectionState.endDate,
+                    maxRows,
                 )
             )
                 return false;
@@ -231,7 +249,7 @@ const TimetableGrid: React.FC<Props> = ({
      * Sets the state to begin the selection of an area.
      * @param event
      * @param date universal ISO formatted string
-     * @param timeBlockIndex a number from 0 to 48
+     * @param timeBlockIndex a number from `startRow` to `endRow`
      */
     const beginSelectingArea = useCallback(
         (
@@ -261,7 +279,7 @@ const TimetableGrid: React.FC<Props> = ({
     /**
      * Set the end coordinate of the rectangular area drawn by the user.
      * @param date universal ISO formatted string
-     * @param timeBlockIndex a number from 0 to 48
+     * @param timeBlockIndex a number from `startRow` to `endRow`
      */
     const setSelectionAreaEnd = useCallback(
         (date: string, timeBlockIndex: number) => {
@@ -331,12 +349,13 @@ const TimetableGrid: React.FC<Props> = ({
                         ? "12px"
                         : "0",
                 borderBottomRightRadius:
-                    timeBlockIndex === 48 - 1 &&
+                    timeBlockIndex === endRow - startRow - 1 &&
                     columnIndex === intervalLength - 1
                         ? "12px"
                         : "0",
                 borderBottomLeftRadius:
-                    timeBlockIndex === 48 - 1 && columnIndex === 0
+                    timeBlockIndex === endRow - startRow - 1 &&
+                    columnIndex === 0
                         ? "12px"
                         : "0",
                 gridRowStart: timeBlockIndex + 2,
@@ -346,7 +365,8 @@ const TimetableGrid: React.FC<Props> = ({
                 borderTop:
                     timeBlockIndex % 2 === 0 ? hourBorder : halfHourBorder,
                 borderLeft: hourBorder,
-                borderBottom: timeBlockIndex === 48 - 1 ? hourBorder : "",
+                borderBottom:
+                    timeBlockIndex === endRow - startRow - 1 ? hourBorder : "",
                 borderRight:
                     columnIndex === intervalLength - 1 ? hourBorder : "",
             };
@@ -361,7 +381,7 @@ const TimetableGrid: React.FC<Props> = ({
             }
             return styles;
         },
-        [isDarkMode, getTimeBlockColour],
+        [isDarkMode, getTimeBlockColour, startRow, endRow],
     );
 
     return (
@@ -371,6 +391,8 @@ const TimetableGrid: React.FC<Props> = ({
                     ? styles.individual
                     : styles.group
             } ${disabled && styles.disabled} ${isDarkMode ? styles.dark : ""}`}
+            id={id}
+            onScroll={onScroll}
             draggable={false}
         >
             {timeIntervals.map((interval, intervalIndex) => {
@@ -383,18 +405,22 @@ const TimetableGrid: React.FC<Props> = ({
                     >
                         {displayTimeLabels &&
                             timeIntervals.length > 0 &&
-                            TIME_LABELS.map((label, i) => (
-                                <div
-                                    key={`${label}-${i}`}
-                                    className={styles.timeLabel}
-                                    style={{
-                                        gridColumnStart: 1,
-                                        gridRowStart: i + 2,
-                                    }}
-                                >
-                                    <span className={styles.text}>{label}</span>
-                                </div>
-                            ))}
+                            TIME_LABELS.slice(startRow, endRow + 1).map(
+                                (label, i) => (
+                                    <div
+                                        key={`${label}-${i}`}
+                                        className={styles.timeLabel}
+                                        style={{
+                                            gridColumnStart: 1,
+                                            gridRowStart: i + 2,
+                                        }}
+                                    >
+                                        <span className={styles.text}>
+                                            {label}
+                                        </span>
+                                    </div>
+                                ),
+                            )}
                         {interval.map((date: string, columnIndex) => (
                             <>
                                 {/* TODO: Move this to a separate component. */}
@@ -416,7 +442,7 @@ const TimetableGrid: React.FC<Props> = ({
                                     </span>
                                 </span>
                                 {!showGroupAvailability
-                                    ? [...Array(48)].map(
+                                    ? [...Array(endRow - startRow)].map(
                                           (_, timeBlockIndex) => (
                                               // Showing the timetable for filling availabilities.
                                               <div
@@ -477,7 +503,7 @@ const TimetableGrid: React.FC<Props> = ({
                                               ></div>
                                           ),
                                       )
-                                    : [...Array(48)].map(
+                                    : [...Array(endRow - startRow)].map(
                                           (_, timeBlockIndex) => (
                                               // Showing the timetable with group availabilities,
                                               // not for filling in individual availabilities.

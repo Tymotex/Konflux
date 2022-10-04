@@ -98,12 +98,13 @@ export const boundsAreValid = (
     time2: number | undefined,
     date1: string | undefined,
     date2: string | undefined,
+    maxRows: number,
 ) => {
     return (
         time1 !== undefined &&
         time1 >= 0 &&
         time2 !== undefined &&
-        time2 < 48 &&
+        time2 < maxRows &&
         date1 &&
         isUniversalIsoFormat(date1) &&
         date2 &&
@@ -160,10 +161,12 @@ export const createNewAvailabilitiesAfterSelection = (
     time2: number | undefined,
     date1: string | undefined,
     date2: string | undefined,
+    earliestTimeIndex: number,
+    maxRows: number,
     isSelecting: boolean,
     isDeselecting: boolean,
 ): KonfluxEvent["groupAvailabilities"] => {
-    if (!boundsAreValid(time1, time2, date1, date2))
+    if (!boundsAreValid(time1, time2, date1, date2, maxRows))
         throw new Error("Can't commit area selection due to invalid bounds.");
     if (isSelecting && isDeselecting)
         throw new Error(
@@ -199,17 +202,20 @@ export const createNewAvailabilitiesAfterSelection = (
 
             // Add or remove the current timeblock in the rectangular
             // area depending on if we're selecting or deselecting.
-            const timeBlock = newAvailabilities[currDate][timeBlockIndex];
+            const timeBlock =
+                newAvailabilities[currDate][timeBlockIndex + earliestTimeIndex];
             if (isSelecting)
-                newAvailabilities[currDate][timeBlockIndex] = {
+                newAvailabilities[currDate][
+                    timeBlockIndex + earliestTimeIndex
+                ] = {
                     ...timeBlock,
                     [username]: { placeholder: true },
                 };
             else if (isDeselecting) {
                 if (timeBlock && username in timeBlock)
-                    delete newAvailabilities[currDate][timeBlockIndex][
-                        username
-                    ];
+                    delete newAvailabilities[currDate][
+                        timeBlockIndex + earliestTimeIndex
+                    ][username];
             } else {
                 throw new Error(
                     "Neither selecting nor deselecting. Please try again.",

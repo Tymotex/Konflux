@@ -16,145 +16,161 @@ $default-bg-colour-dark: $grey-700;
     selectedColour: $selected-bg-colour;
 }
 
-.header {
-    text-align: center;
+.container {
+    overflow: auto;
 
-    // This is equal to the width of the time labels occupying the first column
-    // of the grid.
-    margin-left: $time-label-width;
-    margin-bottom: $margin-lg;
+    .header {
+        text-align: center;
 
-    p {
-        max-width: 24em;
+        // This is equal to the width of the time labels occupying the first column
+        // of the grid.
+        padding-left: $time-label-width;
+        padding-bottom: $margin-lg;
+
+        p {
+            max-width: 24em;
+            margin: $spacing-sm auto;
+        }
+    }
+
+    .grid {
+        display: flex;
+        flex-direction: row;
+        column-gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 32px;
+
+        &:first-child {
+            margin-left: auto;
+        }
+        &:last-child {
+            margin-right: auto;
+        }
+
+        &.disabled {
+            pointer-events: none;
+            filter: blur(3px);
+        }
+
+        .timeLabel {
+            position: relative;
+            user-select: none;
+            font-family: "Montserrat", sans-serif;
+
+            .text {
+                color: $grey-600;
+                position: absolute;
+                transform: translateY(-40%);
+                right: 10px;
+            }
+
+            &:nth-child(2n) {
+                font-size: small;
+                .text {
+                    color: $grey-400;
+                    font-weight: lighter;
+                }
+            }
+        }
+
+        .interval {
+            display: grid;
+            grid-template-rows: repeat($time-block-height, 49);
+            grid-auto-columns: minmax(80px, 100px);
+            grid-row-gap: 0;
+            grid-column-gap: 0;
+            justify-content: start;
+
+            // Date labels.
+            &:first-child {
+                grid-template-columns: minmax(90px, 100px);
+            }
+
+            .dateLabel {
+                text-align: center;
+                user-select: none;
+                font-family: "Montserrat", sans-serif;
+                margin-bottom: $spacing-xs;
+
+                .date {
+                    display: block;
+                    font-size: small;
+                }
+                .dayOfWeek {
+                    font-weight: bold;
+                    display: block;
+                }
+            }
+
+            .timeBlock {
+                background: $default-bg-colour;
+                cursor: pointer;
+                box-sizing: border-box;
+                transition: background 50ms ease-in-out;
+
+                &.selected {
+                    background: $selected-bg-colour !important;
+                }
+
+                &.inSelectedArea {
+                    background: $selection-indicator-bg-colour !important;
+                    cursor: move;
+                }
+
+                &.inDeselectedArea {
+                    background: $deselection-indicator-bg-colour !important;
+                    cursor: move;
+                }
+
+                &.pressed {
+                    background: $selection-indicator-bg-colour !important;
+                }
+            }
+        }
+
+        // Styles specifically targeting the individual timetable.
+        &.individual {
+            .interval .timeBlock {
+                &:hover {
+                    background: $primary-200 !important;
+                    border: 3px solid $primary-600 !important;
+                }
+            }
+        }
+
+        // Styles specifically targeting the group timetable.
+        &.group {
+            .interval .timeBlock {
+                &:hover {
+                    // border: 3px solid $grey-600 !important;
+                    background: $grey-200 !important;
+                }
+            }
+        }
+
+        // Dark timetable styles.
+        &.dark {
+            .timeLabel {
+                .text {
+                    color: $grey-200;
+                }
+            }
+            .interval {
+                .timeBlock {
+                    background: $default-bg-colour-dark;
+                }
+            }
+        }
     }
 }
 
-.grid {
-    display: flex;
-    flex-direction: row;
-    column-gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 32px;
-
-    &:first-child {
-        margin-left: auto;
-    }
-    &:last-child {
-        margin-right: auto;
-    }
-
-    &.disabled {
-        pointer-events: none;
-        filter: blur(3px);
-    }
-
-    .timeLabel {
-        position: relative;
-        user-select: none;
-        font-family: "Montserrat", sans-serif;
-
-        .text {
-            color: $grey-600;
-            position: absolute;
-            transform: translateY(-40%);
-            right: 10px;
-        }
-
-        &:nth-child(2n) {
+@media screen and (max-width: $sm) {
+    .container {
+        .header {
+            margin-left: auto;
+            padding: $spacing-sm 0;
+            margin-bottom: $spacing-xl;
             font-size: small;
-            .text {
-                color: $grey-400;
-                font-weight: lighter;
-            }
-        }
-    }
-
-    .interval {
-        display: grid;
-        grid-template-rows: repeat($time-block-height, 49);
-        grid-auto-columns: minmax(80px, 100px);
-        grid-row-gap: 0;
-        grid-column-gap: 0;
-        justify-content: start;
-
-        // Date labels.
-        &:first-child {
-            grid-template-columns: minmax(80px, 100px);
-        }
-
-        .dateLabel {
-            text-align: center;
-            user-select: none;
-            font-family: "Montserrat", sans-serif;
-            margin-bottom: $spacing-xs;
-
-            .date {
-                display: block;
-                font-size: small;
-            }
-            .dayOfWeek {
-                font-weight: bold;
-                display: block;
-            }
-        }
-
-        .timeBlock {
-            background: $default-bg-colour;
-            cursor: pointer;
-            box-sizing: border-box;
-            transition: background 50ms ease-in-out;
-
-            &.selected {
-                background: $selected-bg-colour !important;
-            }
-
-            &.inSelectedArea {
-                background: $selection-indicator-bg-colour !important;
-                cursor: move;
-            }
-
-            &.inDeselectedArea {
-                background: $deselection-indicator-bg-colour !important;
-                cursor: move;
-            }
-
-            &.pressed {
-                background: $selection-indicator-bg-colour !important;
-            }
-        }
-    }
-
-    // Styles specifically targeting the individual timetable.
-    &.individual {
-        .interval .timeBlock {
-            &:hover {
-                background: $primary-200 !important;
-                border: 3px solid $primary-600 !important;
-            }
-        }
-    }
-
-    // Styles specifically targeting the group timetable.
-    &.group {
-        .interval .timeBlock {
-            &:hover {
-                // border: 3px solid $grey-600 !important;
-                background: $grey-200 !important;
-            }
-        }
-    }
-
-    // Dark timetable styles.
-    &.dark {
-        .timeLabel {
-            .text {
-                color: $grey-200;
-            }
-        }
-        .interval {
-            .timeBlock {
-                background: $default-bg-colour-dark;
-            }
         }
     }
 }
