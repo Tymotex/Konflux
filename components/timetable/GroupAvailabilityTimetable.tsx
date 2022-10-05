@@ -149,6 +149,7 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
                 maxRows={48}
                 id="group-timetable"
                 onScroll={syncScroll}
+                updateStatus={(_) => {}}
             />
         </div>
     );

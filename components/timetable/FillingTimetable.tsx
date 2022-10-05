@@ -1,4 +1,5 @@
 import DualRangeSlider from "components/form/DualRangeSlider";
+import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
 import { useBreakpointTrigger } from "hooks/window";
 import React, { useCallback, useContext, useLayoutEffect, useRef } from "react";
@@ -11,12 +12,14 @@ interface Props {
     username: string;
     eventId: string;
     showGroupAvailability?: boolean;
+    updateStatus: (status: Status) => void;
 }
 
 const FillingTimetable: React.FC<Props> = ({
     showGroupAvailability = false,
     username,
     eventId,
+    updateStatus,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const widthLessThanXs = useBreakpointTrigger(parseInt(styleVariables.xs));
@@ -33,18 +36,18 @@ const FillingTimetable: React.FC<Props> = ({
 
     const handleTimeRangeChange = useCallback(
         (minVal: number, maxVal: number) => {
-            // setEarliestTimeIndex(minVal);
-            // setLatestTimeIndex(maxVal);
+            updateStatus("pending");
             eventDispatch({
                 type: "SET_TIME_RANGE",
                 payload: {
                     eventId: eventId,
                     earliestTimeIndex: minVal,
                     latestTimeIndex: maxVal,
+                    updateStatus,
                 },
             });
         },
-        [eventDispatch, eventId],
+        [eventDispatch, eventId, updateStatus],
     );
 
     const syncScroll = useCallback(() => {
@@ -86,6 +89,7 @@ const FillingTimetable: React.FC<Props> = ({
                 maxRows={48}
                 id="individual-timetable"
                 onScroll={syncScroll}
+                updateStatus={updateStatus}
             />
         </div>
     );

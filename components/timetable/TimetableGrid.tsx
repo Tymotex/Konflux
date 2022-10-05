@@ -1,3 +1,4 @@
+import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import dayjs from "dayjs";
@@ -30,6 +31,7 @@ interface Props {
     endRow?: number;
     maxRows?: number;
     onScroll?: React.UIEventHandler<HTMLDivElement>;
+    updateStatus: (status: Status) => void;
 }
 
 const TimetableGrid: React.FC<Props> = ({
@@ -44,6 +46,7 @@ const TimetableGrid: React.FC<Props> = ({
     endRow = 34,
     maxRows = 48,
     onScroll,
+    updateStatus,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const [selectionState, selectionDispatch] = useReducer(
@@ -73,6 +76,7 @@ const TimetableGrid: React.FC<Props> = ({
                 !selectionState.isDeselectingArea
             )
                 return;
+            updateStatus("pending");
 
             try {
                 selectionDispatch({
@@ -88,6 +92,7 @@ const TimetableGrid: React.FC<Props> = ({
                                 payload: {
                                     eventId: eventId,
                                     groupAvailabilities: newAvailabilities,
+                                    updateStatus: updateStatus,
                                 },
                             });
                         },
@@ -138,6 +143,7 @@ const TimetableGrid: React.FC<Props> = ({
         selectionDispatch,
         maxRows,
         startRow,
+        updateStatus,
     ]);
 
     /**
@@ -154,6 +160,7 @@ const TimetableGrid: React.FC<Props> = ({
                 );
                 return;
             }
+            updateStatus("pending");
             const newAvailabilities = { ...eventState.groupAvailabilities };
             const timeBlock =
                 newAvailabilities[date][timeBlockIndex + startRow];
@@ -173,10 +180,11 @@ const TimetableGrid: React.FC<Props> = ({
                 payload: {
                     eventId,
                     groupAvailabilities: newAvailabilities,
+                    updateStatus: updateStatus,
                 },
             });
         },
-        [eventState, eventDispatch, username, eventId, startRow],
+        [eventState, eventDispatch, username, eventId, startRow, updateStatus],
     );
 
     /**
@@ -424,7 +432,7 @@ const TimetableGrid: React.FC<Props> = ({
                                 ),
                             )}
                         {interval.map((date: string, columnIndex) => (
-                            <>
+                            <React.Fragment key={date}>
                                 {/* TODO: Move this to a separate component. */}
                                 <span
                                     className={styles.dateLabel}
@@ -523,7 +531,7 @@ const TimetableGrid: React.FC<Props> = ({
                                               ></div>
                                           ),
                                       )}
-                            </>
+                            </React.Fragment>
                         ))}
                     </div>
                 );

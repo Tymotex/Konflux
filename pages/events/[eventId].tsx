@@ -26,6 +26,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { debounce } from "utils/debounce";
 import { spawnNotification } from "utils/notifications";
 import styles from "./[eventId].module.scss";
 
@@ -49,6 +50,9 @@ const EventPage: NextPage = () => {
     // Sync status of each input component.
     const [updateEventNameStatus, setUpdateEventNameStatus] =
         useState<Status>(null);
+    const [updateDatesStatus, setUpdateDatesStatus] = useState<Status>(null);
+    const [updateTimetableStatus, setUpdateTimetableStatus] =
+        useState<Status>(null);
 
     // Get the event's ID from the route.
     const eventId = useMemo(
@@ -64,12 +68,37 @@ const EventPage: NextPage = () => {
         [eventState],
     );
 
+    // Whether the current member of the event (after signing in) is an owner.
     const isOwner = useMemo(
         () =>
             username &&
             username in eventState.members &&
             eventState.members[username].isOwner,
         [username, eventState],
+    );
+
+    // Updates the remote event's name, n milliseoncds after the user's last
+    // input. This is done to limit the rate of requests sent to the remote
+    // Firebase instance.
+    const debouncedUpdateEventName = useMemo(
+        () =>
+            debounce((payload: { eventId: string; newVal: any }) => {
+                const { newVal, eventId } = payload;
+                if (!newVal) {
+                    spawnNotification("error", "Event name must not be empty.");
+                    setUpdateEventNameStatus("failure");
+                    return;
+                }
+                updateEventName(eventId, newVal)
+                    .then(() => {
+                        setUpdateEventNameStatus("success");
+                    })
+                    .catch((err) => {
+                        spawnNotification("error", err.message);
+                        setUpdateEventNameStatus("failure");
+                    });
+            }, 1000),
+        [],
     );
 
     // Fetch and listen for changes to the remote Event data object.
@@ -111,23 +140,20 @@ const EventPage: NextPage = () => {
                 payload: { event: { ...eventState, name: e.target.value } },
             });
 
-            if (!e.target.value) {
-                spawnNotification("error", "Event name must not be empty.");
-                setUpdateEventNameStatus("failure");
-                return;
-            }
-            updateEventName(eventId, e.target.value)
-                .then(() => {
-                    setUpdateEventNameStatus("success");
-                })
-                .catch((err) => {
-                    spawnNotification("error", err.message);
-                    setUpdateEventNameStatus("failure");
-                });
+            debouncedUpdateEventName({ eventId, newVal: e.target.value });
         },
-        [eventId, setUpdateEventNameStatus, eventState],
+        [
+            eventId,
+            setUpdateEventNameStatus,
+            eventState,
+            debouncedUpdateEventName,
+        ],
     );
 
+    const up = useMemo(
+        () => (status: Status) => setUpdateTimetableStatus(status),
+        [setUpdateTimetableStatus],
+    );
     return (
         <PageTransition>
             <EventContext.Provider value={contextValue}>
@@ -166,10 +192,10 @@ const EventPage: NextPage = () => {
                                             onChange={handleNameChange}
                                             isTitle
                                         />
+                                        <SyncStatus
+                                            status={updateEventNameStatus}
+                                        />
                                     </div>
-                                    <SyncStatus
-                                        status={updateEventNameStatus}
-                                    />
                                     <div className={styles.header}>
                                         <h2>
                                             What days could the event happen?
@@ -189,8 +215,13 @@ const EventPage: NextPage = () => {
                                             eventId={eventId}
                                             eventState={eventState}
                                             eventDispatch={eventDispatch}
+                                            updateStatus={(status: Status) =>
+                                                setUpdateDatesStatus(status)
+                                            }
                                         />
                                     </div>
+                                    <SyncStatus status={updateDatesStatus} />
+                                    <div style={{ marginTop: "48px" }} />
                                     {!dateSelected && (
                                         <Callout Icon={InfoIcon}>
                                             Please select at least 1 date to
@@ -202,10 +233,21 @@ const EventPage: NextPage = () => {
                             {dateSelected && (
                                 <div className={styles.timetableContainer}>
                                     {/* Timetable for filling availabilities. */}
-                                    <FillingTimetable
-                                        username={username}
-                                        eventId={eventId}
-                                    />
+                                    <div
+                                        style={{
+                                            overflow: "auto",
+                                            paddingBottom: "100px",
+                                        }}
+                                    >
+                                        <FillingTimetable
+                                            username={username}
+                                            eventId={eventId}
+                                            updateStatus={up}
+                                        />
+                                        <SyncStatus
+                                            status={updateTimetableStatus}
+                                        />
+                                    </div>
                                     {/* Timetable for showing the group's availabilities */}
                                     <GroupAvailabilityTimetable
                                         username={username}

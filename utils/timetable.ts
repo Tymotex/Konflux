@@ -15,9 +15,6 @@ export const getHeaderHeight = (): string => {
         individualTimetable.offsetHeight,
         groupTimetable.offsetHeight,
     );
-    console.log(
-        `header1 = ${individualTimetable.offsetHeight} header2 = ${groupTimetable.offsetHeight}`,
-    );
     return String(targetHeight + "px");
 };
 

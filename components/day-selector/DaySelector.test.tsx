@@ -31,6 +31,7 @@ describe("Day selector tests", () => {
                 initMonth={initMonth}
                 eventState={EMPTY_EVENT}
                 eventDispatch={mockDispatch}
+                updateStatus={(_) => {}}
             />,
         );
     });

@@ -40,7 +40,6 @@ const EventSignIn: React.FC<Props> = ({
             if (usernameInput.current) {
                 const username = usernameInput.current.value;
                 setUsername(username);
-                console.log(eventState.members);
                 if (username in eventState.members) {
                     eventDispatch({
                         type: "SIGN_IN_MEMBER",

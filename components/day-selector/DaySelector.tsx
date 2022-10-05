@@ -1,3 +1,4 @@
+import { Status } from "components/sync-status/SyncStatus";
 import { EventAction } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import dayjs from "dayjs";
@@ -6,6 +7,7 @@ import React, {
     Dispatch,
     useCallback,
     useEffect,
+    useMemo,
     useReducer,
     useState,
 } from "react";
@@ -13,6 +15,7 @@ import {
     FaChevronLeft as LeftIcon,
     FaChevronRight as RightIcon,
 } from "react-icons/fa";
+import { debounce } from "utils/debounce";
 import { spawnNotification } from "utils/notifications";
 import {
     Day,
@@ -31,6 +34,7 @@ interface Props {
     // Optionally override the initial display years and months.
     initYear?: string;
     initMonth?: string;
+    updateStatus: (status: Status) => void;
 }
 
 const DaySelector: React.FC<Props> = ({
@@ -39,6 +43,7 @@ const DaySelector: React.FC<Props> = ({
     initMonth = INITIAL_MONTH,
     eventState,
     eventDispatch,
+    updateStatus,
 }) => {
     // The days to be displayed on the calendar. By default, we start by showing
     // the days of the current month.
@@ -77,29 +82,25 @@ const DaySelector: React.FC<Props> = ({
                 !selectionState.isDeselectingRange
             )
                 return;
-            try {
-                selectionDispatch({
-                    type: "COMMIT_SELECTION",
-                    payload: {
-                        availabilities: eventState.groupAvailabilities,
-                        onCommit: (newAvailabilities) => {
-                            eventDispatch({
-                                type: "SET_AVAILABILITIES",
-                                payload: {
-                                    eventId: eventId,
-                                    groupAvailabilities: newAvailabilities,
-                                },
-                            });
-                        },
+            if (updateStatus) updateStatus("pending");
+
+            selectionDispatch({
+                type: "COMMIT_SELECTION",
+                payload: {
+                    availabilities: eventState.groupAvailabilities,
+                    onCommit: (newAvailabilities) => {
+                        eventDispatch({
+                            type: "SET_AVAILABILITIES",
+                            payload: {
+                                eventId: eventId,
+                                groupAvailabilities: newAvailabilities,
+                                updateStatus: updateStatus,
+                            },
+                        });
                     },
-                });
-            } catch (err) {
-                if (err instanceof Error)
-                    spawnNotification("error", err.message);
-                throw err;
-            } finally {
-                selectionDispatch({ type: "RESET" });
-            }
+                },
+            });
+            selectionDispatch({ type: "RESET" });
         };
 
         // Cancel the range selection/deselection by doing nothing and resetting
@@ -124,7 +125,14 @@ const DaySelector: React.FC<Props> = ({
             body.removeEventListener("mouseup", commitRangeSelection);
             body.removeEventListener("mouseleave", abortRangeSelection);
         };
-    }, [eventDispatch, eventState, eventId, selectionState, selectionDispatch]);
+    }, [
+        eventDispatch,
+        eventState,
+        eventId,
+        selectionState,
+        selectionDispatch,
+        updateStatus,
+    ]);
 
     /**
      * When the user sets a different month in the calendar, rerender the day
@@ -168,6 +176,7 @@ const DaySelector: React.FC<Props> = ({
      */
     const toggleDaySelection = useCallback(
         (date: string) => {
+            updateStatus("pending");
             const newAvailabilities = { ...eventState.groupAvailabilities };
             if (date in newAvailabilities) {
                 delete newAvailabilities[date];
@@ -179,10 +188,11 @@ const DaySelector: React.FC<Props> = ({
                 payload: {
                     eventId: eventId,
                     groupAvailabilities: newAvailabilities,
+                    updateStatus: updateStatus,
                 },
             });
         },
-        [eventState, eventDispatch, eventId],
+        [eventState, eventDispatch, eventId, updateStatus],
     );
 
     /**

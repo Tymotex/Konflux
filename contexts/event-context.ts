@@ -1,3 +1,4 @@
+import { Status } from "components/sync-status/SyncStatus";
 import {
     signUpMember,
     KonfluxEvent,
@@ -17,6 +18,7 @@ export type EventAction =
               eventId: string;
               earliestTimeIndex: number;
               latestTimeIndex: number;
+              updateStatus: (status: Status) => void;
           };
       }
     | {
@@ -24,6 +26,7 @@ export type EventAction =
           payload: {
               eventId: string;
               groupAvailabilities: KonfluxEvent["groupAvailabilities"];
+              updateStatus: (status: Status) => void;
           };
       }
     | {
@@ -48,39 +51,51 @@ export const eventReducer = (
     switch (action.type) {
         case "SET_EVENT":
             return action.payload.event;
-        case "SET_TIME_RANGE":
-            const { eventId, earliestTimeIndex, latestTimeIndex } =
-                action.payload;
-            updateEventTimeRange(
+        case "SET_TIME_RANGE": {
+            const {
                 eventId,
                 earliestTimeIndex,
                 latestTimeIndex,
-            ).catch((error) =>
-                spawnNotification(
-                    "error",
-                    `Couldn't sync to remote. Reason: ${error}`,
-                ),
-            );
+                updateStatus,
+            } = action.payload;
+            // console.log("Call");
+            updateEventTimeRange(eventId, earliestTimeIndex, latestTimeIndex)
+                .then(() => {
+                    updateStatus("success");
+                })
+                .catch((error) => {
+                    spawnNotification(
+                        "error",
+                        `Couldn't sync to remote. Reason: ${error}`,
+                    );
+                    updateStatus("failure");
+                });
             return {
                 ...state,
                 earliest: action.payload.earliestTimeIndex,
                 latest: action.payload.latestTimeIndex,
             };
-        case "SET_AVAILABILITIES":
-            updateRemoteAvailabilities(
-                action.payload.eventId,
-                action.payload.groupAvailabilities,
-            ).catch((error) =>
-                spawnNotification(
-                    "error",
-                    `Couldn't sync to remote. Reason: ${error}`,
-                ),
-            );
+        }
+        case "SET_AVAILABILITIES": {
+            const { eventId, groupAvailabilities, updateStatus } =
+                action.payload;
+            updateRemoteAvailabilities(eventId, groupAvailabilities)
+                .then(() => {
+                    updateStatus("success");
+                })
+                .catch((error) => {
+                    spawnNotification(
+                        "error",
+                        `Couldn't sync to remote. Reason: ${error}`,
+                    );
+                    updateStatus("failure");
+                });
             // TODO: is it the case that affecting the local state is unnecessary if the update to remote succeeds? Because it would simply be pulled.
             return {
                 ...state,
                 groupAvailabilities: action.payload.groupAvailabilities,
             };
+        }
         case "SIGN_UP_MEMBER": {
             const { eventId, username } = action.payload;
             signUpMember(eventId, { username, isOwner: false }).catch((err) =>

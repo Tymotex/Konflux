@@ -44,7 +44,7 @@ const DualRangeSlider: React.FC<Props> = ({
     useEffect(() => {
         pushMinIfPast();
         pushMaxIfPast();
-    }, [pushMinIfPast, pushMaxIfPast]);
+    }, [leftSliderVal, rightSliderVal, pushMinIfPast, pushMaxIfPast]);
 
     useEffect(() => {
         onChange(leftSliderVal, rightSliderVal);
