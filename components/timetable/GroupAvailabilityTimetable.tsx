@@ -10,6 +10,7 @@ import React, {
     useMemo,
     useState,
 } from "react";
+import ReactTooltip from "react-tooltip";
 import { getHeaderHeight, syncHorizontalScroll } from "utils/timetable";
 import AvailabilityLegend from "./AvailabilityLegend";
 import styles from "./Timetable.module.scss";

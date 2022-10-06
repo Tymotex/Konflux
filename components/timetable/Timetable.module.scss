@@ -1,4 +1,5 @@
 @import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
 
 // Sizing.
 $time-block-height: 30px;
@@ -103,6 +104,7 @@ $default-bg-colour-dark: $grey-700;
             }
 
             .timeBlock {
+                position: relative;
                 background: $default-bg-colour;
                 cursor: pointer;
                 box-sizing: border-box;
@@ -163,10 +165,20 @@ $default-bg-colour-dark: $grey-700;
     }
 }
 
+.tooltipContainer {
+    font-size: $font-size-sm;
+
+    .peopleList {
+        padding-left: $spacing-md;
+        font-size: 16px;
+    }
+}
+
 @media screen and (max-width: $sm) {
     .container {
         .header {
             margin-left: auto;
+            margin-right: auto;
             padding: $spacing-sm 0;
             margin-bottom: $spacing-xl;
             font-size: small;

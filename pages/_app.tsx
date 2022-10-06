@@ -4,11 +4,10 @@ import "utils/firebaseInit";
 import "@reach/tooltip/styles.css";
 import { PageLayout } from "components/layout";
 import { NotificationContainer } from "components/notification";
-import { ThemeContext, ThemeProvider } from "contexts/ThemeProvider";
+import { ThemeProvider } from "contexts/ThemeProvider";
 import { AnimatePresence } from "framer-motion";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { useContext } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.scss";
 

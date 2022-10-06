@@ -21,6 +21,7 @@ import { useRouter } from "next/router";
 import React, {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useReducer,
     useRef,
@@ -159,6 +160,7 @@ const EventPage: NextPage = () => {
         () => (status: Status) => setUpdateTimetableStatus(status),
         [setUpdateTimetableStatus],
     );
+
     return (
         <PageTransition>
             <EventContext.Provider value={cachedContextValue}>

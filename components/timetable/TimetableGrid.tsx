@@ -1,3 +1,4 @@
+import { Tooltip } from "@reach/tooltip";
 import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
@@ -8,9 +9,14 @@ import React, {
     useEffect,
     useMemo,
     useReducer,
+    useState,
 } from "react";
+import ReactTooltip from "react-tooltip";
 import { spawnNotification } from "utils/notifications";
+import { getDisplayTime, getPeopleAvailable } from "utils/timetable";
 import { areaSelectionReducer, NO_SELECTION } from "./area-selection-reducer";
+import AvailabilityTooltip from "./AvailabilityTooltip";
+import TimeBlock from "./TimeBlock";
 import {
     boundsAreValid,
     createIntervals,
@@ -53,6 +59,11 @@ const TimetableGrid: React.FC<Props> = ({
         areaSelectionReducer,
         NO_SELECTION,
     );
+
+    // State variables to display the availability tooltip.
+    const [isMouseInGrid, setIsMouseInGrid] = useState(false);
+    const [displayTimeStartIndex, setDisplayTime] = useState<number>(-1);
+    const [whoIsAvailable, setWhoIsAvailable] = useState<string[]>([]);
 
     // A list of lists of dates and group availability at those dates.
     // Used to render contiguous dates together and in chronological order.
@@ -404,6 +415,12 @@ const TimetableGrid: React.FC<Props> = ({
             id={id}
             onScroll={onScroll}
             draggable={false}
+            onMouseEnter={() => {
+                setIsMouseInGrid(true);
+            }}
+            onMouseLeave={() => {
+                setIsMouseInGrid(false);
+            }}
         >
             {timeIntervals.map((interval, intervalIndex) => {
                 const displayTimeLabels = intervalIndex === 0;
@@ -502,12 +519,14 @@ const TimetableGrid: React.FC<Props> = ({
                                                       date,
                                                       timeBlockIndex,
                                                   );
+                                                  setIsMouseInGrid(false);
                                               }}
                                               onMouseEnter={() => {
                                                   setSelectionAreaEnd(
                                                       date,
                                                       timeBlockIndex,
                                                   );
+                                                  setIsMouseInGrid(true);
                                               }}
                                           ></div>
                                       ))
@@ -516,9 +535,8 @@ const TimetableGrid: React.FC<Props> = ({
                                       ].map((_, timeBlockIndex) => (
                                           // Showing the timetable with group availabilities,
                                           // not for filling in individual availabilities.
-                                          <div
+                                          <TimeBlock
                                               key={timeBlockIndex}
-                                              className={`${styles.timeBlock}`}
                                               style={getTimeBlockStyles(
                                                   timeBlockIndex,
                                                   columnIndex,
@@ -527,13 +545,48 @@ const TimetableGrid: React.FC<Props> = ({
                                                   displayTimeLabels,
                                                   "group",
                                               )}
-                                          ></div>
+                                              onMouseEnter={(e) => {
+                                                  setWhoIsAvailable(
+                                                      getPeopleAvailable(
+                                                          eventState,
+                                                          date,
+                                                          timeBlockIndex,
+                                                      ),
+                                                  );
+                                                  setDisplayTime(
+                                                      timeBlockIndex,
+                                                  );
+                                              }}
+                                          />
                                       ))}
                             </React.Fragment>
                         ))}
                     </div>
                 );
             })}
+            {showGroupAvailability && isMouseInGrid && (
+                <ReactTooltip
+                    id="timetable-tooltip"
+                    effect="solid"
+                    type={isDarkMode ? "light" : "dark"}
+                >
+                    <div className={styles.tooltipContainer}>
+                        <h3>
+                            Available from{" "}
+                            {getDisplayTime(eventState, displayTimeStartIndex)}
+                        </h3>
+                        {whoIsAvailable?.length > 0 ? (
+                            <ul className={styles.peopleList}>
+                                {whoIsAvailable.map((person) => (
+                                    <li key={person}>{person}</li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <>No one 😥</>
+                        )}
+                    </div>
+                </ReactTooltip>
+            )}
         </div>
     );
 };
