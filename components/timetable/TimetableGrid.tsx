@@ -1,4 +1,3 @@
-import { Tooltip } from "@reach/tooltip";
 import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
@@ -15,7 +14,6 @@ import ReactTooltip from "react-tooltip";
 import { spawnNotification } from "utils/notifications";
 import { getDisplayTime, getPeopleAvailable } from "utils/timetable";
 import { areaSelectionReducer, NO_SELECTION } from "./area-selection-reducer";
-import AvailabilityTooltip from "./AvailabilityTooltip";
 import TimeBlock from "./TimeBlock";
 import {
     boundsAreValid,

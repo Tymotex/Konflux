@@ -1,5 +1,6 @@
 import React from "react";
-import Logo from "public/logo.svg";
+import LogoLight from "public/logo-light.svg";
+import LogoDark from "public/logo-dark.svg";
 import styles from "./TopNav.module.scss";
 import { DarkModeToggle } from "components/dark-mode-toggle";
 import Link from "next/link";
@@ -16,10 +17,17 @@ const TopNav: React.FC<Props> = () => {
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
             <div className={styles.navContentsContainer}>
                 <h1 className={styles.brand}>
-                    <Logo
-                        className={styles.brandIcon}
-                        onClick={() => router.push("/")}
-                    />
+                    {isDarkMode ? (
+                        <LogoDark
+                            className={styles.brandIcon}
+                            onClick={() => router.push("/")}
+                        />
+                    ) : (
+                        <LogoLight
+                            className={styles.brandIcon}
+                            onClick={() => router.push("/")}
+                        />
+                    )}
                     <Link href="/">
                         <a
                             aria-label="Application name"

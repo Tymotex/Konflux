@@ -11,6 +11,7 @@ import styles from "./index.module.scss";
 import { motion } from "framer-motion";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { PageTransition } from "components/page-transition";
+import Head from "next/head";
 
 const container = {
     hidden: { opacity: 0 },
@@ -107,108 +108,116 @@ const Home: NextPage = () => {
     );
 
     return (
-        <PageTransition>
-            <div className={styles.container}>
-                <motion.header
-                    className={`${styles.header} ${
-                        isDarkMode ? styles.dark : ""
-                    }`}
-                    variants={entryAnimVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
-                    <h2 className={styles.tagline}>
-                        A minimal web app for planning meetups.
-                    </h2>
-                    <ul className={styles.features}>
-                        <li>
-                            <CheckIcon className={styles.check} /> Plan meetups
-                            in 1 minute.
-                        </li>
-                        <li>
-                            <CheckIcon className={styles.check} />
-                            100% free service.
-                        </li>
-                        <li>
-                            <CheckIcon className={styles.check} />
-                            <strong>No registration required</strong>
-                        </li>
-                    </ul>
-                </motion.header>
-                <main className={styles.main}>
-                    <motion.div
-                        className={styles.callToAction}
+        <>
+            <Head>
+                <title>Konflux</title>
+            </Head>
+            <PageTransition>
+                <div className={styles.container}>
+                    <motion.header
+                        className={`${styles.header} ${
+                            isDarkMode ? styles.dark : ""
+                        }`}
+                        variants={entryAnimVariants}
                         initial="hidden"
                         animate="visible"
-                        variants={entryAnimVariants}
                     >
-                        <h2>Start Here</h2>
-                        <motion.span
-                            animate={{ y: [0, 4, 0, -4, 0] }}
-                            transition={{
-                                ease: "linear",
-                                duration: 0.75,
-                                delay: 2.5,
-                                repeat: 2,
-                            }}
-                        >
-                            <ArrowDownIcon
-                                className={`${styles.arrowIcon} ${
-                                    isDarkMode ? styles.dark : ""
-                                }`}
-                            />
-                        </motion.span>
-                    </motion.div>
-                    <motion.form
-                        className={styles.startForm}
-                        variants={container}
-                        initial={"hidden"}
-                        animate="show"
-                    >
-                        <motion.div variants={item}>
-                            <TextField
-                                refHandle={eventNameInput}
-                                id={"event-name"}
-                                placeholder={"Dinner with Linus Torvalds"}
-                                required
-                                label={"Event Name"}
-                            />
-                        </motion.div>
-                        <motion.div variants={item}>
-                            <TextField
-                                refHandle={usernameInput}
-                                id={"username"}
-                                placeholder={"Linus Torvalds"}
-                                required
-                                label={"Username"}
-                                infoText={
-                                    "A name that others can recognise you by."
-                                }
-                            />
-                        </motion.div>
-                        <motion.div variants={item}>
-                            <TextField
-                                refHandle={passwordInput}
-                                id={"password"}
-                                type={"password"}
-                                label={"Password"}
-                                infoText={
-                                    "An optional password you can set so that only you can modify the event."
-                                }
-                            />
-                        </motion.div>
+                        <h2 className={styles.tagline}>
+                            A minimal web app for planning meetups.
+                        </h2>
+                        <ul className={styles.features}>
+                            <li>
+                                <CheckIcon className={styles.check} /> Plan
+                                meetups in 1 minute.
+                            </li>
+                            <li>
+                                <CheckIcon className={styles.check} />
+                                100% free service.
+                            </li>
+                            <li>
+                                <CheckIcon className={styles.check} />
+                                <strong>No registration required</strong>
+                            </li>
+                        </ul>
+                    </motion.header>
+                    <main className={styles.main}>
                         <motion.div
-                            variants={item}
-                            style={{ textAlign: "center", marginTop: "32px" }}
+                            className={styles.callToAction}
+                            initial="hidden"
+                            animate="visible"
+                            variants={entryAnimVariants}
                         >
-                            <Button onClick={(e) => handleEventCreation(e)}>
-                                Begin
-                            </Button>
+                            <h2>Start Here</h2>
+                            <motion.span
+                                animate={{ y: [0, 4, 0, -4, 0] }}
+                                transition={{
+                                    ease: "linear",
+                                    duration: 0.75,
+                                    delay: 2.5,
+                                    repeat: 2,
+                                }}
+                            >
+                                <ArrowDownIcon
+                                    className={`${styles.arrowIcon} ${
+                                        isDarkMode ? styles.dark : ""
+                                    }`}
+                                />
+                            </motion.span>
                         </motion.div>
-                    </motion.form>
-                </main>
-            </div>
-        </PageTransition>
+                        <motion.form
+                            className={styles.startForm}
+                            variants={container}
+                            initial={"hidden"}
+                            animate="show"
+                        >
+                            <motion.div variants={item}>
+                                <TextField
+                                    refHandle={eventNameInput}
+                                    id={"event-name"}
+                                    placeholder={"Dinner with Linus Torvalds"}
+                                    required
+                                    label={"Event Name"}
+                                />
+                            </motion.div>
+                            <motion.div variants={item}>
+                                <TextField
+                                    refHandle={usernameInput}
+                                    id={"username"}
+                                    placeholder={"Linus Torvalds"}
+                                    required
+                                    label={"Username"}
+                                    infoText={
+                                        "A name that others can recognise you by."
+                                    }
+                                />
+                            </motion.div>
+                            <motion.div variants={item}>
+                                <TextField
+                                    refHandle={passwordInput}
+                                    id={"password"}
+                                    type={"password"}
+                                    label={"Password"}
+                                    infoText={
+                                        "An optional password you can set so that only you can modify the event."
+                                    }
+                                />
+                            </motion.div>
+                            <motion.div
+                                variants={item}
+                                style={{
+                                    textAlign: "center",
+                                    marginTop: "32px",
+                                }}
+                            >
+                                <Button onClick={(e) => handleEventCreation(e)}>
+                                    Begin
+                                </Button>
+                            </motion.div>
+                        </motion.form>
+                    </main>
+                </div>
+            </PageTransition>
+        </>
     );
 };
 

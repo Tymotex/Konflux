@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import ReactTooltip from "react-tooltip";
-import AvailabilityTooltip from "./AvailabilityTooltip";
 import styles from "./Timetable.module.scss";
-import { renderToString } from "react-dom/server";
 
 interface Props {
     style: React.CSSProperties;
