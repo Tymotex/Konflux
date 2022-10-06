@@ -8,6 +8,7 @@ import React, {
 import styles from "./DualRangeSlider.module.scss";
 import { TIME_LABELS } from "components/timetable/timetable-utils";
 import { useDarkMode } from "contexts/ThemeProvider";
+import { spawnNotification } from "utils/notifications";
 
 interface Props {
     defaultMinVal: number;
@@ -47,8 +48,9 @@ const DualRangeSlider: React.FC<Props> = ({
     }, [leftSliderVal, rightSliderVal, pushMinIfPast, pushMaxIfPast]);
 
     useEffect(() => {
-        onChange(leftSliderVal, rightSliderVal);
-    }, [leftSliderVal, rightSliderVal, onChange]);
+        if (leftSliderVal + minGap < rightSliderVal)
+            onChange(leftSliderVal, rightSliderVal);
+    }, [leftSliderVal, rightSliderVal, minGap, onChange]);
 
     return (
         <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>

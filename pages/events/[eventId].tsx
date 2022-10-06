@@ -38,7 +38,7 @@ const EventPage: NextPage = () => {
     // Using context and reducer together to allow for descendants to cleanly
     // modify the local single source of truth for the event's data.
     const [eventState, eventDispatch] = useReducer(eventReducer, EMPTY_EVENT);
-    const contextValue = useMemo(
+    const cachedContextValue = useMemo(
         () => ({ eventState, eventDispatch }),
         [eventState, eventDispatch],
     );
@@ -117,7 +117,7 @@ const EventPage: NextPage = () => {
         } catch (err) {
             spawnNotification("error", (err as Error).message);
         }
-    }, [eventId, eventDispatch]);
+    }, [eventId, eventDispatch, router]);
 
     // Grab the username and password transmitted through navigation from a
     // previous page. See: https://www.youtube.com/watch?v=7wzMMBRVrfw.
@@ -161,7 +161,7 @@ const EventPage: NextPage = () => {
     );
     return (
         <PageTransition>
-            <EventContext.Provider value={contextValue}>
+            <EventContext.Provider value={cachedContextValue}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         initial={{ opacity: 0 }}

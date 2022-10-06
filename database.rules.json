@@ -8,10 +8,10 @@
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 255"
         },
         "earliest": {
-          ".validate": "newData.isNumber() && newData.val() > 0"
+          ".validate": "newData.isNumber() && newData.val() >= 0"
         },
         "latest": {
-          ".validate": "newData.isNumber() && newData.val() > 0"
+          ".validate": "newData.isNumber() && newData.val() >= 0"
         }
       }
     }

@@ -55,7 +55,7 @@ const DaySelector: React.FC<Props> = ({
 
     const isDarkMode = useDarkMode();
 
-    const dateToday = dayjs().format("YYYY-MM-DD");
+    const dateToday = useMemo(() => dayjs().format("YYYY-MM-DD"), []);
 
     /**
      * The user can select a range of days by pressing down on a starting day
@@ -67,6 +67,43 @@ const DaySelector: React.FC<Props> = ({
         NO_SELECTION,
     );
 
+    // Commits the selected days in the range into the `selectedDays` set.
+    const commitRangeSelection = useCallback(() => {
+        if (
+            !selectionState.isSelectingRange &&
+            !selectionState.isDeselectingRange
+        )
+            return;
+        if (updateStatus) updateStatus("pending");
+
+        selectionDispatch({
+            type: "COMMIT_SELECTION",
+            payload: {
+                availabilities: eventState.groupAvailabilities,
+                onCommit: (newAvailabilities) => {
+                    // NOTE: this causes 'Warning: Cannot update a component
+                    //       while rendering a different component.
+                    eventDispatch({
+                        type: "SET_AVAILABILITIES",
+                        payload: {
+                            eventId: eventId,
+                            groupAvailabilities: newAvailabilities,
+                            updateStatus: updateStatus,
+                        },
+                    });
+                },
+            },
+        });
+        selectionDispatch({ type: "RESET" });
+    }, [
+        eventId,
+        selectionState,
+        selectionDispatch,
+        updateStatus,
+        eventDispatch,
+        eventState,
+    ]);
+
     /**
      * When the user is selecting a range and lifts up their finger anywhere on
      * the <body>, add the selected ranges to the `selectedDays`.
@@ -75,34 +112,6 @@ const DaySelector: React.FC<Props> = ({
      * days from the `selectedDays` set instead of adding.
      */
     useEffect(() => {
-        // Commits the selected days in the range into the `selectedDays` set.
-        const commitRangeSelection = () => {
-            if (
-                !selectionState.isSelectingRange &&
-                !selectionState.isDeselectingRange
-            )
-                return;
-            if (updateStatus) updateStatus("pending");
-
-            selectionDispatch({
-                type: "COMMIT_SELECTION",
-                payload: {
-                    availabilities: eventState.groupAvailabilities,
-                    onCommit: (newAvailabilities) => {
-                        eventDispatch({
-                            type: "SET_AVAILABILITIES",
-                            payload: {
-                                eventId: eventId,
-                                groupAvailabilities: newAvailabilities,
-                                updateStatus: updateStatus,
-                            },
-                        });
-                    },
-                },
-            });
-            selectionDispatch({ type: "RESET" });
-        };
-
         // Cancel the range selection/deselection by doing nothing and resetting
         // the range-tracking state.
         const abortRangeSelection = () => {
@@ -132,6 +141,7 @@ const DaySelector: React.FC<Props> = ({
         selectionState,
         selectionDispatch,
         updateStatus,
+        commitRangeSelection,
     ]);
 
     /**

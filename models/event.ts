@@ -1,5 +1,6 @@
 import { getDatabase, onValue, push, ref, set } from "firebase/database";
 import { NextRouter } from "next/router";
+import { spawnNotification } from "utils/notifications";
 
 /**
  * Member details, but localised entirely to the event data object it is
@@ -85,20 +86,15 @@ export const onEventChange = async (
     try {
         const eventRef = ref(getDatabase(), `events/${eventId}`);
 
-        onValue(
-            eventRef,
-            (snapshot) => {
-                if (!snapshot.exists()) {
-                    router.push("/404");
-                    // throw new Error("Event does not exist.");
-                }
-                const currEvent = snapshot.val() as KonfluxEvent;
-                handleChange(currEvent);
-            },
-            (error) => {
-                throw new Error("FUCK");
-            },
-        );
+        onValue(eventRef, (snapshot) => {
+            if (!snapshot.exists()) {
+                router.push("/404");
+                spawnNotification("error", "That event doesn't exist.");
+                // throw new Error("Event does not exist.");
+            }
+            const currEvent = snapshot.val() as KonfluxEvent;
+            handleChange(currEvent);
+        });
     } catch (err) {
         throw new Error(
             `Failed to listen to event with ID '${eventId}'. Reason: ${err}`,
@@ -205,7 +201,11 @@ export const updateEventTimeRange = async (
         );
         await Promise.all([writeEarliest, writeLatest]);
     } catch (err) {
-        throw new Error(`Failed to update the event's name. Reason: ${err}`);
+        console.log("earliest:", earliestTimeIndex);
+        console.log("latest:", latestTimeIndex);
+        throw new Error(
+            `Failed to update the event's time range. Reason: ${err}`,
+        );
     }
 };
 

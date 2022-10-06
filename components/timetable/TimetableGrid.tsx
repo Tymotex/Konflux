@@ -452,85 +452,83 @@ const TimetableGrid: React.FC<Props> = ({
                                     </span>
                                 </span>
                                 {!showGroupAvailability
-                                    ? [...Array(endRow - startRow)].map(
-                                          (_, timeBlockIndex) => (
-                                              // Showing the timetable for filling availabilities.
-                                              <div
-                                                  key={timeBlockIndex}
-                                                  className={`${
-                                                      styles.timeBlock
-                                                  } ${
-                                                      isSelected(
-                                                          date,
-                                                          timeBlockIndex,
-                                                      )
-                                                          ? styles.selected
-                                                          : styles.notSelected
-                                                  } ${
-                                                      isInAreaSelection(
-                                                          date,
-                                                          timeBlockIndex,
-                                                      )
-                                                          ? selectionState.isSelectingArea
-                                                              ? styles.inSelectedArea
-                                                              : styles.inDeselectedArea
-                                                          : ""
-                                                  }`}
-                                                  style={getTimeBlockStyles(
-                                                      timeBlockIndex,
-                                                      columnIndex,
+                                    ? [
+                                          ...Array(Math.abs(endRow - startRow)),
+                                      ].map((_, timeBlockIndex) => (
+                                          // Showing the timetable for filling availabilities.
+                                          <div
+                                              key={timeBlockIndex}
+                                              className={`${styles.timeBlock} ${
+                                                  isSelected(
                                                       date,
-                                                      interval.length,
-                                                      displayTimeLabels,
-                                                      "individual",
-                                                  )}
-                                                  onClick={() =>
-                                                      toggleTimeblockSelection(
-                                                          date,
-                                                          timeBlockIndex,
-                                                      )
-                                                  }
-                                                  onMouseDown={(e) =>
-                                                      setPressedClass(e, true)
-                                                  }
-                                                  onMouseUp={(e) => {
-                                                      setPressedClass(e, false);
-                                                  }}
-                                                  onMouseLeave={(e) => {
-                                                      setPressedClass(e, false);
-                                                      beginSelectingArea(
-                                                          e,
-                                                          date,
-                                                          timeBlockIndex,
-                                                      );
-                                                  }}
-                                                  onMouseEnter={() => {
-                                                      setSelectionAreaEnd(
-                                                          date,
-                                                          timeBlockIndex,
-                                                      );
-                                                  }}
-                                              ></div>
-                                          ),
-                                      )
-                                    : [...Array(endRow - startRow)].map(
-                                          (_, timeBlockIndex) => (
-                                              // Showing the timetable with group availabilities,
-                                              // not for filling in individual availabilities.
-                                              <div
-                                                  key={timeBlockIndex}
-                                                  className={`${styles.timeBlock}`}
-                                                  style={getTimeBlockStyles(
                                                       timeBlockIndex,
-                                                      columnIndex,
+                                                  )
+                                                      ? styles.selected
+                                                      : styles.notSelected
+                                              } ${
+                                                  isInAreaSelection(
                                                       date,
-                                                      interval.length,
-                                                      displayTimeLabels,
-                                                      "group",
-                                                  )}
-                                              ></div>
-                                          ),
-                                      )}
+                                                      timeBlockIndex,
+                                                  )
+                                                      ? selectionState.isSelectingArea
+                                                          ? styles.inSelectedArea
+                                                          : styles.inDeselectedArea
+                                                      : ""
+                                              }`}
+                                              style={getTimeBlockStyles(
+                                                  timeBlockIndex,
+                                                  columnIndex,
+                                                  date,
+                                                  interval.length,
+                                                  displayTimeLabels,
+                                                  "individual",
+                                              )}
+                                              onClick={() =>
+                                                  toggleTimeblockSelection(
+                                                      date,
+                                                      timeBlockIndex,
+                                                  )
+                                              }
+                                              onMouseDown={(e) =>
+                                                  setPressedClass(e, true)
+                                              }
+                                              onMouseUp={(e) => {
+                                                  setPressedClass(e, false);
+                                              }}
+                                              onMouseLeave={(e) => {
+                                                  setPressedClass(e, false);
+                                                  beginSelectingArea(
+                                                      e,
+                                                      date,
+                                                      timeBlockIndex,
+                                                  );
+                                              }}
+                                              onMouseEnter={() => {
+                                                  setSelectionAreaEnd(
+                                                      date,
+                                                      timeBlockIndex,
+                                                  );
+                                              }}
+                                          ></div>
+                                      ))
+                                    : [
+                                          ...Array(Math.abs(endRow - startRow)),
+                                      ].map((_, timeBlockIndex) => (
+                                          // Showing the timetable with group availabilities,
+                                          // not for filling in individual availabilities.
+                                          <div
+                                              key={timeBlockIndex}
+                                              className={`${styles.timeBlock}`}
+                                              style={getTimeBlockStyles(
+                                                  timeBlockIndex,
+                                                  columnIndex,
+                                                  date,
+                                                  interval.length,
+                                                  displayTimeLabels,
+                                                  "group",
+                                              )}
+                                          ></div>
+                                      ))}
                             </React.Fragment>
                         ))}
                     </div>

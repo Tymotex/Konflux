@@ -6,16 +6,20 @@ export const spawnNotification = (
 ) => {
     switch (type) {
         case "success":
-            toast.success(message);
+            toast.success(message, { toastId: message });
             break;
         case "info":
-            toast.info(message);
+            toast.info(message, { toastId: message });
             break;
         case "warning":
-            toast.warning(message);
+            toast.warning(message, { toastId: message });
             break;
         case "error":
-            toast.error(message);
+            toast.error(message, {
+                toastId: message,
+                autoClose: false,
+                closeOnClick: false,
+            });
             console.error(message);
             break;
         default:
