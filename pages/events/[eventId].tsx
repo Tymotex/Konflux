@@ -103,15 +103,20 @@ const EventPage: NextPage = () => {
 
     // Fetch and listen for changes to the remote Event data object.
     useEffect(() => {
-        if (eventId && eventDispatch)
-            onEventChange(eventId, (newEvent) =>
-                eventDispatch({
-                    type: "SET_EVENT",
-                    payload: { event: newEvent },
-                }),
-            ).catch((err) => {
-                spawnNotification("error", err.message);
-            });
+        if (!(eventId && eventDispatch)) return;
+        try {
+            onEventChange(
+                eventId,
+                (newEvent) =>
+                    eventDispatch({
+                        type: "SET_EVENT",
+                        payload: { event: newEvent },
+                    }),
+                router,
+            );
+        } catch (err) {
+            spawnNotification("error", (err as Error).message);
+        }
     }, [eventId, eventDispatch]);
 
     // Grab the username and password transmitted through navigation from a

@@ -1,4 +1,5 @@
 import { getDatabase, onValue, push, ref, set } from "firebase/database";
+import { NextRouter } from "next/router";
 
 /**
  * Member details, but localised entirely to the event data object it is
@@ -75,15 +76,29 @@ export const EMPTY_EVENT: KonfluxEvent = {
 export const onEventChange = async (
     eventId: string,
     handleChange: (newEvent: KonfluxEvent) => void,
+    // This function is awkwardly coupled to the router as a workaround to
+    // trying to catch exceptions in `onValue`.
+    router: NextRouter,
 ) => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
 
     try {
         const eventRef = ref(getDatabase(), `events/${eventId}`);
-        onValue(eventRef, (snapshot) => {
-            const currEvent = snapshot.val() as KonfluxEvent;
-            handleChange(currEvent);
-        });
+
+        onValue(
+            eventRef,
+            (snapshot) => {
+                if (!snapshot.exists()) {
+                    router.push("/404");
+                    // throw new Error("Event does not exist.");
+                }
+                const currEvent = snapshot.val() as KonfluxEvent;
+                handleChange(currEvent);
+            },
+            (error) => {
+                throw new Error("FUCK");
+            },
+        );
     } catch (err) {
         throw new Error(
             `Failed to listen to event with ID '${eventId}'. Reason: ${err}`,
