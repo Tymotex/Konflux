@@ -66,11 +66,15 @@
         flex-direction: row;
         column-gap: 5px;
         align-items: center;
-        color: $grey-500;
+        color: $grey-600;
         font-size: small;
 
         &.title {
             font-size: large;
+
+            &.dark {
+                color: $grey-100;
+            }
 
             label {
                 position: relative;

@@ -168,6 +168,11 @@ $hover-transition-duration: 70ms;
                 color: $grey-500;
             }
 
+            &.previousDate {
+                pointer-events: none;
+                color: rgba($color: $grey-500, $alpha: 0.3);
+            }
+
             &:hover > .day {
                 background-color: $day-hover-bg-colour;
             }

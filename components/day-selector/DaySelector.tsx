@@ -313,6 +313,8 @@ const DaySelector: React.FC<Props> = ({
             <ol className={styles.dayGrid}>
                 {days?.map((day) => {
                     const dateStr = day.date.format("YYYY-MM-DD");
+                    const isBeforeToday = dateStr < dateToday;
+
                     return (
                         <li
                             data-testid={`date-${dateStr}`}
@@ -330,7 +332,7 @@ const DaySelector: React.FC<Props> = ({
                                         ? styles.inDeselectionRange
                                         : styles.inSelectionRange
                                     : ""
-                            }`}
+                            } ${isBeforeToday ? styles.previousDate : ""}`}
                             key={dateStr}
                             onClick={() => toggleDaySelection(dateStr)}
                             onMouseLeave={(e) => handleMouseLeave(e, dateStr)}

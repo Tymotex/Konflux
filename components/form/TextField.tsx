@@ -38,7 +38,11 @@ const TextField: React.FC<Props> = ({
                 isTitle ? styles.title : ""
             }`}
         >
-            <div className={`${styles.label} ${isTitle ? styles.title : ""}`}>
+            <div
+                className={`${styles.label} ${isTitle ? styles.title : ""} ${
+                    isDarkMode ? styles.dark : ""
+                }`}
+            >
                 {required && <Asterisk className={styles.asterisk} />}
                 <label htmlFor={id}>{label}</label>
             </div>
