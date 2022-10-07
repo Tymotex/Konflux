@@ -89,6 +89,10 @@
             }
         }
 
+        &.dark {
+            color: $grey-100;
+        }
+
         .asterisk {
             height: $font-size-sm;
             width: $font-size-sm;

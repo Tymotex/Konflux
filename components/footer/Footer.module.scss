@@ -3,10 +3,12 @@
 
 .footer {
     margin-top: auto;
+    margin-bottom: $spacing-xs;
 
     .footerItems {
         @include reset-list;
 
+        margin-top: $spacing-lg;
         display: flex;
         flex-direction: row;
         column-gap: $spacing-xs;

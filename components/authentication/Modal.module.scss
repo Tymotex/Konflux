@@ -1,0 +1,86 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.modalContainer {
+    width: 100%;
+    max-width: $sm;
+    background: none;
+    padding: 0;
+
+    .content {
+        position: relative;
+        margin-left: $margin-sm;
+        margin-right: $margin-sm;
+        border-radius: 12px;
+        padding: $padding-2xl;
+        background: $grey-100;
+        color: $grey-800;
+
+        .headingText {
+            margin: 0 0 $margin-3xl 0;
+        }
+
+        .closeButton {
+            @include reset-button;
+            position: absolute;
+            top: $spacing-sm;
+            right: $spacing-sm;
+
+            height: 30px;
+            width: 30px;
+            background: rgba($grey-400, 0.15);
+            border-radius: 100px;
+
+            svg {
+                position: absolute;
+
+                top: 50%;
+                left: 50%;
+
+                height: 14px;
+                width: 14px;
+
+                transform: translateY(-50%) translateX(-50%);
+            }
+        }
+
+        .form {
+            width: 220px;
+            margin: 0 auto;
+            text-align: center;
+
+            .formButton {
+            }
+        }
+
+        .authProviderDivider {
+            width: fit-content;
+            margin: $margin-xl auto $margin-lg auto;
+            font-family: "Montserrat", sans-serif;
+            color: $grey-400;
+        }
+
+        .authProviderForm {
+            text-align: center;
+        }
+    }
+
+    &.dark {
+        .content {
+            background: $grey-700;
+            color: $grey-100;
+
+            .closeButton {
+                * {
+                    fill: white;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .modalContainer .content {
+        padding: $padding-lg;
+    }
+}

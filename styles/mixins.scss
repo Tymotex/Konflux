@@ -20,6 +20,8 @@
 
     /* Corrects inability to style clickable `input` types in iOS */
     -webkit-appearance: none;
+
+    cursor: pointer;
 }
 
 @mixin reset-list {

@@ -5,6 +5,7 @@ import {
     updateRemoteAvailabilities,
     signInMember,
     updateEventTimeRange,
+    LocalEventMember,
 } from "models/event";
 import { createContext, Dispatch } from "react";
 import { spawnNotification } from "utils/notifications";
@@ -33,14 +34,7 @@ export type EventAction =
           type: "SIGN_UP_MEMBER";
           payload: {
               eventId: string;
-              username: string;
-          };
-      }
-    | {
-          type: "SIGN_IN_MEMBER";
-          payload: {
-              eventId: string;
-              username: string;
+              user: LocalEventMember;
           };
       };
 
@@ -58,7 +52,6 @@ export const eventReducer = (
                 latestTimeIndex,
                 updateStatus,
             } = action.payload;
-            // console.log("Call");
             updateEventTimeRange(eventId, earliestTimeIndex, latestTimeIndex)
                 .then(() => {
                     updateStatus("success");
@@ -97,29 +90,31 @@ export const eventReducer = (
             };
         }
         case "SIGN_UP_MEMBER": {
-            const { eventId, username } = action.payload;
-            signUpMember(eventId, { username, isOwner: false }).catch((err) =>
+            const { eventId, user } = action.payload;
+
+            // By default, new members other than the original creators are not
+            // owners.
+            user.isOwner = false;
+
+            signUpMember(eventId, user).catch((err) =>
                 spawnNotification(
                     "error",
                     `Couldn't sync to remote. Reason: ${err}`,
                 ),
             );
+
             return {
                 ...state,
                 members: {
                     ...state.members,
-                    [username]: {
+                    [user.username]: {
+                        password: user.password,
+                        email: user.email,
+                        profilePicUrl: user.profilePicUrl,
                         isOwner: false,
                     },
                 },
             };
-        }
-        case "SIGN_IN_MEMBER": {
-            const { eventId, username } = action.payload;
-            signInMember(eventId, username).catch((err) =>
-                spawnNotification("error", `Couldn't sign in. Reason: ${err}`),
-            );
-            return state;
         }
         default:
             throw new Error(

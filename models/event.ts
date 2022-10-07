@@ -112,7 +112,8 @@ export const onEventChange = async (
 export const createEvent = async (
     eventName: string,
     creatorUsername: string,
-): Promise<string> => {
+    password: string,
+): Promise<[string, KonfluxEvent]> => {
     const event: KonfluxEvent = {
         name: eventName,
         earliest: 18,
@@ -121,13 +122,14 @@ export const createEvent = async (
         members: {
             [creatorUsername]: {
                 isOwner: true,
+                password: password,
             },
         },
     };
     try {
         const reference = await push(ref(getDatabase(), `events`), event);
         if (!reference.key) throw Error("Firebase did not assign an ID.");
-        return reference.key;
+        return [reference.key, event];
     } catch (err) {
         throw new Error(`Failed to create event. Reason: ${err}`);
     }
@@ -227,13 +229,13 @@ export const signUpMember = async (eventId: string, user: LocalEventMember) => {
     }
 };
 
-/**
- * Checks the given user's supplied details against their details in the remote
- * event data.
- * @param eventId
- * @param user
- */
-export const signInMember = async (eventId: string, username: string) => {
-    if (!eventId) throw new Error("Event ID mustn't be empty.");
-    // TODO: this would be where we need to check passwords.
-};
+// /**
+//  * Checks the given user's supplied details against their details in the remote
+//  * event data.
+//  * @param eventId
+//  * @param user
+//  */
+// export const signInMember = async (eventId: string, username: string) => {
+//     if (!eventId) throw new Error("Event ID mustn't be empty.");
+//     // TODO: this would be where we need to check passwords.
+// };

@@ -3,7 +3,7 @@ import { TextField } from "components/form";
 import { createEvent } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { MouseEvent, useCallback, useRef } from "react";
+import { MouseEvent, useCallback, useContext, useRef } from "react";
 import { spawnNotification } from "utils/notifications";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { PageTransition } from "components/page-transition";
 import Head from "next/head";
+import { AuthContext } from "contexts/auth-context";
 
 const container = {
     hidden: { opacity: 0 },
@@ -40,6 +41,8 @@ const Home: NextPage = () => {
     const eventNameInput = useRef<HTMLInputElement>(null);
     const usernameInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
+
+    const { authState, authDispatch } = useContext(AuthContext);
 
     const isDarkMode = useDarkMode();
 
@@ -87,16 +90,32 @@ const Home: NextPage = () => {
 
             try {
                 // Creating the event in Firebase realtime DB.
-                const eventId = await createEvent(formEventName, formUsername);
+                // Note that this creates the first member in the event model
+                // and assigns them as the owner of the event.
+                const [eventId, event] = await createEvent(
+                    formEventName,
+                    formUsername,
+                    formPassword,
+                );
 
-                // Transmit username and password to the event details page so that it
-                // need not be fetched and verified.
+                // Dispatch a login.
+                try {
+                    authDispatch({
+                        type: "LOCAL_LOGIN",
+                        payload: {
+                            event: event,
+                            username: formUsername,
+                            localPassword: formPassword,
+                        },
+                    });
+                } catch (err) {
+                    spawnNotification("error", (err as Error).message);
+                }
+
+                // Transmit username and password to the event details page so
+                // that it need not be fetched and verified.
                 router.push({
                     pathname: `/events/${eventId}`,
-                    query: {
-                        username: formUsername,
-                        password: formPassword,
-                    },
                 });
             } catch (err) {
                 if (err instanceof Error)

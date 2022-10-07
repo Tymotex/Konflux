@@ -13,6 +13,7 @@ import {
     GroupAvailabilityTimetable,
 } from "components/timetable";
 import { BASE_URL } from "constants/url";
+import { AuthContext } from "contexts/auth-context";
 import { EventContext, eventReducer } from "contexts/event-context";
 import { AnimatePresence, motion } from "framer-motion";
 import { EMPTY_EVENT, onEventChange, updateEventName } from "models/event";
@@ -21,6 +22,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, {
     useCallback,
+    useContext,
     useEffect,
     useLayoutEffect,
     useMemo,
@@ -40,14 +42,13 @@ const EventPage: NextPage = () => {
     // Using context and reducer together to allow for descendants to cleanly
     // modify the local single source of truth for the event's data.
     const [eventState, eventDispatch] = useReducer(eventReducer, EMPTY_EVENT);
-    const cachedContextValue = useMemo(
+    const cachedEventContext = useMemo(
         () => ({ eventState, eventDispatch }),
         [eventState, eventDispatch],
     );
 
-    // User credentials, localised just to this event.
-    const [username, setUsername] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+    // User auth state.
+    const { authState, authDispatch } = useContext(AuthContext);
 
     // Sync status of each input component.
     const [updateEventNameStatus, setUpdateEventNameStatus] =
@@ -73,10 +74,10 @@ const EventPage: NextPage = () => {
     // Whether the current member of the event (after signing in) is an owner.
     const isOwner = useMemo(
         () =>
-            username &&
-            username in eventState.members &&
-            eventState.members[username].isOwner,
-        [username, eventState],
+            authState.username &&
+            authState.username in eventState.members &&
+            eventState.members[authState.username].isOwner,
+        [authState, eventState],
     );
 
     // Updates the remote event's name, n milliseoncds after the user's last
@@ -121,21 +122,6 @@ const EventPage: NextPage = () => {
         }
     }, [eventId, eventDispatch, router]);
 
-    // Grab the username and password transmitted through navigation from a
-    // previous page. See: https://www.youtube.com/watch?v=7wzMMBRVrfw.
-    useEffect(() => {
-        const {
-            query: { username, password },
-        } = router;
-        if (username) {
-            setUsername(String(username));
-            setPassword(String(password));
-            // Clear URL query parameters.
-            // See: https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params.
-            router.replace(`/events/${eventId}`, undefined, { shallow: true });
-        }
-    }, [router, eventId]);
-
     /**
      * Push the local name change to the remote copy of the event.
      */
@@ -168,7 +154,7 @@ const EventPage: NextPage = () => {
                 <title>{eventState.name}</title>
             </Head>
             <PageTransition>
-                <EventContext.Provider value={cachedContextValue}>
+                <EventContext.Provider value={cachedEventContext}>
                     <AnimatePresence mode="wait">
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -184,12 +170,8 @@ const EventPage: NextPage = () => {
                         >
                             <div className={styles.main}>
                                 {/* TODO: refactor event credentials management. */}
-                                {!username && (
-                                    <EventSignIn
-                                        eventId={eventId}
-                                        setUsername={setUsername}
-                                        setPassword={setPassword}
-                                    />
+                                {!authState.username && (
+                                    <EventSignIn eventId={eventId} />
                                 )}
                                 {isOwner && (
                                     <div>
@@ -261,7 +243,7 @@ const EventPage: NextPage = () => {
                                             }}
                                         >
                                             <FillingTimetable
-                                                username={username}
+                                                username={authState.username}
                                                 eventId={eventId}
                                                 updateStatus={up}
                                             />
@@ -271,7 +253,7 @@ const EventPage: NextPage = () => {
                                         </div>
                                         {/* Timetable for showing the group's availabilities */}
                                         <GroupAvailabilityTimetable
-                                            username={username}
+                                            username={authState.username}
                                             eventId={eventId}
                                         />
                                     </div>

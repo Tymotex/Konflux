@@ -12,7 +12,9 @@ const PageTransition: React.FC<Props> = ({ children }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            style={{ minHeight: "calc(100vh - 56px - 38px)" }}
+            // Full viewport height minus the height of the topnav and space
+            // for the footerfooter.
+            style={{ minHeight: "calc(100vh - 56px - 60px)" }}
         >
             {children}
         </motion.div>

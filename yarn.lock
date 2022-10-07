@@ -2020,6 +2020,18 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==
 
+"@reach/alert-dialog@^0.17.0":
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/@reach/alert-dialog/-/alert-dialog-0.17.0.tgz#cb6b7d81a85d7bd6d7d58bd4b0abe8e7515b2256"
+  integrity sha512-qJOp9JE2Jv8ALUhq5yJrrGITk1YCkkDFlqejI19qeAXsuQ/ZIKzeiDYSih+avb+1mfV4HEzB9WoVJWcRTOwjiQ==
+  dependencies:
+    "@reach/auto-id" "0.17.0"
+    "@reach/dialog" "0.17.0"
+    "@reach/utils" "0.17.0"
+    invariant "^2.2.4"
+    prop-types "^15.7.2"
+    tslib "^2.3.0"
+
 "@reach/alert@^0.17.0":
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/@reach/alert/-/alert-0.17.0.tgz#94b2fc13c3b192a2652766c806b90b76a4fc7cbc"
@@ -2038,7 +2050,7 @@
     "@reach/utils" "0.17.0"
     tslib "^2.3.0"
 
-"@reach/dialog@^0.17.0":
+"@reach/dialog@0.17.0", "@reach/dialog@^0.17.0":
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/@reach/dialog/-/dialog-0.17.0.tgz#81c48dd4405945dfc6b6c3e5e125db2c4324e9e8"
   integrity sha512-AnfKXugqDTGbeG3c8xDcrQDE4h9b/vnc27Sa118oQSquz52fneUeX9MeFb5ZEiBJK8T5NJpv7QUTBIKnFCAH5A==

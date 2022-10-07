@@ -5,11 +5,16 @@ interface Props {
     children: React.ReactNode;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
     style?: React.CSSProperties;
+    className?: string;
 }
 
-const Button: React.FC<Props> = ({ children, onClick, style }) => {
+const Button: React.FC<Props> = ({ children, onClick, style, className }) => {
     return (
-        <button className={styles.btn} onClick={onClick} style={style}>
+        <button
+            className={`${styles.btn} ${className ? className : ""}`}
+            onClick={onClick}
+            style={style}
+        >
             {children}
         </button>
     );
