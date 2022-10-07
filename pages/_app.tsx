@@ -2,6 +2,7 @@
 import "utils/firebaseInit";
 
 import "@reach/tooltip/styles.css";
+import "@reach/dialog/styles.css";
 import { PageLayout } from "components/layout";
 import { NotificationContainer } from "components/notification";
 import { ThemeProvider } from "contexts/ThemeProvider";

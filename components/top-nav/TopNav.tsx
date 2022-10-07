@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import LogoLight from "public/logo-light.svg";
 import LogoDark from "public/logo-dark.svg";
 import styles from "./TopNav.module.scss";
@@ -6,12 +6,34 @@ import { DarkModeToggle } from "components/dark-mode-toggle";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useDarkMode } from "contexts/ThemeProvider";
+import { Dialog } from "@reach/dialog";
+import { LoginModal, RegisterModal } from "components/authentication";
 
 interface Props {}
 
 const TopNav: React.FC<Props> = () => {
     const router = useRouter();
     const isDarkMode = useDarkMode();
+
+    const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
+    const openRegisterModal = useCallback(
+        () => setRegisterIsOpen(true),
+        [setRegisterIsOpen],
+    );
+    const closeRegisterModal = useCallback(
+        () => setRegisterIsOpen(false),
+        [setRegisterIsOpen],
+    );
+
+    const [loginIsOpen, setLoginIsOpen] = useState<boolean>(false);
+    const openLoginModal = useCallback(
+        () => setLoginIsOpen(true),
+        [setLoginIsOpen],
+    );
+    const closeLoginModal = useCallback(
+        () => setLoginIsOpen(false),
+        [setLoginIsOpen],
+    );
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
@@ -43,8 +65,23 @@ const TopNav: React.FC<Props> = () => {
                     }`}
                 >
                     <DarkModeToggle />
-                    <button className={styles.login}>Login</button>
-                    <button className={styles.register}>Register</button>
+                    <LoginModal
+                        isOpen={loginIsOpen}
+                        onDismiss={closeLoginModal}
+                    />
+                    <button className={styles.login} onClick={openLoginModal}>
+                        Login
+                    </button>
+                    <RegisterModal
+                        isOpen={registerIsOpen}
+                        onDismiss={closeRegisterModal}
+                    />
+                    <button
+                        className={styles.register}
+                        onClick={openRegisterModal}
+                    >
+                        Register
+                    </button>
                 </div>
             </div>
         </nav>

@@ -36,16 +36,20 @@ const FillingTimetable: React.FC<Props> = ({
 
     const handleTimeRangeChange = useCallback(
         (minVal: number, maxVal: number) => {
-            updateStatus("pending");
-            eventDispatch({
-                type: "SET_TIME_RANGE",
-                payload: {
-                    eventId: eventId,
-                    earliestTimeIndex: minVal,
-                    latestTimeIndex: maxVal,
-                    updateStatus,
-                },
-            });
+            // Need to check for eventID to solve issue #51.
+            // See: https://github.com/Tymotex/Konflux/issues/51
+            if (eventId) {
+                updateStatus("pending");
+                eventDispatch({
+                    type: "SET_TIME_RANGE",
+                    payload: {
+                        eventId: eventId,
+                        earliestTimeIndex: minVal,
+                        latestTimeIndex: maxVal,
+                        updateStatus,
+                    },
+                });
+            }
         },
         [eventDispatch, eventId, updateStatus],
     );

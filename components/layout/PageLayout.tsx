@@ -13,7 +13,10 @@ const PageLayout: React.FC<Props> = ({ children }) => {
     const isDarkMode = useDarkMode();
 
     return (
-        <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
+        <div
+            className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}
+            id="content-container"
+        >
             <TopNav />
             {children}
             <Footer />
