@@ -52,7 +52,7 @@ const TextField: React.FC<Props> = ({
                     autocompleteItems.has(e.target.value),
                 );
             },
-            [value, setMatchesAnAutocompleteItem, autocompleteItems],
+            [setMatchesAnAutocompleteItem, autocompleteItems],
         );
 
     return !autocompleteItems ? (
@@ -130,6 +130,7 @@ const TextField: React.FC<Props> = ({
                         {autocompleteItems &&
                             Array.from(autocompleteItems).map((item) => (
                                 <ComboboxOption
+                                    key={item}
                                     value={item}
                                     style={{
                                         background: isDarkMode

@@ -123,7 +123,7 @@ const Home: NextPage = () => {
                 else throw err;
             }
         },
-        [router],
+        [router, authDispatch],
     );
 
     return (

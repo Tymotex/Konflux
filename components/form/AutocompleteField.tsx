@@ -48,7 +48,7 @@ const AutocompleteField: React.FC<Props> = ({
                 <ComboboxPopover>
                     <ComboboxList>
                         {autocompleteItems.map((item) => (
-                            <ComboboxOption value={item} />
+                            <ComboboxOption key={item} value={item} />
                         ))}
                     </ComboboxList>
                 </ComboboxPopover>

@@ -1,11 +1,10 @@
 import { Status } from "components/sync-status/SyncStatus";
 import {
-    signUpMember,
     KonfluxEvent,
-    updateRemoteAvailabilities,
-    signInMember,
-    updateEventTimeRange,
     LocalEventMember,
+    signUpMember,
+    updateEventTimeRange,
+    updateRemoteAvailabilities,
 } from "models/event";
 import { createContext, Dispatch } from "react";
 import { spawnNotification } from "utils/notifications";

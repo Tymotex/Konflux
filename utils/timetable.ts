@@ -41,11 +41,13 @@ export const getPeopleAvailable = (
     eventState: KonfluxEvent,
     date: string,
     timeBlockIndex: number,
-): string[] => {
-    return Object.keys(
-        eventState.groupAvailabilities[date][
-            timeBlockIndex + eventState.earliest
-        ] || {},
+): Set<string> => {
+    return new Set(
+        Object.keys(
+            eventState.groupAvailabilities[date][
+                timeBlockIndex + eventState.earliest
+            ] || {},
+        ),
     );
 };
 

@@ -79,7 +79,14 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
                 });
             }
         },
-        [eventId, eventState, authDispatch, usernameInputRef, passwordInputRef],
+        [
+            eventId,
+            eventState,
+            authDispatch,
+            usernameInputRef,
+            passwordInputRef,
+            eventDispatch,
+        ],
     );
 
     return (
@@ -141,7 +148,8 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
                                     create an account
                                 </Link>
                             </strong>{" "}
-                            so we don't have to ask you who you are every time.
+                            so we don&apos;t have to ask you who you are every
+                            time.
                         </Callout>
                     </AlertDialogDescription>
                 </div>

@@ -1,6 +1,8 @@
 import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "contexts/ThemeProvider";
+import { map } from "cypress/types/bluebird";
+import { has, keys } from "cypress/types/lodash";
 import dayjs from "dayjs";
 import React, {
     useCallback,
@@ -61,7 +63,15 @@ const TimetableGrid: React.FC<Props> = ({
     // State variables to display the availability tooltip.
     const [isMouseInGrid, setIsMouseInGrid] = useState(false);
     const [displayTimeStartIndex, setDisplayTime] = useState<number>(-1);
-    const [whoIsAvailable, setWhoIsAvailable] = useState<string[]>([]);
+    const [whoIsAvailable, setWhoIsAvailable] = useState<Set<string>>();
+    const whoIsntAvailable = useMemo(() => {
+        if (!whoIsAvailable) return new Set<string>();
+        return new Set<string>(
+            Object.keys(eventState.members || {}).filter(
+                (person) => !whoIsAvailable.has(person),
+            ),
+        );
+    }, [whoIsAvailable, eventState]);
 
     // A list of lists of dates and group availability at those dates.
     // Used to render contiguous dates together and in chronological order.
@@ -573,14 +583,26 @@ const TimetableGrid: React.FC<Props> = ({
                             Available from{" "}
                             {getDisplayTime(eventState, displayTimeStartIndex)}
                         </h3>
-                        {whoIsAvailable?.length > 0 ? (
+                        {whoIsAvailable && whoIsAvailable.size > 0 ? (
                             <ul className={styles.peopleList}>
-                                {whoIsAvailable.map((person) => (
+                                {Array.from(whoIsAvailable).map((person) => (
                                     <li key={person}>{person}</li>
                                 ))}
                             </ul>
                         ) : (
                             <>No one 😥</>
+                        )}
+                        <h3>Unavailable</h3>
+                        {eventState &&
+                        whoIsntAvailable &&
+                        whoIsntAvailable.size > 0 ? (
+                            <ul className={styles.peopleList}>
+                                {Array.from(whoIsntAvailable).map((person) => (
+                                    <li key={person}>{person}</li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <>No one 🥳</>
                         )}
                     </div>
                 </ReactTooltip>

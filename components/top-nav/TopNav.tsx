@@ -52,7 +52,13 @@ const TopNav: React.FC<Props> = () => {
                 }, 1000);
             }
         }
-    }, [router]);
+    }, [
+        router,
+        closeLoginModal,
+        closeRegisterModal,
+        openLoginModal,
+        openRegisterModal,
+    ]);
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
