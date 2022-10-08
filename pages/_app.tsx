@@ -3,13 +3,14 @@ import "utils/firebaseInit";
 
 import "@reach/tooltip/styles.css";
 import "@reach/dialog/styles.css";
+import "@reach/combobox/styles.css";
+import "react-toastify/dist/ReactToastify.css";
 import { PageLayout } from "components/layout";
 import { NotificationContainer } from "components/notification";
 import { ThemeProvider } from "contexts/ThemeProvider";
 import { AnimatePresence } from "framer-motion";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.scss";
 import {
     AuthContext,

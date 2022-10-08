@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import LogoLight from "public/logo-light.svg";
 import LogoDark from "public/logo-dark.svg";
 import styles from "./TopNav.module.scss";
@@ -34,6 +34,25 @@ const TopNav: React.FC<Props> = () => {
         () => setLoginIsOpen(false),
         [setLoginIsOpen],
     );
+
+    useEffect(() => {
+        // If at the homepage and either the login or register query parameter
+        // was supplied, open the corresponding modal.
+        const { login, register } = router.query;
+        if (router.pathname === "/") {
+            if (login) {
+                setTimeout(() => {
+                    openLoginModal();
+                    closeRegisterModal();
+                }, 1000);
+            } else if (register) {
+                setTimeout(() => {
+                    openRegisterModal();
+                    closeLoginModal();
+                }, 1000);
+            }
+        }
+    }, [router]);
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>

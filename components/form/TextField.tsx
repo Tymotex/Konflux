@@ -1,9 +1,16 @@
-import React, { RefObject } from "react";
+import React, { RefObject, useCallback, useMemo, useState } from "react";
 import styles from "./TextField.module.scss";
 import Asterisk from "./asterisk.svg";
 import Info from "./info.svg";
 import { Tooltip } from "@reach/tooltip";
 import { useDarkMode } from "contexts/ThemeProvider";
+import {
+    Combobox,
+    ComboboxInput,
+    ComboboxList,
+    ComboboxOption,
+    ComboboxPopover,
+} from "@reach/combobox";
 
 interface Props {
     id: string;
@@ -16,6 +23,7 @@ interface Props {
     value?: string;
     onChange?: React.ChangeEventHandler<HTMLInputElement>;
     isTitle?: boolean;
+    autocompleteItems?: Set<string>;
 }
 
 const TextField: React.FC<Props> = ({
@@ -29,10 +37,25 @@ const TextField: React.FC<Props> = ({
     value,
     onChange,
     isTitle,
+    autocompleteItems,
 }) => {
     const isDarkMode = useDarkMode();
 
-    return (
+    const [matchesAnAutocompleteItem, setMatchesAnAutocompleteItem] =
+        useState<boolean>();
+
+    const checkIfMatchesAutocompleteItem: React.ChangeEventHandler<HTMLInputElement> =
+        useCallback(
+            (e) => {
+                if (!autocompleteItems) return;
+                setMatchesAnAutocompleteItem(
+                    autocompleteItems.has(e.target.value),
+                );
+            },
+            [value, setMatchesAnAutocompleteItem, autocompleteItems],
+        );
+
+    return !autocompleteItems ? (
         <div
             className={`${styles.inputContainer} ${
                 isTitle ? styles.title : ""
@@ -61,13 +84,64 @@ const TextField: React.FC<Props> = ({
                     onChange={onChange}
                 />
                 {infoText && (
-                    <Tooltip label={infoText} aria-label={infoText}>
+                    <Tooltip
+                        label={infoText}
+                        aria-label={infoText}
+                        style={{ zIndex: 100000 }}
+                    >
                         <button className={styles.infoBtn}>
                             <Info />
                         </button>
                     </Tooltip>
                 )}
             </div>
+        </div>
+    ) : (
+        <div className={styles.inputContainer}>
+            <div className={`${styles.label} ${isDarkMode ? styles.dark : ""}`}>
+                {required && <Asterisk className={styles.asterisk} />}
+                <label id={id}>{label}</label>
+            </div>
+            <Combobox
+                aria-labelledby={id}
+                className={`${styles.textFieldContainer} ${styles.combobox}`}
+            >
+                <ComboboxInput
+                    className={`${styles.textField} ${
+                        isDarkMode ? styles.dark : ""
+                    } ${matchesAnAutocompleteItem ? styles.matchesItem : ""}`}
+                    placeholder={placeholder}
+                    ref={refHandle}
+                    onChange={checkIfMatchesAutocompleteItem}
+                />
+                {infoText && (
+                    <Tooltip
+                        label={infoText}
+                        aria-label={infoText}
+                        style={{ zIndex: 100000 }}
+                    >
+                        <button className={styles.infoBtn}>
+                            <Info />
+                        </button>
+                    </Tooltip>
+                )}
+                <ComboboxPopover style={{ zIndex: 100000 }}>
+                    <ComboboxList>
+                        {autocompleteItems &&
+                            Array.from(autocompleteItems).map((item) => (
+                                <ComboboxOption
+                                    value={item}
+                                    style={{
+                                        background: isDarkMode
+                                            ? "#374151"
+                                            : "white",
+                                        color: isDarkMode ? "white" : "#374151",
+                                    }}
+                                />
+                            ))}
+                    </ComboboxList>
+                </ComboboxPopover>
+            </Combobox>
         </div>
     );
 };

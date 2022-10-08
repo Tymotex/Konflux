@@ -151,7 +151,7 @@ const EventPage: NextPage = () => {
     return (
         <>
             <Head>
-                <title>{eventState.name}</title>
+                <title>{eventState?.name}</title>
             </Head>
             <PageTransition>
                 <EventContext.Provider value={cachedEventContext}>

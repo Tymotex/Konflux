@@ -3,7 +3,7 @@ import { TextField } from "components/form";
 import { createEvent } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { MouseEvent, useCallback, useContext, useRef } from "react";
+import { MouseEvent, useCallback, useContext, useEffect, useRef } from "react";
 import { spawnNotification } from "utils/notifications";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";

@@ -61,6 +61,17 @@
         }
     }
 
+    .combobox {
+        .textField {
+            &.matchesItem {
+                border: 2px solid $green-300;
+            }
+            &:not(.matchesItem) {
+                border: 2px solid $primary-500;
+            }
+        }
+    }
+
     .label {
         display: flex;
         flex-direction: row;

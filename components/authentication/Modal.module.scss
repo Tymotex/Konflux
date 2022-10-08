@@ -67,12 +67,12 @@
 
     &.dark {
         .content {
-            background: $grey-700;
+            background: $grey-800;
             color: $grey-100;
 
             .closeButton {
                 * {
-                    fill: white;
+                    fill: $grey-100;
                 }
             }
         }

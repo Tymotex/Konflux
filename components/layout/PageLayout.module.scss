@@ -6,6 +6,8 @@
     justify-content: space-between;
     min-height: calc(100vh - $topnav-height);
     height: fit-content;
+    padding-top: $topnav-height;
+    background: $grey-100;
 
     transition: 0.2s background ease-in-out, 0.2s color ease-in-out;
     &.dark {
