@@ -586,7 +586,16 @@ const TimetableGrid: React.FC<Props> = ({
                         {whoIsAvailable && whoIsAvailable.size > 0 ? (
                             <ul className={styles.peopleList}>
                                 {Array.from(whoIsAvailable).map((person) => (
-                                    <li key={person}>{person}</li>
+                                    <li key={person} className={styles.item}>
+                                        <img
+                                            className={styles.avatar}
+                                            alt={person}
+                                            src={
+                                                "https://st.depositphotos.com/1269204/1219/i/950/depositphotos_12196477-stock-photo-smiling-men-isolated-on-the.jpg"
+                                            }
+                                        />{" "}
+                                        {person}
+                                    </li>
                                 ))}
                             </ul>
                         ) : (
@@ -598,7 +607,16 @@ const TimetableGrid: React.FC<Props> = ({
                         whoIsntAvailable.size > 0 ? (
                             <ul className={styles.peopleList}>
                                 {Array.from(whoIsntAvailable).map((person) => (
-                                    <li key={person}>{person}</li>
+                                    <li key={person} className={styles.item}>
+                                        <img
+                                            className={styles.avatar}
+                                            alt={person}
+                                            src={
+                                                "https://st.depositphotos.com/1269204/1219/i/950/depositphotos_12196477-stock-photo-smiling-men-isolated-on-the.jpg"
+                                            }
+                                        />{" "}
+                                        {person}
+                                    </li>
                                 ))}
                             </ul>
                         ) : (

@@ -169,8 +169,23 @@ $default-bg-colour-dark: $grey-700;
     font-size: $font-size-sm;
 
     .peopleList {
-        padding-left: $spacing-md;
-        font-size: 16px;
+        @include reset-list;
+
+        list-style: none;
+
+        .item {
+            display: flex;
+            align-items: center;
+            column-gap: $spacing-xs;
+
+            .avatar {
+                height: $font-size-md;
+                width: $font-size-md;
+                border-radius: $font-size-md;
+                box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+                    rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+            }
+        }
     }
 }
 
