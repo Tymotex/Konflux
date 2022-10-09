@@ -51,6 +51,12 @@ a {
     border-radius: 100px;
 }
 
+// Float Reach UI's menus above other UI.
+// See: https://reach.tech/menu-button/.
+div[data-reach-popover] {
+    z-index: 1000000;
+}
+
 @media (prefers-color-scheme: dark) {
     html {
         color-scheme: dark;

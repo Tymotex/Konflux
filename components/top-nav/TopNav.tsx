@@ -8,8 +8,10 @@ import { useRouter } from "next/router";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { Dialog } from "@reach/dialog";
 import { LoginModal, RegisterModal } from "components/authentication";
-import { getProfilePicUrl, getUserName } from "utils/auth";
+import { signOutUser } from "utils/auth";
 import { getAuth, onAuthStateChanged } from "@firebase/auth";
+import { AvatarDropdown } from "components/avatar";
+import { spawnNotification } from "utils/notifications";
 
 interface Props {}
 
@@ -17,8 +19,10 @@ const TopNav: React.FC<Props> = () => {
     const router = useRouter();
     const isDarkMode = useDarkMode();
 
+    // Auth state.
     const [signedIn, setSignedIn] = useState(false);
 
+    // Register modal state.
     const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
     const openRegisterModal = useCallback(
         () => setRegisterIsOpen(true),
@@ -29,6 +33,7 @@ const TopNav: React.FC<Props> = () => {
         [setRegisterIsOpen],
     );
 
+    // Login modal state.
     const [loginIsOpen, setLoginIsOpen] = useState<boolean>(false);
     const openLoginModal = useCallback(
         () => setLoginIsOpen(true),
@@ -126,12 +131,23 @@ const TopNav: React.FC<Props> = () => {
                             </button>
                         </>
                     ) : (
-                        <>
-                            <img
-                                src={getProfilePicUrl()}
-                                style={{ height: "24px", width: "24px" }}
-                            />
-                        </>
+                        <AvatarDropdown
+                            signOut={() => {
+                                signOutUser()
+                                    .then(() => {
+                                        setSignedIn(false);
+                                        setRegisterIsOpen(false);
+                                        setLoginIsOpen(false);
+                                        spawnNotification(
+                                            "success",
+                                            "You've signed out.",
+                                        );
+                                    })
+                                    .catch((err) => {
+                                        spawnNotification("error", err);
+                                    });
+                            }}
+                        />
                     )}
                 </div>
             </div>

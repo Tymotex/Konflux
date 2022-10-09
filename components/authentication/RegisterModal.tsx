@@ -40,7 +40,7 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             nativeSignUp(username, email, password);
             onDismiss();
         },
-        [{ nameInputRef }, emailInputRef, passwordInputRef],
+        [nameInputRef, emailInputRef, passwordInputRef, onDismiss],
     );
 
     return (

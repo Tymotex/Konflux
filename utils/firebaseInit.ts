@@ -1,7 +1,6 @@
 import { FirebaseOptions, getApp, initializeApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectDatabaseEmulator, getDatabase } from "firebase/database";
-import { notifyAuthChange } from "./auth";
 
 const firebaseInitConfig = {
     apiKey: "AIzaSyCWYC8b93kQS7XbiBNPSoA2BR4H4BuUagQ",

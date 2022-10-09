@@ -14,7 +14,7 @@ const GoogleSignInButton: React.FC<Props> = () => {
             className={`${styles.button} ${isDarkMode ? styles.dark : ""}`}
             onClick={(e) => {
                 e.preventDefault();
-                authProviderSignIn();
+                authProviderSignIn("google");
             }}
         >
             <GoogleIcon className={styles.googleIcon} /> Sign in with Google

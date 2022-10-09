@@ -40,6 +40,8 @@ export const nativeSignUp = async (
     await updateProfile(result.user, {
         displayName: username,
     });
+
+    spawnNotification("success", `You've signed up. Welcome ${username}!`);
 };
 
 /**
@@ -50,6 +52,8 @@ export const nativeSignUp = async (
  */
 export const nativeSignIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(getAuth(), email, password);
+
+    spawnNotification("success", "Welcome back.");
 };
 
 /**
@@ -66,13 +70,20 @@ export const authProviderSignIn = async (providerName: "google") => {
             throw new Error(`Unknown provider ${providerName}.`);
     }
     await signInWithPopup(getAuth(), provider);
+
+    spawnNotification(
+        "success",
+        `You've signed in with ${providerName}. Welcome!`,
+    );
 };
 
 /**
  * Sign out the user.
  * @returns
  */
-export const signOutUser = () => signOut(getAuth());
+export const signOutUser = () => {
+    return signOut(getAuth());
+};
 
 /**
  * Determine whether the user is signed in or not.

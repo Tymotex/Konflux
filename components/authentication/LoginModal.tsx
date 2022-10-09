@@ -44,7 +44,7 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                         passwordInputRef.current.value = "";
                 });
         },
-        [passwordInputRef, emailInputRef],
+        [passwordInputRef, emailInputRef, onDismiss],
     );
 
     return (

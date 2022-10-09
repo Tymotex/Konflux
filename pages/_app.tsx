@@ -4,6 +4,7 @@ import "utils/firebaseInit";
 import "@reach/tooltip/styles.css";
 import "@reach/dialog/styles.css";
 import "@reach/combobox/styles.css";
+import "@reach/menu-button/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import { PageLayout } from "components/layout";
 import { NotificationContainer } from "components/notification";
