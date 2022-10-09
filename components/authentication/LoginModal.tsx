@@ -1,5 +1,5 @@
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styles from "./Modal.module.scss";
 import CloseIcon from "./close.svg";
 import { useDarkMode } from "contexts/ThemeProvider";
@@ -8,6 +8,8 @@ import { TextField } from "components/form";
 import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { useModalLayoutShiftFix } from "hooks/modal";
+import { nativeSignIn } from "utils/auth";
+import { spawnNotification } from "utils/notifications";
 
 interface Props {
     isOpen: boolean;
@@ -15,12 +17,35 @@ interface Props {
 }
 
 const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
-    const nameInputRef = useRef(null);
-    const emailInputRef = useRef(null);
-    const passwordInputRef = useRef(null);
+    const emailInputRef = useRef<HTMLInputElement>(null);
+    const passwordInputRef = useRef<HTMLInputElement>(null);
     const isDarkMode = useDarkMode();
 
     useModalLayoutShiftFix(isOpen);
+
+    const logInUser: React.FormEventHandler<HTMLFormElement> = useCallback(
+        (e) => {
+            e.preventDefault();
+            if (!emailInputRef.current)
+                throw new Error("Email input detached.");
+            if (!passwordInputRef.current)
+                throw new Error("Password input detached.");
+
+            const password = passwordInputRef.current.value;
+            const email = emailInputRef.current.value;
+
+            nativeSignIn(email, password)
+                .then(() => {
+                    onDismiss();
+                })
+                .catch((err) => {
+                    spawnNotification("error", err.message);
+                    if (passwordInputRef.current)
+                        passwordInputRef.current.value = "";
+                });
+        },
+        [passwordInputRef, emailInputRef],
+    );
 
     return (
         <DialogOverlay
@@ -44,18 +69,9 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                     </button>
                     <header>
                         <Logo size={32} />
-                        <h2 className={styles.headingText}>
-                            Create an account.
-                        </h2>
+                        <h2 className={styles.headingText}>Welcome back.</h2>
                     </header>
-                    <form className={styles.form}>
-                        <TextField
-                            id="login-name"
-                            refHandle={nameInputRef}
-                            label="Your name"
-                            placeholder="E.g. Linus Torvalds"
-                            required
-                        />
+                    <form className={styles.form} onSubmit={logInUser}>
                         <TextField
                             id="login-email"
                             refHandle={emailInputRef}
@@ -70,7 +86,9 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                             type="password"
                             required
                         />
-                        <Button className={styles.formButton}>Create</Button>
+                        <Button className={styles.formButton} isSubmit>
+                            Log in
+                        </Button>
                     </form>
                     <p className={styles.authProviderDivider}>
                         Or continue with

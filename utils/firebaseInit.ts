@@ -1,6 +1,7 @@
 import { FirebaseOptions, getApp, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { connectDatabaseEmulator, getDatabase } from "firebase/database";
+import { notifyAuthChange } from "./auth";
 
 const firebaseInitConfig = {
     apiKey: "AIzaSyCWYC8b93kQS7XbiBNPSoA2BR4H4BuUagQ",
@@ -16,12 +17,16 @@ function createFirebaseApp(config: FirebaseOptions) {
         return getApp();
     } catch {
         const app = initializeApp(config);
+
         const db = getDatabase(app);
         connectDatabaseEmulator(db, "localhost", 9000);
+
+        // See: https://firebase.google.com/docs/emulator-suite/connect_auth.
+        const auth = getAuth();
+        connectAuthEmulator(auth, "http://localhost:9099");
+
         return app;
     }
 }
 
 const firebaseApp = createFirebaseApp(firebaseInitConfig);
-
-export const auth = getAuth(firebaseApp);

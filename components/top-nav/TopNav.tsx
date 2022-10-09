@@ -8,12 +8,16 @@ import { useRouter } from "next/router";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { Dialog } from "@reach/dialog";
 import { LoginModal, RegisterModal } from "components/authentication";
+import { getProfilePicUrl, getUserName } from "utils/auth";
+import { getAuth, onAuthStateChanged } from "@firebase/auth";
 
 interface Props {}
 
 const TopNav: React.FC<Props> = () => {
     const router = useRouter();
     const isDarkMode = useDarkMode();
+
+    const [signedIn, setSignedIn] = useState(false);
 
     const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
     const openRegisterModal = useCallback(
@@ -60,6 +64,14 @@ const TopNav: React.FC<Props> = () => {
         openRegisterModal,
     ]);
 
+    useEffect(() => {
+        onAuthStateChanged(getAuth(), (user) => {
+            if (user) {
+                setSignedIn(true);
+            }
+        });
+    }, [setSignedIn]);
+
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
             <div className={styles.navContentsContainer}>
@@ -90,23 +102,37 @@ const TopNav: React.FC<Props> = () => {
                     }`}
                 >
                     <DarkModeToggle />
-                    <LoginModal
-                        isOpen={loginIsOpen}
-                        onDismiss={closeLoginModal}
-                    />
-                    <button className={styles.login} onClick={openLoginModal}>
-                        Login
-                    </button>
-                    <RegisterModal
-                        isOpen={registerIsOpen}
-                        onDismiss={closeRegisterModal}
-                    />
-                    <button
-                        className={styles.register}
-                        onClick={openRegisterModal}
-                    >
-                        Register
-                    </button>
+                    {!signedIn ? (
+                        <>
+                            <LoginModal
+                                isOpen={loginIsOpen}
+                                onDismiss={closeLoginModal}
+                            />
+                            <button
+                                className={styles.login}
+                                onClick={openLoginModal}
+                            >
+                                Login
+                            </button>
+                            <RegisterModal
+                                isOpen={registerIsOpen}
+                                onDismiss={closeRegisterModal}
+                            />
+                            <button
+                                className={styles.register}
+                                onClick={openRegisterModal}
+                            >
+                                Register
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <img
+                                src={getProfilePicUrl()}
+                                style={{ height: "24px", width: "24px" }}
+                            />
+                        </>
+                    )}
                 </div>
             </div>
         </nav>
