@@ -44,7 +44,7 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
 
     const allMembers = new Set(Object.keys(eventState?.members || {}));
 
-    const authenticate = useCallback(
+    const locallyAuthenticate = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
             if (!usernameInputRef.current)
@@ -117,7 +117,10 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
                         Who are you?
                     </AlertDialogLabel>
 
-                    <form onSubmit={authenticate} className={styles.form}>
+                    <form
+                        onSubmit={locallyAuthenticate}
+                        className={styles.form}
+                    >
                         <TextField
                             id="event-username"
                             refHandle={usernameInputRef}

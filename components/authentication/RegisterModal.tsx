@@ -1,5 +1,5 @@
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import styles from "./Modal.module.scss";
 import CloseIcon from "./close.svg";
 import { useDarkMode } from "contexts/ThemeProvider";
@@ -8,7 +8,9 @@ import { TextField } from "components/form";
 import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { useModalLayoutShiftFix } from "hooks/modal";
-import { nativeSignUp } from "utils/auth";
+import { getProfilePicUrl, nativeSignUp } from "utils/auth";
+import { spawnNotification } from "utils/notifications";
+import { AuthContext } from "contexts/auth-context";
 
 interface Props {
     isOpen: boolean;
@@ -20,6 +22,8 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
     const emailInputRef = useRef<HTMLInputElement>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const isDarkMode = useDarkMode();
+
+    const { authState, authDispatch } = useContext(AuthContext);
 
     useModalLayoutShiftFix(isOpen);
 
@@ -37,8 +41,21 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             const email = emailInputRef.current.value;
             const password = passwordInputRef.current.value;
 
-            nativeSignUp(username, email, password);
-            onDismiss();
+            nativeSignUp(username, email, password)
+                .then(() => {
+                    onDismiss();
+                    authDispatch({
+                        type: "GLOBAL_LOGIN",
+                        payload: {
+                            username,
+                            email,
+                            profilePicUrl: getProfilePicUrl(),
+                        },
+                    });
+                })
+                .catch((err) => {
+                    spawnNotification("error", err.message);
+                });
         },
         [nameInputRef, emailInputRef, passwordInputRef, onDismiss],
     );

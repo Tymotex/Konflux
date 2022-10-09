@@ -4,6 +4,13 @@ import { spawnNotification } from "utils/notifications";
 import { EventAction } from "./event-context";
 
 /* --------------------------- Reducer and actions -------------------------- */
+// Note: there are two different 'strategies' for authentication.
+// 1. Local: no registration is required. The user simply enters a username and
+//    password and that's it, but these details are scoped only to the current
+//    event and must be re-entered when the page is revisited.
+// 2. Global: this is how registration is handled in all other apps. The user
+//    logs in once, then their information persists and can be used instead of
+//    local authentication for each event.
 export type AuthAction =
     | {
           type: "LOCAL_LOGIN";
@@ -22,11 +29,28 @@ export type AuthAction =
               username: string;
               localPassword?: string;
           };
+      }
+    | {
+          // Note: this does not actually log in the user. For that, use the
+          // auth utilities in `utils/auth.ts`. This only sets the state so that
+          // the UI knows the username that it can use for filling in the
+          // availabilities in the timetable.
+          type: "GLOBAL_LOGIN";
+          payload: {
+              username: string;
+              email: string;
+              profilePicUrl: string;
+          };
+      }
+    | {
+          type: "GLOBAL_SIGN_OUT";
       };
 
 export type AuthState = {
     username: string;
     localPassword?: string;
+    profilePicUrl?: string;
+    authType: "local" | "global" | null;
 };
 
 export const authReducer = (state: AuthState, action: AuthAction) => {
@@ -53,6 +77,7 @@ export const authReducer = (state: AuthState, action: AuthAction) => {
             return {
                 username,
                 localPassword,
+                authType: "local",
             };
         }
         case "LOCAL_REGISTER": {
@@ -70,7 +95,29 @@ export const authReducer = (state: AuthState, action: AuthAction) => {
                 },
             });
 
-            return { username, localPassword };
+            return {
+                username,
+                localPassword,
+                authType: "local",
+            };
+        }
+        case "GLOBAL_LOGIN": {
+            const { username, email, profilePicUrl } = action.payload;
+
+            return {
+                username,
+                email,
+                profilePicUrl,
+                authType: "global",
+            };
+        }
+        case "GLOBAL_SIGN_OUT": {
+            return {
+                usename: "",
+                email: "",
+                profilePicUrl: "",
+                authType: null,
+            };
         }
         default:
             return state;

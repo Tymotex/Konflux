@@ -587,13 +587,11 @@ const TimetableGrid: React.FC<Props> = ({
                             <ul className={styles.peopleList}>
                                 {Array.from(whoIsAvailable).map((person) => (
                                     <li key={person} className={styles.item}>
-                                        <img
+                                        {/* <img
                                             className={styles.avatar}
                                             alt={person}
-                                            src={
-                                                "https://st.depositphotos.com/1269204/1219/i/950/depositphotos_12196477-stock-photo-smiling-men-isolated-on-the.jpg"
-                                            }
-                                        />{" "}
+                                            src={}
+                                        />{" "} */}
                                         {person}
                                     </li>
                                 ))}
@@ -608,13 +606,14 @@ const TimetableGrid: React.FC<Props> = ({
                             <ul className={styles.peopleList}>
                                 {Array.from(whoIsntAvailable).map((person) => (
                                     <li key={person} className={styles.item}>
-                                        <img
+                                        {/* TODO: need a way to grab the user's profile picture that's not hacky... */}
+                                        {/* <img
                                             className={styles.avatar}
                                             alt={person}
                                             src={
                                                 "https://st.depositphotos.com/1269204/1219/i/950/depositphotos_12196477-stock-photo-smiling-men-isolated-on-the.jpg"
                                             }
-                                        />{" "}
+                                        />{" "} */}
                                         {person}
                                     </li>
                                 ))}

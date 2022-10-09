@@ -7,6 +7,7 @@ import {
     createUserWithEmailAndPassword,
     updateProfile,
     signInWithEmailAndPassword,
+    User,
 } from "firebase/auth";
 import { spawnNotification } from "./notifications";
 
@@ -75,6 +76,7 @@ export const authProviderSignIn = async (providerName: "google") => {
         "success",
         `You've signed in with ${providerName}. Welcome!`,
     );
+    return getAuth().currentUser;
 };
 
 /**

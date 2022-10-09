@@ -1,15 +1,15 @@
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import React, { useCallback, useEffect, useRef } from "react";
-import styles from "./Modal.module.scss";
-import CloseIcon from "./close.svg";
-import { useDarkMode } from "contexts/ThemeProvider";
 import { Logo } from "components/brand";
-import { TextField } from "components/form";
 import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
+import { TextField } from "components/form";
+import { useDarkMode } from "contexts/ThemeProvider";
 import { useModalLayoutShiftFix } from "hooks/modal";
+import React, { useCallback, useRef } from "react";
 import { nativeSignIn } from "utils/auth";
 import { spawnNotification } from "utils/notifications";
+import CloseIcon from "./close.svg";
+import styles from "./Modal.module.scss";
 
 interface Props {
     isOpen: boolean;

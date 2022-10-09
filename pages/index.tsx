@@ -3,7 +3,15 @@ import { TextField } from "components/form";
 import { createEvent } from "models/event";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { MouseEvent, useCallback, useContext, useEffect, useRef } from "react";
+import {
+    FormEventHandler,
+    MouseEvent,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+} from "react";
 import { spawnNotification } from "utils/notifications";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
@@ -21,13 +29,13 @@ const container = {
         transition: {
             delay: 0.75,
             delayChildren: 0.75,
-            staggerChildren: 0.5,
+            staggerChildren: 0.25,
         },
     },
 };
 
 const item = {
-    hidden: { opacity: 0, x: -100 },
+    hidden: { opacity: 0, x: -40 },
     show: { opacity: 1, x: 0, transition: { duration: 1 } },
 };
 
@@ -43,49 +51,68 @@ const Home: NextPage = () => {
     const passwordInput = useRef<HTMLInputElement>(null);
 
     const { authState, authDispatch } = useContext(AuthContext);
+    const loggedIn = useMemo(
+        () => authState && authState.username && authState.username.length > 0,
+        [authState],
+    );
 
     const isDarkMode = useDarkMode();
 
     // Handle the creation of an event.
-    const handleEventCreation = useCallback(
-        async (e: MouseEvent): Promise<void> => {
+    const handleEventCreation: FormEventHandler<HTMLFormElement> = useCallback(
+        async (e): Promise<void> => {
             e.preventDefault();
-            if (
-                eventNameInput.current === null ||
-                usernameInput.current === null ||
-                passwordInput.current === null
-            ) {
+            let username: string;
+            let password: string;
+            let eventName: string;
+
+            if (eventNameInput.current === null) {
                 spawnNotification(
                     "error",
-                    "Input element references detached!",
-                );
-                spawnNotification(
-                    "error",
-                    `${eventNameInput.current === null}`,
+                    "Event name input reference detached!",
                 );
                 return;
             }
-
             // Get and validate the event name.
-            const formEventName = String(eventNameInput.current.value);
-            if (formEventName.length === 0) {
+            eventName = String(eventNameInput.current.value);
+            if (eventName.length === 0) {
                 throw new Error("Event name must not be empty.");
-            } else if (formEventName.length >= 255) {
+            } else if (eventName.length >= 255) {
                 throw new Error(
                     "Event name must be fewer than 255 characters.",
                 );
             }
 
-            // Get and validate the username and password
-            const formUsername = String(usernameInput.current.value);
-            const formPassword = String(passwordInput.current.value);
-            if (formUsername.length === 0) {
-                throw new Error("Username is required.");
-            } else if (formUsername.length >= 255) {
-                throw new Error("Username must be fewer than 255 characters.");
-            }
-            if (formPassword.length >= 64) {
-                throw new Error("Password must be fewer than 64 characters.");
+            if (!loggedIn) {
+                if (
+                    usernameInput.current === null ||
+                    passwordInput.current === null
+                ) {
+                    spawnNotification(
+                        "error",
+                        "Username or password input references detached!",
+                    );
+                    return;
+                }
+
+                // Get and validate the username and password
+                username = String(usernameInput.current.value);
+                password = String(passwordInput.current.value);
+                if (username.length === 0) {
+                    throw new Error("Username is required.");
+                } else if (username.length >= 255) {
+                    throw new Error(
+                        "Username must be fewer than 255 characters.",
+                    );
+                }
+                if (password.length >= 64) {
+                    throw new Error(
+                        "Password must be fewer than 64 characters.",
+                    );
+                }
+            } else {
+                username = authState.username;
+                password = "TODO:wtfToDoWhenGloballyAuthed";
             }
 
             try {
@@ -93,23 +120,25 @@ const Home: NextPage = () => {
                 // Note that this creates the first member in the event model
                 // and assigns them as the owner of the event.
                 const [eventId, event] = await createEvent(
-                    formEventName,
-                    formUsername,
-                    formPassword,
+                    eventName,
+                    username,
+                    password,
                 );
 
-                // Dispatch a login.
-                try {
-                    authDispatch({
-                        type: "LOCAL_LOGIN",
-                        payload: {
-                            event: event,
-                            username: formUsername,
-                            localPassword: formPassword,
-                        },
-                    });
-                } catch (err) {
-                    spawnNotification("error", (err as Error).message);
+                if (!loggedIn) {
+                    // Dispatch a login.
+                    try {
+                        authDispatch({
+                            type: "LOCAL_LOGIN",
+                            payload: {
+                                event: event,
+                                username: username,
+                                localPassword: password,
+                            },
+                        });
+                    } catch (err) {
+                        spawnNotification("error", (err as Error).message);
+                    }
                 }
 
                 // Transmit username and password to the event details page so
@@ -184,6 +213,7 @@ const Home: NextPage = () => {
                             </motion.span>
                         </motion.div>
                         <motion.form
+                            onSubmit={handleEventCreation}
                             className={styles.startForm}
                             variants={container}
                             initial={"hidden"}
@@ -198,29 +228,33 @@ const Home: NextPage = () => {
                                     label={"Event Name"}
                                 />
                             </motion.div>
-                            <motion.div variants={item}>
-                                <TextField
-                                    refHandle={usernameInput}
-                                    id={"username"}
-                                    placeholder={"Linus Torvalds"}
-                                    required
-                                    label={"Username"}
-                                    infoText={
-                                        "A name that others can recognise you by."
-                                    }
-                                />
-                            </motion.div>
-                            <motion.div variants={item}>
-                                <TextField
-                                    refHandle={passwordInput}
-                                    id={"password"}
-                                    type={"password"}
-                                    label={"Password"}
-                                    infoText={
-                                        "An optional password you can set so that only you can modify the event."
-                                    }
-                                />
-                            </motion.div>
+                            {!loggedIn && (
+                                <>
+                                    <motion.div variants={item}>
+                                        <TextField
+                                            refHandle={usernameInput}
+                                            id={"username"}
+                                            placeholder={"Linus Torvalds"}
+                                            required
+                                            label={"Username"}
+                                            infoText={
+                                                "A name that others can recognise you by."
+                                            }
+                                        />
+                                    </motion.div>
+                                    <motion.div variants={item}>
+                                        <TextField
+                                            refHandle={passwordInput}
+                                            id={"password"}
+                                            type={"password"}
+                                            label={"Password"}
+                                            infoText={
+                                                "An optional password you can set so that only you can modify the event."
+                                            }
+                                        />
+                                    </motion.div>
+                                </>
+                            )}
                             <motion.div
                                 variants={item}
                                 style={{
@@ -228,9 +262,7 @@ const Home: NextPage = () => {
                                     marginTop: "32px",
                                 }}
                             >
-                                <Button onClick={(e) => handleEventCreation(e)}>
-                                    Begin
-                                </Button>
+                                <Button isSubmit>Begin</Button>
                             </motion.div>
                         </motion.form>
                     </main>

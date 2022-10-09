@@ -49,6 +49,14 @@ const EventPage: NextPage = () => {
 
     // User auth state.
     const { authState, authDispatch } = useContext(AuthContext);
+    const loggedInGlobally = useMemo(
+        () =>
+            authState &&
+            authState.username &&
+            authState.username.length > 0 &&
+            authState.authType === "global",
+        [authState],
+    );
 
     // Sync status of each input component.
     const [updateEventNameStatus, setUpdateEventNameStatus] =
@@ -147,6 +155,21 @@ const EventPage: NextPage = () => {
         () => (status: Status) => setUpdateTimetableStatus(status),
         [setUpdateTimetableStatus],
     );
+
+    useEffect(() => {
+        if (loggedInGlobally) {
+            // If the globally logged in user is not already a member of this
+            // event, put them in the members list.
+            if (!(authState.username in eventState.members))
+                eventDispatch({
+                    type: "SIGN_UP_MEMBER",
+                    payload: {
+                        eventId: eventId,
+                        user: { username: authState.username },
+                    },
+                });
+        }
+    }, [loggedInGlobally, eventDispatch, eventState]);
 
     return (
         <>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import LogoLight from "public/logo-light.svg";
 import LogoDark from "public/logo-dark.svg";
 import styles from "./TopNav.module.scss";
@@ -8,10 +8,11 @@ import { useRouter } from "next/router";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { Dialog } from "@reach/dialog";
 import { LoginModal, RegisterModal } from "components/authentication";
-import { signOutUser } from "utils/auth";
+import { getProfilePicUrl, signOutUser } from "utils/auth";
 import { getAuth, onAuthStateChanged } from "@firebase/auth";
 import { AvatarDropdown } from "components/avatar";
 import { spawnNotification } from "utils/notifications";
+import { AuthContext } from "contexts/auth-context";
 
 interface Props {}
 
@@ -21,6 +22,7 @@ const TopNav: React.FC<Props> = () => {
 
     // Auth state.
     const [signedIn, setSignedIn] = useState(false);
+    const { authState, authDispatch } = useContext(AuthContext);
 
     // Register modal state.
     const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
@@ -73,9 +75,21 @@ const TopNav: React.FC<Props> = () => {
         onAuthStateChanged(getAuth(), (user) => {
             if (user) {
                 setSignedIn(true);
+                if (!user.displayName) throw new Error("No display name");
+                if (!user.email)
+                    throw new Error("No email associated with account.");
+
+                authDispatch({
+                    type: "GLOBAL_LOGIN",
+                    payload: {
+                        username: user.displayName,
+                        email: user.email,
+                        profilePicUrl: getProfilePicUrl(),
+                    },
+                });
             }
         });
-    }, [setSignedIn]);
+    }, [setSignedIn, authDispatch]);
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
@@ -107,7 +121,7 @@ const TopNav: React.FC<Props> = () => {
                     }`}
                 >
                     <DarkModeToggle />
-                    {!signedIn ? (
+                    {!signedIn && authState.authType !== "local" ? (
                         <>
                             <LoginModal
                                 isOpen={loginIsOpen}
@@ -132,12 +146,16 @@ const TopNav: React.FC<Props> = () => {
                         </>
                     ) : (
                         <AvatarDropdown
+                            profilePicUrl={authState?.profilePicUrl || ""}
                             signOut={() => {
                                 signOutUser()
                                     .then(() => {
                                         setSignedIn(false);
                                         setRegisterIsOpen(false);
                                         setLoginIsOpen(false);
+                                        authDispatch({
+                                            type: "GLOBAL_SIGN_OUT",
+                                        });
                                         spawnNotification(
                                             "success",
                                             "You've signed out.",

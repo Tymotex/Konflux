@@ -7,20 +7,20 @@ import {
     MenuPopover,
     MenuLink,
 } from "@reach/menu-button";
+import { AuthContext } from "contexts/auth-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { getProfilePicUrl, getUserName, signOutUser } from "utils/auth";
 import styles from "./AvatarDropdown.module.scss";
 
 interface Props {
     signOut: () => void;
+    profilePicUrl: string;
 }
 
-const AvatarDropdown: React.FC<Props> = ({ signOut }) => {
+const AvatarDropdown: React.FC<Props> = ({ signOut, profilePicUrl }) => {
     const router = useRouter();
-    const profilePicUrl = useMemo(() => getProfilePicUrl(), []);
-
     const isDarkMode = useDarkMode();
 
     return (

@@ -32,8 +32,8 @@ function MyApp({ Component, pageProps }: AppProps) {
     return (
         <>
             <ThemeProvider>
-                <PageLayout>
-                    <AuthContext.Provider value={cachedAuthContext}>
+                <AuthContext.Provider value={cachedAuthContext}>
+                    <PageLayout>
                         <AnimatePresence
                             mode="wait"
                             onExitComplete={() => window.scrollTo(0, 0)}
@@ -41,8 +41,8 @@ function MyApp({ Component, pageProps }: AppProps) {
                             <Component {...pageProps} key={router.route} />
                         </AnimatePresence>
                         <NotificationContainer />
-                    </AuthContext.Provider>
-                </PageLayout>
+                    </PageLayout>
+                </AuthContext.Provider>
             </ThemeProvider>
         </>
     );
