@@ -7,21 +7,22 @@ import styles from "./Logo.module.scss";
 
 interface Props {
     size?: number;
+    className?: string;
 }
 
-const Logo: React.FC<Props> = ({ size }) => {
+const Logo: React.FC<Props> = ({ size, className }) => {
     const isDarkMode = useDarkMode();
     const router = useRouter();
 
     return isDarkMode ? (
         <LogoDark
-            className={styles.brandIcon}
+            className={`${styles.brandIcon} ${className ? className : ""}`}
             onClick={() => router.push("/")}
             style={{ height: size, width: size }}
         />
     ) : (
         <LogoLight
-            className={styles.brandIcon}
+            className={`${styles.brandIcon} ${className ? className : ""}`}
             onClick={() => router.push("/")}
             style={{ height: size, width: size }}
         />
