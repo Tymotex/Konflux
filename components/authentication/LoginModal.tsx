@@ -59,6 +59,7 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             }}
         >
             <DialogContent
+                aria-label="Login form"
                 className={`${styles.modalContainer} ${
                     isDarkMode ? styles.dark : ""
                 }`}

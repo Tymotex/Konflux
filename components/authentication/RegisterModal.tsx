@@ -55,6 +55,7 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             }}
         >
             <DialogContent
+                aria-label="Registration form"
                 className={`${styles.modalContainer} ${
                     isDarkMode ? styles.dark : ""
                 }`}
