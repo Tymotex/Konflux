@@ -1,7 +1,7 @@
 import { Status } from "components/sync-status/SyncStatus";
 import {
     KonfluxEvent,
-    LocalEventMember,
+    EventMember,
     signUpMember,
     updateEventTimeRange,
     updateRemoteAvailabilities,
@@ -30,10 +30,10 @@ export type EventAction =
           };
       }
     | {
-          type: "SIGN_UP_MEMBER";
+          type: "ADD_MEMBER";
           payload: {
               eventId: string;
-              user: LocalEventMember;
+              user: EventMember;
           };
       };
 
@@ -88,7 +88,7 @@ export const eventReducer = (
                 groupAvailabilities: action.payload.groupAvailabilities,
             };
         }
-        case "SIGN_UP_MEMBER": {
+        case "ADD_MEMBER": {
             const { eventId, user } = action.payload;
 
             // By default, new members other than the original creators are not
@@ -107,6 +107,7 @@ export const eventReducer = (
                 members: {
                     ...state.members,
                     [user.username]: {
+                        scope: user.scope,
                         password: user.password,
                         email: user.email,
                         profilePicUrl: user.profilePicUrl,

@@ -14,25 +14,28 @@ import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "../styles/globals.scss";
 import {
-    AuthContext,
-    authReducer,
-    EMPTY_AUTH_STATE,
-} from "contexts/auth-context";
+    LocalAuthContext,
+    localAuthReducer,
+    EMPTY_EVENT_USER,
+} from "contexts/local-auth-context";
 import { useMemo, useReducer } from "react";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
 
-    const [authState, authDispatch] = useReducer(authReducer, EMPTY_AUTH_STATE);
+    const [localAuthState, localAuthDispatch] = useReducer(
+        localAuthReducer,
+        EMPTY_EVENT_USER,
+    );
     const cachedAuthContext = useMemo(
-        () => ({ authState, authDispatch }),
-        [authState, authDispatch],
+        () => ({ localAuthState, localAuthDispatch }),
+        [localAuthState, localAuthDispatch],
     );
 
     return (
         <>
             <ThemeProvider>
-                <AuthContext.Provider value={cachedAuthContext}>
+                <LocalAuthContext.Provider value={cachedAuthContext}>
                     <PageLayout>
                         <AnimatePresence
                             mode="wait"
@@ -42,7 +45,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                         </AnimatePresence>
                         <NotificationContainer />
                     </PageLayout>
-                </AuthContext.Provider>
+                </LocalAuthContext.Provider>
             </ThemeProvider>
         </>
     );

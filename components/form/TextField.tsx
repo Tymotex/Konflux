@@ -44,17 +44,6 @@ const TextField: React.FC<Props> = ({
     const [matchesAnAutocompleteItem, setMatchesAnAutocompleteItem] =
         useState<boolean>();
 
-    const checkIfMatchesAutocompleteItem: React.ChangeEventHandler<HTMLInputElement> =
-        useCallback(
-            (e) => {
-                if (!autocompleteItems) return;
-                setMatchesAnAutocompleteItem(
-                    autocompleteItems.has(e.target.value),
-                );
-            },
-            [setMatchesAnAutocompleteItem, autocompleteItems],
-        );
-
     return !autocompleteItems ? (
         <div
             className={`${styles.inputContainer} ${
@@ -105,6 +94,9 @@ const TextField: React.FC<Props> = ({
             <Combobox
                 aria-labelledby={id}
                 className={`${styles.textFieldContainer} ${styles.combobox}`}
+                onSelect={(str) =>
+                    setMatchesAnAutocompleteItem(autocompleteItems.has(str))
+                }
             >
                 <ComboboxInput
                     className={`${styles.textField} ${
@@ -112,7 +104,11 @@ const TextField: React.FC<Props> = ({
                     } ${matchesAnAutocompleteItem ? styles.matchesItem : ""}`}
                     placeholder={placeholder}
                     ref={refHandle}
-                    onChange={checkIfMatchesAutocompleteItem}
+                    onChange={(e) =>
+                        setMatchesAnAutocompleteItem(
+                            autocompleteItems.has(e.target.value),
+                        )
+                    }
                 />
                 {infoText && (
                     <Tooltip

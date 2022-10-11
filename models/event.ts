@@ -3,11 +3,11 @@ import { NextRouter } from "next/router";
 import { spawnNotification } from "utils/notifications";
 
 /**
- * Member details, but localised entirely to the event data object it is
- * associated with.
+ * Recorded details of a member that has signed up to the event.
  */
-export interface LocalEventMember {
+export interface EventMember {
     username: string;
+    scope: "local" | "global" | "";
     password?: string;
     email?: string;
     profilePicUrl?: string;
@@ -51,7 +51,7 @@ export interface KonfluxEvent {
     };
     /** The people in this event. */
     members: {
-        [username: string]: Omit<LocalEventMember, "username">;
+        [username: string]: Omit<EventMember, "username">;
     };
 }
 
@@ -216,7 +216,7 @@ export const updateEventTimeRange = async (
  * @param eventId
  * @param user
  */
-export const signUpMember = async (eventId: string, user: LocalEventMember) => {
+export const signUpMember = async (eventId: string, user: EventMember) => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
     try {
         const { username, ...userDetails } = user;

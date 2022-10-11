@@ -1,16 +1,15 @@
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import React, { useCallback, useContext, useEffect, useRef } from "react";
-import styles from "./Modal.module.scss";
-import CloseIcon from "./close.svg";
-import { useDarkMode } from "contexts/ThemeProvider";
 import { Logo } from "components/brand";
-import { TextField } from "components/form";
 import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
-import { useModalLayoutShiftFix } from "hooks/modal";
-import { getProfilePicUrl, nativeSignUp } from "utils/auth";
+import { TextField } from "components/form";
+import { LocalAuthContext } from "contexts/local-auth-context";
+import { useDarkMode } from "contexts/ThemeProvider";
+import React, { useCallback, useContext, useRef } from "react";
+import { getProfilePicUrl, GlobalAuth, nativeSignUp } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
-import { AuthContext } from "contexts/auth-context";
+import CloseIcon from "./close.svg";
+import styles from "./Modal.module.scss";
 
 interface Props {
     isOpen: boolean;
@@ -23,11 +22,7 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const isDarkMode = useDarkMode();
 
-    const { authState, authDispatch } = useContext(AuthContext);
-
-    useModalLayoutShiftFix(isOpen);
-
-    const logInUser: React.FormEventHandler<HTMLFormElement> = useCallback(
+    const registerUser: React.FormEventHandler<HTMLFormElement> = useCallback(
         (e) => {
             e.preventDefault();
             if (
@@ -41,20 +36,14 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             const email = emailInputRef.current.value;
             const password = passwordInputRef.current.value;
 
-            nativeSignUp(username, email, password)
+            GlobalAuth.signUp({ provider: "native", email, username, password })
                 .then(() => {
                     onDismiss();
-                    authDispatch({
-                        type: "GLOBAL_LOGIN",
-                        payload: {
-                            username,
-                            email,
-                            profilePicUrl: getProfilePicUrl(),
-                        },
-                    });
                 })
                 .catch((err) => {
                     spawnNotification("error", err.message);
+                    if (passwordInputRef.current)
+                        passwordInputRef.current.value = "";
                 });
         },
         [nameInputRef, emailInputRef, passwordInputRef, onDismiss],
@@ -104,7 +93,7 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                             Create an account.
                         </h2>
                     </header>
-                    <form className={styles.form} onSubmit={logInUser}>
+                    <form className={styles.form} onSubmit={registerUser}>
                         <TextField
                             id="login-name"
                             refHandle={nameInputRef}

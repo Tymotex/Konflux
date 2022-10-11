@@ -1,18 +1,18 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import LogoLight from "public/logo-light.svg";
-import LogoDark from "public/logo-dark.svg";
-import styles from "./TopNav.module.scss";
+import { LoginModal, RegisterModal } from "components/authentication";
+import { AvatarDropdown } from "components/avatar";
+import { Button } from "components/button";
 import { DarkModeToggle } from "components/dark-mode-toggle";
+import { LocalAuthContext } from "contexts/local-auth-context";
+import { useDarkMode } from "contexts/ThemeProvider";
+import { useGlobalOrLocalEventMember } from "hooks/event";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useDarkMode } from "contexts/ThemeProvider";
-import { Dialog } from "@reach/dialog";
-import { LoginModal, RegisterModal } from "components/authentication";
-import { getProfilePicUrl, signOutUser } from "utils/auth";
-import { getAuth, onAuthStateChanged } from "@firebase/auth";
-import { AvatarDropdown } from "components/avatar";
+import LogoDark from "public/logo-dark.svg";
+import LogoLight from "public/logo-light.svg";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
-import { AuthContext } from "contexts/auth-context";
+import styles from "./TopNav.module.scss";
 
 interface Props {}
 
@@ -21,8 +21,8 @@ const TopNav: React.FC<Props> = () => {
     const isDarkMode = useDarkMode();
 
     // Auth state.
-    const [signedIn, setSignedIn] = useState(false);
-    const { authState, authDispatch } = useContext(AuthContext);
+    const { localAuthState } = useContext(LocalAuthContext);
+    const user = useGlobalOrLocalEventMember(localAuthState);
 
     // Register modal state.
     const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
@@ -46,9 +46,9 @@ const TopNav: React.FC<Props> = () => {
         [setLoginIsOpen],
     );
 
+    // If at the homepage and either the login or register query parameter
+    // was supplied, open the corresponding modal.
     useEffect(() => {
-        // If at the homepage and either the login or register query parameter
-        // was supplied, open the corresponding modal.
         const { login, register } = router.query;
         if (router.pathname === "/") {
             if (login) {
@@ -71,25 +71,20 @@ const TopNav: React.FC<Props> = () => {
         openRegisterModal,
     ]);
 
-    useEffect(() => {
-        onAuthStateChanged(getAuth(), (user) => {
-            if (user) {
-                setSignedIn(true);
-                if (!user.displayName) throw new Error("No display name");
-                if (!user.email)
-                    throw new Error("No email associated with account.");
-
-                authDispatch({
-                    type: "GLOBAL_LOGIN",
-                    payload: {
-                        username: user.displayName,
-                        email: user.email,
-                        profilePicUrl: getProfilePicUrl(),
-                    },
-                });
-            }
-        });
-    }, [setSignedIn, authDispatch]);
+    /**
+     * Signs the user out and closes all auth modals.
+     */
+    const handleSignOut = useCallback(() => {
+        GlobalAuth.signOut()
+            .then(() => {
+                setRegisterIsOpen(false);
+                setLoginIsOpen(false);
+                spawnNotification("success", "You've signed out.");
+            })
+            .catch((err) => {
+                spawnNotification("error", err);
+            });
+    }, [GlobalAuth, setRegisterIsOpen, setLoginIsOpen]);
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
@@ -121,7 +116,22 @@ const TopNav: React.FC<Props> = () => {
                     }`}
                 >
                     <DarkModeToggle />
-                    {!signedIn && authState.authType !== "local" ? (
+                    {user ? (
+                        user.scope === "local" ? (
+                            <>
+                                <Button>Sign Out ({user.username})</Button>
+                            </>
+                        ) : user.scope === "global" ? (
+                            <AvatarDropdown
+                                profilePicUrl={user.profilePicUrl || ""}
+                                signOut={handleSignOut}
+                            />
+                        ) : (
+                            <></>
+                        )
+                    ) : (
+                        // When user isn't signed in, render login and register
+                        // buttons.
                         <>
                             <LoginModal
                                 isOpen={loginIsOpen}
@@ -144,28 +154,6 @@ const TopNav: React.FC<Props> = () => {
                                 Register
                             </button>
                         </>
-                    ) : (
-                        <AvatarDropdown
-                            profilePicUrl={authState?.profilePicUrl || ""}
-                            signOut={() => {
-                                signOutUser()
-                                    .then(() => {
-                                        setSignedIn(false);
-                                        setRegisterIsOpen(false);
-                                        setLoginIsOpen(false);
-                                        authDispatch({
-                                            type: "GLOBAL_SIGN_OUT",
-                                        });
-                                        spawnNotification(
-                                            "success",
-                                            "You've signed out.",
-                                        );
-                                    })
-                                    .catch((err) => {
-                                        spawnNotification("error", err);
-                                    });
-                            }}
-                        />
                     )}
                 </div>
             </div>

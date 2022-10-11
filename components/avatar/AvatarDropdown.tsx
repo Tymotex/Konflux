@@ -1,17 +1,8 @@
-import {
-    Menu,
-    MenuList,
-    MenuButton,
-    MenuItem,
-    MenuItems,
-    MenuPopover,
-    MenuLink,
-} from "@reach/menu-button";
-import { AuthContext } from "contexts/auth-context";
+import { Menu, MenuButton, MenuItem, MenuList } from "@reach/menu-button";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { useRouter } from "next/router";
-import React, { useContext, useMemo } from "react";
-import { getProfilePicUrl, getUserName, signOutUser } from "utils/auth";
+import React from "react";
+import { useGlobalUser } from "utils/global-auth";
 import styles from "./AvatarDropdown.module.scss";
 
 interface Props {
@@ -22,14 +13,15 @@ interface Props {
 const AvatarDropdown: React.FC<Props> = ({ signOut, profilePicUrl }) => {
     const router = useRouter();
     const isDarkMode = useDarkMode();
+    const user = useGlobalUser();
 
-    return (
+    return user ? (
         <Menu>
             <MenuButton className={styles.btn}>
                 <img
                     src={profilePicUrl}
                     className={styles.avatarImg}
-                    alt={`${getUserName()} profile picture`}
+                    alt={`${user.username} profile picture`}
                 />
             </MenuButton>
             <MenuList
@@ -44,6 +36,8 @@ const AvatarDropdown: React.FC<Props> = ({ signOut, profilePicUrl }) => {
                 <MenuItem onSelect={() => signOut()}>Sign Out</MenuItem>
             </MenuList>
         </Menu>
+    ) : (
+        <></>
     );
 };
 

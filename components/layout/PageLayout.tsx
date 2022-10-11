@@ -1,7 +1,7 @@
 import { Footer } from "components/footer";
 import { PageTransition } from "components/page-transition";
 import { TopNav } from "components/top-nav";
-import { AuthContext } from "contexts/auth-context";
+import { LocalAuthContext } from "contexts/local-auth-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import React, { useContext } from "react";
 import styles from "./PageLayout.module.scss";

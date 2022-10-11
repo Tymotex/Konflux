@@ -4,39 +4,28 @@ import {
     AlertDialogLabel,
     AlertDialogOverlay,
 } from "@reach/alert-dialog";
-import { AuthContext } from "contexts/auth-context";
-import { EventContext } from "contexts/event-context";
-import React, {
-    FormEvent,
-    useCallback,
-    useContext,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import styles from "./EventSignIn.module.scss";
-import BackIcon from "./back.svg";
-import { useDarkMode } from "contexts/ThemeProvider";
 import { Button } from "components/button";
-import { AutocompleteField, TextField } from "components/form";
-import { useModalLayoutShiftFix } from "hooks/modal";
-import { useRouter } from "next/router";
 import { Callout } from "components/callout";
 import IdeaIcon from "components/callout/idea.svg";
+import { TextField } from "components/form";
+import { EventContext } from "contexts/event-context";
+import { useDarkMode } from "contexts/ThemeProvider";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { FormEvent, useCallback, useContext, useRef } from "react";
+import BackIcon from "./back.svg";
+import styles from "./EventSignIn.module.scss";
 
 interface Props {
     eventId: string;
+    onSubmit: (username: string, password: string) => void;
 }
 
-const EventSignIn: React.FC<Props> = ({ eventId }) => {
+const EventSignIn: React.FC<Props> = ({ eventId, onSubmit }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
-    const { authState, authDispatch } = useContext(AuthContext);
     const router = useRouter();
 
     const isDarkMode = useDarkMode();
-
-    useModalLayoutShiftFix(true);
 
     const backBtnRef = useRef<HTMLButtonElement>(null);
     const usernameInputRef = useRef<HTMLInputElement>(null);
@@ -44,50 +33,29 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
 
     const allMembers = new Set(Object.keys(eventState?.members || {}));
 
-    const locallyAuthenticate = useCallback(
-        (e: FormEvent) => {
-            e.preventDefault();
-            if (!usernameInputRef.current)
-                throw new Error("Username input ref detached");
-            if (!passwordInputRef.current)
-                throw new Error("Password input ref detached");
+    /**
+     * Submit form and dispatch either a login or register request to populate
+     * the local auth context.
+     */
+    const locallyAuthenticate = useCallback(() => {
+        if (!usernameInputRef.current)
+            throw new Error("Username input ref detached");
+        if (!passwordInputRef.current)
+            throw new Error("Password input ref detached");
 
-            const username = usernameInputRef.current.value;
-            const password = passwordInputRef.current.value;
+        const username = usernameInputRef.current.value;
+        const password = passwordInputRef.current.value;
 
-            // If this user is already a member, attempt to dispatch a login,
-            // otherwise directly attempt to create them as a new user.
-            if (username in eventState.members) {
-                authDispatch({
-                    type: "LOCAL_LOGIN",
-                    payload: {
-                        event: eventState,
-                        username,
-                        localPassword: password,
-                    },
-                });
-            } else {
-                authDispatch({
-                    type: "LOCAL_REGISTER",
-                    payload: {
-                        eventId,
-                        event: eventState,
-                        eventDispatch,
-                        username,
-                        localPassword: password,
-                    },
-                });
-            }
-        },
-        [
-            eventId,
-            eventState,
-            authDispatch,
-            usernameInputRef,
-            passwordInputRef,
-            eventDispatch,
-        ],
-    );
+        // If this user is already a member, attempt to dispatch a login,
+        // otherwise directly attempt to create them as a new user.
+        onSubmit(username, password);
+    }, [
+        eventId,
+        eventState,
+        usernameInputRef,
+        passwordInputRef,
+        eventDispatch,
+    ]);
 
     return (
         <AlertDialogOverlay
@@ -117,10 +85,7 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
                         Who are you?
                     </AlertDialogLabel>
 
-                    <form
-                        onSubmit={locallyAuthenticate}
-                        className={styles.form}
-                    >
+                    <div className={styles.form}>
                         <TextField
                             id="event-username"
                             refHandle={usernameInputRef}
@@ -137,8 +102,14 @@ const EventSignIn: React.FC<Props> = ({ eventId }) => {
                             type="password"
                             infoText="Leave empty if you didn't set a password when you registered to this event."
                         />
-                        <Button isSubmit>Submit</Button>
-                    </form>
+                        <Button
+                            onClick={() => {
+                                locallyAuthenticate();
+                            }}
+                        >
+                            Submit
+                        </Button>
+                    </div>
 
                     <AlertDialogDescription className={styles.description}>
                         <Callout Icon={IdeaIcon}>

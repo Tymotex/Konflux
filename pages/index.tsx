@@ -20,7 +20,7 @@ import { motion } from "framer-motion";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { PageTransition } from "components/page-transition";
 import Head from "next/head";
-import { AuthContext } from "contexts/auth-context";
+import { LocalAuthContext } from "contexts/local-auth-context";
 
 const container = {
     hidden: { opacity: 0 },
@@ -50,7 +50,7 @@ const Home: NextPage = () => {
     const usernameInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
 
-    const { authState, authDispatch } = useContext(AuthContext);
+    const { authState, authDispatch } = useContext(LocalAuthContext);
     const loggedIn = useMemo(
         () => authState && authState.username && authState.username.length > 0,
         [authState],

@@ -4,9 +4,8 @@ import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { TextField } from "components/form";
 import { useDarkMode } from "contexts/ThemeProvider";
-import { useModalLayoutShiftFix } from "hooks/modal";
 import React, { useCallback, useRef } from "react";
-import { nativeSignIn } from "utils/auth";
+import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
 import CloseIcon from "./close.svg";
 import styles from "./Modal.module.scss";
@@ -21,8 +20,6 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const isDarkMode = useDarkMode();
 
-    useModalLayoutShiftFix(isOpen);
-
     const logInUser: React.FormEventHandler<HTMLFormElement> = useCallback(
         (e) => {
             e.preventDefault();
@@ -34,7 +31,7 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             const password = passwordInputRef.current.value;
             const email = emailInputRef.current.value;
 
-            nativeSignIn(email, password)
+            GlobalAuth.signIn({ provider: "native", email, password })
                 .then(() => {
                     onDismiss();
                 })
@@ -52,6 +49,7 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
             isOpen={isOpen}
             onDismiss={onDismiss}
             className={styles.overlay}
+            // TODO: move this to class? I recall this didn't work before though.
             style={{
                 background: "hsl(0, 100%, 0%, 0.5)",
                 backdropFilter: "blur(2px)",
