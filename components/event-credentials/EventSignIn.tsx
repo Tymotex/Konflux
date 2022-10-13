@@ -74,11 +74,11 @@ const EventSignIn: React.FC<Props> = ({
 
         onSubmitSuccess(username, password);
     }, [
-        eventId,
         eventState,
         usernameInputRef,
         passwordInputRef,
-        eventDispatch,
+        localAuthDispatch,
+        onSubmitSuccess,
     ]);
 
     return (

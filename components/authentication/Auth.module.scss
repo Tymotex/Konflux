@@ -1,0 +1,19 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.form {
+    width: 220px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.authProviderDivider {
+    width: fit-content;
+    margin: $margin-xl auto $margin-lg auto;
+    font-family: "Montserrat", sans-serif;
+    color: $grey-400;
+}
+
+.authProviderForm {
+    text-align: center;
+}

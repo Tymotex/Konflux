@@ -301,9 +301,6 @@ const EventPage: NextPage = () => {
                                                     }}
                                                 >
                                                     <FillingTimetable
-                                                        username={
-                                                            localAuthState.username
-                                                        }
                                                         eventId={eventId}
                                                         updateStatus={(
                                                             status: Status,

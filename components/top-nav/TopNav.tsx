@@ -36,7 +36,6 @@ const TopNav: React.FC<Props> = () => {
     );
     const closeRegisterModal = useCallback(() => {
         setRegisterIsOpen(false);
-        router.reload();
     }, [setRegisterIsOpen]);
 
     // Login modal state.
@@ -47,10 +46,11 @@ const TopNav: React.FC<Props> = () => {
     );
     const closeLoginModal = useCallback(() => {
         setLoginIsOpen(false);
-    }, [setLoginIsOpen, router]);
+    }, [setLoginIsOpen]);
 
     // If at the homepage and either the login or register query parameter
     // was supplied, open the corresponding modal.
+    // This lets other pages 'link to' the login/register modals.
     useEffect(() => {
         const { login, register } = router.query;
         if (router.pathname === "/") {
@@ -87,7 +87,7 @@ const TopNav: React.FC<Props> = () => {
             .catch((err) => {
                 spawnNotification("error", err);
             });
-    }, [GlobalAuth, setRegisterIsOpen, setLoginIsOpen]);
+    }, [setRegisterIsOpen, setLoginIsOpen]);
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>

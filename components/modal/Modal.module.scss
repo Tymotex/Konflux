@@ -7,6 +7,19 @@
     background: none;
     padding: 0;
 
+    &.dark {
+        .content {
+            background: $grey-800;
+            color: $grey-100;
+
+            .closeButton {
+                * {
+                    fill: $grey-100;
+                }
+            }
+        }
+    }
+
     .content {
         position: relative;
         margin-left: $margin-sm;
@@ -68,6 +81,12 @@
                 background: rgba($grey-400, 0.15);
                 border-radius: 100px;
 
+                transition: 100ms transform ease-in-out;
+
+                &:hover {
+                    transform: scale(1.1);
+                }
+
                 svg {
                     position: absolute;
 
@@ -82,35 +101,15 @@
             }
         }
 
-        .form {
-            width: 220px;
-            margin: 0 auto;
-            text-align: center;
+        &.dark {
+            .content {
+                background: $grey-800;
+                color: $grey-100;
 
-            .formButton {
-            }
-        }
-
-        .authProviderDivider {
-            width: fit-content;
-            margin: $margin-xl auto $margin-lg auto;
-            font-family: "Montserrat", sans-serif;
-            color: $grey-400;
-        }
-
-        .authProviderForm {
-            text-align: center;
-        }
-    }
-
-    &.dark {
-        .content {
-            background: $grey-800;
-            color: $grey-100;
-
-            .closeButton {
-                * {
-                    fill: $grey-100;
+                .closeButton {
+                    * {
+                        fill: $grey-100;
+                    }
                 }
             }
         }
@@ -122,10 +121,3 @@
         padding: $padding-lg;
     }
 }
-
-// @media (min-width: 768px) and (max-width: 1023px) {
-//     .modalContainer .content .header .headingCurvedDivider svg {
-//         width: calc(175% + 1.3px);
-//         height: 137px;
-//     }
-// }

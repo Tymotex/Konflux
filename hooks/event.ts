@@ -1,11 +1,9 @@
-import { EventAction, EventContext } from "contexts/event-context";
-import { LocalAuthAction, LocalAuthContext } from "contexts/local-auth-context";
+import { EventAction } from "contexts/event-context";
+import { LocalAuthContext } from "contexts/local-auth-context";
 import { EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
-import { Dispatch, useContext, useEffect, useMemo, useState } from "react";
+import { Dispatch, useContext, useEffect, useMemo } from "react";
 import { useGlobalUser } from "utils/global-auth";
-import { spawnNotification } from "utils/notifications";
-import { useOnPageLeave } from "./router";
 
 /**
  * Returns the event member's credentials.

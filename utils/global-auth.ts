@@ -22,6 +22,8 @@ export const AVATAR_PLACEHOLDER_URL = "/avatar-placeholder.png";
 // Also lets you fetch information about the user such as their username,
 // email, profile picture, etc.
 export class GlobalAuth {
+    static observerCallbacks: any[] = [];
+
     // Static classes can't be instantiated.
     constructor() {
         if (this instanceof GlobalAuth)
@@ -77,6 +79,10 @@ export class GlobalAuth {
      * @param eventHandler
      */
     static onUserChange(eventHandler: (user: EventMember | null) => void) {
+        // Unfortunately, `onAuthStateChanged` does not trigger when the user's
+        // display name or other fields change. We need to manually push
+        // updates to observers as well.
+        GlobalAuth.observerCallbacks.push(eventHandler);
         onAuthStateChanged(getAuth(), (firebaseUser: User | null) => {
             if (firebaseUser === null) {
                 eventHandler(null);
@@ -85,6 +91,10 @@ export class GlobalAuth {
             // Convert firebase's User model into our 'EventMember' model.
             eventHandler(GlobalAuth.firebaseUserToEventUser(firebaseUser));
         });
+    }
+
+    private static disseminate(newUser: EventMember) {
+        GlobalAuth.observerCallbacks.forEach((f) => f(newUser));
     }
 
     private static firebaseUserToEventUser(firebaseUser: User): EventMember {
@@ -117,7 +127,9 @@ export class GlobalAuth {
             password,
         );
         spawnNotification("success", "Welcome back.");
-        return GlobalAuth.firebaseUserToEventUser(userCreds.user);
+        const authUser = GlobalAuth.firebaseUserToEventUser(userCreds.user);
+        GlobalAuth.disseminate(authUser);
+        return authUser;
     }
 
     /**
@@ -127,7 +139,10 @@ export class GlobalAuth {
         const provider = new GoogleAuthProvider();
         const userCreds = await signInWithPopup(getAuth(), provider);
         spawnNotification("success", "You've signed in with Google. Welcome!");
-        return GlobalAuth.firebaseUserToEventUser(userCreds.user);
+
+        const authUser = GlobalAuth.firebaseUserToEventUser(userCreds.user);
+        GlobalAuth.disseminate(authUser);
+        return authUser;
     }
 
     /**
@@ -163,7 +178,9 @@ export class GlobalAuth {
 
         spawnNotification("success", `You've signed up. Welcome ${username}!`);
 
-        return GlobalAuth.firebaseUserToEventUser(userCreds.user);
+        const authUser = GlobalAuth.firebaseUserToEventUser(userCreds.user);
+        GlobalAuth.disseminate(authUser);
+        return authUser;
     }
 }
 
@@ -180,7 +197,7 @@ export const useGlobalUser = (): EventMember | null => {
     const [user, setUser] = useState<EventMember | null>(null);
 
     useEffect(() => {
-        GlobalAuth.onUserChange(setUser);
+        GlobalAuth.onUserChange((newUser) => setUser(newUser));
     }, [setUser]);
 
     return user;
