@@ -4,6 +4,7 @@ import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { TextField } from "components/form";
 import { useDarkMode } from "contexts/ThemeProvider";
+import { useRouter } from "next/router";
 import React, { useCallback, useRef } from "react";
 import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";

@@ -37,6 +37,9 @@ import {
     useWatchAndAddMemberToEventIfNotExist,
     useDetermineIsOwner,
     useGlobalOrLocalEventMember,
+    useClearAuthOnPageMount,
+    useBypassEventSignInWithURL,
+    useDetectAuthBypassAttempt,
 } from "hooks/event";
 
 const EventPage: NextPage = () => {
@@ -62,7 +65,13 @@ const EventPage: NextPage = () => {
     const eventMember = useGlobalOrLocalEventMember(localAuthState);
     const isOwnerOfEvent = useDetermineIsOwner(eventMember, eventState);
 
-    // When the globally or locally authenicated user changes, add them into
+    // On this page, we always want to locally authenticate from scratch (to
+    // enforce that the local authentication is scoped to only one event).
+    useClearAuthOnPageMount();
+    useBypassEventSignInWithURL(eventId, eventState);
+    const isAuthBypassing = useDetectAuthBypassAttempt();
+
+    // When the globally or locally authenticated user changes, add them into
     // the event if they aren't already registered.
     useWatchAndAddMemberToEventIfNotExist(
         eventMember,
@@ -150,31 +159,7 @@ const EventPage: NextPage = () => {
     );
 
     // TODO: document or try to remove.
-    const [formSubmitted, setFormSubmitted] = useState<boolean>();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    useEffect(() => {
-        // Flipped
-        if (formSubmitted) {
-            console.log(
-                `Initiating. Username = ${username}, in members? = ${
-                    username in eventState.members
-                }`,
-            );
-            localAuthDispatch({
-                type:
-                    username in eventState.members
-                        ? "LOCAL_SIGN_IN"
-                        : "LOCAL_SIGN_UP",
-                payload: {
-                    event: eventState,
-                    username,
-                    localPassword: password,
-                },
-            });
-        }
-        setFormSubmitted(false);
-    }, [localAuthDispatch, formSubmitted, username, password]);
+    const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
 
     return (
         <>
@@ -198,15 +183,33 @@ const EventPage: NextPage = () => {
                             }}
                         >
                             <div className={styles.main}>
-                                {!eventMember ? (
-                                    <EventSignIn
-                                        eventId={eventId}
-                                        onSubmit={(username, password) => {
-                                            setUsername(username);
-                                            setPassword(password);
-                                            setFormSubmitted(true);
-                                        }}
-                                    />
+                                {!eventMember && !isAuthBypassing ? (
+                                    <>
+                                        <EventSignIn
+                                            eventId={eventId}
+                                            localAuthDispatch={
+                                                localAuthDispatch
+                                            }
+                                            // onSubmitSuccess={() => {
+                                            //     setFormSubmitted(true);
+                                            // }}
+                                        />
+                                        {/* TODO: Move styles to class. */}
+                                        <div
+                                            style={{
+                                                width: "300px",
+                                                margin: "0 auto",
+                                                textAlign: "center",
+                                                marginTop: "200px",
+                                            }}
+                                        >
+                                            <Button
+                                                onClick={() => router.push("/")}
+                                            >
+                                                Go Home
+                                            </Button>
+                                        </div>
+                                    </>
                                 ) : (
                                     <>
                                         {isOwnerOfEvent && (

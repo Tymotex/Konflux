@@ -82,7 +82,6 @@ export class GlobalAuth {
                 eventHandler(null);
                 return;
             }
-
             // Convert firebase's User model into our 'EventMember' model.
             eventHandler(GlobalAuth.firebaseUserToEventUser(firebaseUser));
         });
@@ -97,7 +96,6 @@ export class GlobalAuth {
             scope: "global",
             username: firebaseUser.displayName || "",
             email: firebaseUser.email,
-            isOwner: false,
             password: "TODO:wtfToDoWhenGloballyAuthed",
             profilePicUrl: firebaseUser.photoURL || AVATAR_PLACEHOLDER_URL,
         };
@@ -113,36 +111,23 @@ export class GlobalAuth {
         email: string,
         password: string,
     ): Promise<EventMember | null> {
-        try {
-            const userCreds = await signInWithEmailAndPassword(
-                getAuth(),
-                email,
-                password,
-            );
-            spawnNotification("success", "Welcome back.");
-            return GlobalAuth.firebaseUserToEventUser(userCreds.user);
-        } catch (err) {
-            spawnNotification("error", (err as Error).message);
-            return null;
-        }
+        const userCreds = await signInWithEmailAndPassword(
+            getAuth(),
+            email,
+            password,
+        );
+        spawnNotification("success", "Welcome back.");
+        return GlobalAuth.firebaseUserToEventUser(userCreds.user);
     }
 
     /**
      * Initiate an Google's OAuth flow.
      */
     private static async googleSignIn(): Promise<EventMember | null> {
-        try {
-            const provider = new GoogleAuthProvider();
-            const userCreds = await signInWithPopup(getAuth(), provider);
-            spawnNotification(
-                "success",
-                "You've signed in with Google. Welcome!",
-            );
-            return GlobalAuth.firebaseUserToEventUser(userCreds.user);
-        } catch (err) {
-            spawnNotification("error", (err as Error).message);
-            return null;
-        }
+        const provider = new GoogleAuthProvider();
+        const userCreds = await signInWithPopup(getAuth(), provider);
+        spawnNotification("success", "You've signed in with Google. Welcome!");
+        return GlobalAuth.firebaseUserToEventUser(userCreds.user);
     }
 
     /**
@@ -157,36 +142,28 @@ export class GlobalAuth {
         email: string,
         password: string,
     ): Promise<EventMember | null> {
-        try {
-            if (!username) {
-                throw new Error("Please set a username.");
-            } else if (username.length > 64) {
-                throw new Error(
-                    "Please set a username less than 64 characters long.",
-                );
-            }
-
-            const userCreds = await createUserWithEmailAndPassword(
-                getAuth(),
-                email,
-                password,
+        if (!username) {
+            throw new Error("Please set a username.");
+        } else if (username.length > 64) {
+            throw new Error(
+                "Please set a username less than 64 characters long.",
             );
-
-            // Set the display name.
-            await updateProfile(userCreds.user, {
-                displayName: username,
-            });
-
-            spawnNotification(
-                "success",
-                `You've signed up. Welcome ${username}!`,
-            );
-
-            return GlobalAuth.firebaseUserToEventUser(userCreds.user);
-        } catch (err) {
-            spawnNotification("error", (err as Error).message);
-            return null;
         }
+
+        const userCreds = await createUserWithEmailAndPassword(
+            getAuth(),
+            email,
+            password,
+        );
+
+        // Set the display name.
+        await updateProfile(userCreds.user, {
+            displayName: username,
+        });
+
+        spawnNotification("success", `You've signed up. Welcome ${username}!`);
+
+        return GlobalAuth.firebaseUserToEventUser(userCreds.user);
     }
 }
 

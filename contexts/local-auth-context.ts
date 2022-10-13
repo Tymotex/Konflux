@@ -49,11 +49,6 @@ export const localAuthReducer = (
                     `Username '${username}' expected in this event's members list.`,
                 );
 
-            console.log(username);
-            console.log(localPassword);
-            console.log(event.members[username]);
-            // alert("Logging in");
-
             // Expect the passwords to match, only if a password was originally
             // set when the user first registered.
             const expectedLocalPassword = event.members[username].password;

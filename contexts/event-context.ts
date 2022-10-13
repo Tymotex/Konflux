@@ -91,9 +91,13 @@ export const eventReducer = (
         case "ADD_MEMBER": {
             const { eventId, user } = action.payload;
 
+            // If the member already exists, do nothing.
+            if (user.username in state.members) return state;
+
             // By default, new members other than the original creators are not
             // owners.
-            user.isOwner = false;
+            const isOwner = Object.keys(state.members).length === 0;
+            user.isOwner = isOwner;
 
             signUpMember(eventId, user).catch((err) =>
                 spawnNotification(
@@ -111,7 +115,7 @@ export const eventReducer = (
                         password: user.password,
                         email: user.email,
                         profilePicUrl: user.profilePicUrl,
-                        isOwner: false,
+                        isOwner,
                     },
                 },
             };

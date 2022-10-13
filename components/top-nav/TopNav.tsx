@@ -21,8 +21,12 @@ const TopNav: React.FC<Props> = () => {
     const isDarkMode = useDarkMode();
 
     // Auth state.
-    const { localAuthState } = useContext(LocalAuthContext);
+    const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
     const user = useGlobalOrLocalEventMember(localAuthState);
+
+    const localSignOut = useCallback(() => {
+        localAuthDispatch({ type: "LOCAL_SIGN_OUT" });
+    }, [localAuthDispatch]);
 
     // Register modal state.
     const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
@@ -30,10 +34,10 @@ const TopNav: React.FC<Props> = () => {
         () => setRegisterIsOpen(true),
         [setRegisterIsOpen],
     );
-    const closeRegisterModal = useCallback(
-        () => setRegisterIsOpen(false),
-        [setRegisterIsOpen],
-    );
+    const closeRegisterModal = useCallback(() => {
+        setRegisterIsOpen(false);
+        router.reload();
+    }, [setRegisterIsOpen]);
 
     // Login modal state.
     const [loginIsOpen, setLoginIsOpen] = useState<boolean>(false);
@@ -41,10 +45,9 @@ const TopNav: React.FC<Props> = () => {
         () => setLoginIsOpen(true),
         [setLoginIsOpen],
     );
-    const closeLoginModal = useCallback(
-        () => setLoginIsOpen(false),
-        [setLoginIsOpen],
-    );
+    const closeLoginModal = useCallback(() => {
+        setLoginIsOpen(false);
+    }, [setLoginIsOpen, router]);
 
     // If at the homepage and either the login or register query parameter
     // was supplied, open the corresponding modal.
@@ -119,7 +122,9 @@ const TopNav: React.FC<Props> = () => {
                     {user ? (
                         user.scope === "local" ? (
                             <>
-                                <Button>Sign Out ({user.username})</Button>
+                                <Button onClick={localSignOut}>
+                                    Sign Out ({user.username})
+                                </Button>
                             </>
                         ) : user.scope === "global" ? (
                             <AvatarDropdown

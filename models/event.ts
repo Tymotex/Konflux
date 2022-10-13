@@ -7,13 +7,15 @@ import { spawnNotification } from "utils/notifications";
  */
 export interface EventMember {
     username: string;
-    scope: "local" | "global" | "";
+    scope: AuthScope;
     password?: string;
     email?: string;
     profilePicUrl?: string;
     isOwner?: boolean;
     placeholder?: boolean;
 }
+
+export type AuthScope = "local" | "global" | "";
 
 /**
  * A map of time block indices to the people available at them.
@@ -109,11 +111,26 @@ export const onEventChange = async (
  * @param creatorUsername
  * @returns
  */
-export const createEvent = async (
+export const createEventAndAddOwner = async (
     eventName: string,
     creatorUsername: string,
     password: string,
+    scope: AuthScope,
 ): Promise<[string, KonfluxEvent]> => {
+    if (!scope) throw new Error("Auth scope must be specified");
+
+    if (eventName.length === 0)
+        throw new Error("Event name must not be empty.");
+    else if (eventName.length >= 255)
+        throw new Error("Event name must be fewer than 255 characters.");
+
+    if (creatorUsername.length === 0) throw new Error("Username is required.");
+    else if (creatorUsername.length >= 255)
+        throw new Error("Username must be fewer than 255 characters.");
+
+    if (password.length >= 64)
+        throw new Error("Password must be fewer than 64 characters.");
+
     const event: KonfluxEvent = {
         name: eventName,
         earliest: 18,
@@ -122,10 +139,12 @@ export const createEvent = async (
         members: {
             [creatorUsername]: {
                 isOwner: true,
+                scope: scope,
                 password: password,
             },
         },
     };
+
     try {
         const reference = await push(ref(getDatabase(), `events`), event);
         if (!reference.key) throw Error("Firebase did not assign an ID.");

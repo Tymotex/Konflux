@@ -9,19 +9,31 @@ import { Callout } from "components/callout";
 import IdeaIcon from "components/callout/idea.svg";
 import { TextField } from "components/form";
 import { EventContext } from "contexts/event-context";
+import { LocalAuthAction, LocalAuthContext } from "contexts/local-auth-context";
 import { useDarkMode } from "contexts/ThemeProvider";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { FormEvent, useCallback, useContext, useRef } from "react";
+import React, {
+    Dispatch,
+    FormEvent,
+    useCallback,
+    useContext,
+    useRef,
+} from "react";
 import BackIcon from "./back.svg";
 import styles from "./EventSignIn.module.scss";
 
 interface Props {
     eventId: string;
-    onSubmit: (username: string, password: string) => void;
+    onSubmitSuccess?: (username: string, password: string) => void;
+    localAuthDispatch: Dispatch<LocalAuthAction>;
 }
 
-const EventSignIn: React.FC<Props> = ({ eventId, onSubmit }) => {
+const EventSignIn: React.FC<Props> = ({
+    eventId,
+    onSubmitSuccess = () => {},
+    localAuthDispatch,
+}) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const router = useRouter();
 
@@ -48,7 +60,19 @@ const EventSignIn: React.FC<Props> = ({ eventId, onSubmit }) => {
 
         // If this user is already a member, attempt to dispatch a login,
         // otherwise directly attempt to create them as a new user.
-        onSubmit(username, password);
+        localAuthDispatch({
+            type:
+                username in eventState.members
+                    ? "LOCAL_SIGN_IN"
+                    : "LOCAL_SIGN_UP",
+            payload: {
+                event: eventState,
+                username,
+                localPassword: password,
+            },
+        });
+
+        onSubmitSuccess(username, password);
     }, [
         eventId,
         eventState,

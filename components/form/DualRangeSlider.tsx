@@ -18,6 +18,11 @@ interface Props {
     onChange: (minVal: number, maxVal: number) => void;
 }
 
+// These global variables are used to prevent infinite looping in issue #60.
+// See: https://github.com/Tymotex/Konflux/issues/60.
+let prevLeftVal: number | undefined;
+let prevRightVal: number | undefined;
+
 const DualRangeSlider: React.FC<Props> = ({
     defaultMinVal,
     defaultMaxVal,
@@ -48,8 +53,16 @@ const DualRangeSlider: React.FC<Props> = ({
     }, [leftSliderVal, rightSliderVal, pushMinIfPast, pushMaxIfPast]);
 
     useEffect(() => {
-        if (leftSliderVal + minGap < rightSliderVal)
+        const inBounds = leftSliderVal + minGap < rightSliderVal;
+        if (
+            inBounds &&
+            prevLeftVal !== leftSliderVal &&
+            prevRightVal !== rightSliderVal
+        ) {
+            prevLeftVal = leftSliderVal;
+            prevRightVal = rightSliderVal;
             onChange(leftSliderVal, rightSliderVal);
+        }
     }, [leftSliderVal, rightSliderVal, minGap, onChange]);
 
     return (

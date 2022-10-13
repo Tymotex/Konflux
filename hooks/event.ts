@@ -1,7 +1,11 @@
-import { EventAction } from "contexts/event-context";
+import { EventAction, EventContext } from "contexts/event-context";
+import { LocalAuthAction, LocalAuthContext } from "contexts/local-auth-context";
 import { EventMember, KonfluxEvent } from "models/event";
-import { Dispatch, useEffect } from "react";
+import { useRouter } from "next/router";
+import { Dispatch, useContext, useEffect, useMemo, useState } from "react";
 import { useGlobalUser } from "utils/global-auth";
+import { spawnNotification } from "utils/notifications";
+import { useOnPageLeave } from "./router";
 
 /**
  * Returns the event member's credentials.
@@ -87,4 +91,72 @@ export const useDetermineIsOwner = (
         eventState.members[user.username].isOwner
         ? true
         : false;
+};
+
+/**
+ * Resets the local auth state. Useful for pages other than the event page since
+ * the local authentication is scoped only to that one event.
+ * @param localAuthDispatch
+ */
+export const useClearAuthOnPageMount = () => {
+    const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
+
+    useEffect(() => {
+        return () => {
+            if (localAuthState && localAuthState.username) {
+                localAuthDispatch({ type: "LOCAL_SIGN_OUT" });
+            }
+        };
+    }, [localAuthDispatch, localAuthState]);
+};
+
+/**
+ * Determines if there is an auth bypass attempt.
+ * @returns
+ */
+export const useDetectAuthBypassAttempt = (): boolean => {
+    const router = useRouter();
+
+    const isBypassing = useMemo(() => {
+        const { username } = router.query;
+        return username ? true : false;
+    }, [router]);
+
+    return isBypassing;
+};
+
+/**
+ * Automatically dispatch a local sign in attempt when the URL contains
+ * query parameters for the user's local credentials.
+ * Why? This is to save the user from having to re-enter credentials when they
+ *      make the event and get redirected to the event page.
+ */
+export const useBypassEventSignInWithURL = (
+    eventId: string,
+    event: KonfluxEvent,
+) => {
+    const { localAuthDispatch } = useContext(LocalAuthContext);
+    const router = useRouter();
+
+    const isBypassing = useDetectAuthBypassAttempt();
+
+    useEffect(() => {
+        if (isBypassing) {
+            const { username, password } = router.query;
+            if (username) {
+                const usernameStr = String(username);
+                const passwordStr = String(password);
+                if (usernameStr in event.members)
+                    localAuthDispatch({
+                        type: "LOCAL_SIGN_IN",
+                        payload: {
+                            event: event,
+                            username: usernameStr,
+                            localPassword: passwordStr,
+                        },
+                    });
+                router.replace(`/events/${eventId}`);
+            }
+        }
+    }, [isBypassing, event, eventId]);
 };

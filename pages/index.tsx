@@ -1,160 +1,21 @@
-import { Button } from "components/button";
-import { TextField } from "components/form";
-import { createEvent } from "models/event";
+import { EventCreationForm } from "components/form";
+import { PageTransition } from "components/page-transition";
+import { useDarkMode } from "contexts/ThemeProvider";
+import { motion } from "framer-motion";
+import { useClearAuthOnPageLeave } from "hooks/event";
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import {
-    FormEventHandler,
-    MouseEvent,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-} from "react";
-import { spawnNotification } from "utils/notifications";
+import Head from "next/head";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
-import { motion } from "framer-motion";
-import { useDarkMode } from "contexts/ThemeProvider";
-import { PageTransition } from "components/page-transition";
-import Head from "next/head";
-import { LocalAuthContext } from "contexts/local-auth-context";
-
-const container = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            delay: 0.75,
-            delayChildren: 0.75,
-            staggerChildren: 0.25,
-        },
-    },
-};
-
-const item = {
-    hidden: { opacity: 0, x: -40 },
-    show: { opacity: 1, x: 0, transition: { duration: 1 } },
-};
-
-const entryAnimVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 1 } },
-};
 
 const Home: NextPage = () => {
-    const router = useRouter();
-    const eventNameInput = useRef<HTMLInputElement>(null);
-    const usernameInput = useRef<HTMLInputElement>(null);
-    const passwordInput = useRef<HTMLInputElement>(null);
-
-    const { authState, authDispatch } = useContext(LocalAuthContext);
-    const loggedIn = useMemo(
-        () => authState && authState.username && authState.username.length > 0,
-        [authState],
-    );
-
     const isDarkMode = useDarkMode();
 
-    // Handle the creation of an event.
-    const handleEventCreation: FormEventHandler<HTMLFormElement> = useCallback(
-        async (e): Promise<void> => {
-            e.preventDefault();
-            let username: string;
-            let password: string;
-            let eventName: string;
-
-            if (eventNameInput.current === null) {
-                spawnNotification(
-                    "error",
-                    "Event name input reference detached!",
-                );
-                return;
-            }
-            // Get and validate the event name.
-            eventName = String(eventNameInput.current.value);
-            if (eventName.length === 0) {
-                throw new Error("Event name must not be empty.");
-            } else if (eventName.length >= 255) {
-                throw new Error(
-                    "Event name must be fewer than 255 characters.",
-                );
-            }
-
-            if (!loggedIn) {
-                if (
-                    usernameInput.current === null ||
-                    passwordInput.current === null
-                ) {
-                    spawnNotification(
-                        "error",
-                        "Username or password input references detached!",
-                    );
-                    return;
-                }
-
-                // Get and validate the username and password
-                username = String(usernameInput.current.value);
-                password = String(passwordInput.current.value);
-                if (username.length === 0) {
-                    throw new Error("Username is required.");
-                } else if (username.length >= 255) {
-                    throw new Error(
-                        "Username must be fewer than 255 characters.",
-                    );
-                }
-                if (password.length >= 64) {
-                    throw new Error(
-                        "Password must be fewer than 64 characters.",
-                    );
-                }
-            } else {
-                username = authState.username;
-                password = "TODO:wtfToDoWhenGloballyAuthed";
-            }
-
-            try {
-                // Creating the event in Firebase realtime DB.
-                // Note that this creates the first member in the event model
-                // and assigns them as the owner of the event.
-                const [eventId, event] = await createEvent(
-                    eventName,
-                    username,
-                    password,
-                );
-
-                if (!loggedIn) {
-                    // Dispatch a login.
-                    try {
-                        authDispatch({
-                            type: "LOCAL_LOGIN",
-                            payload: {
-                                event: event,
-                                username: username,
-                                localPassword: password,
-                            },
-                        });
-                    } catch (err) {
-                        spawnNotification("error", (err as Error).message);
-                    }
-                }
-
-                // Transmit username and password to the event details page so
-                // that it need not be fetched and verified.
-                router.push({
-                    pathname: `/events/${eventId}`,
-                });
-            } catch (err) {
-                if (err instanceof Error)
-                    spawnNotification("error", err.message);
-                else throw err;
-            }
-        },
-        [router, authDispatch],
-    );
-
+    /**
+     * Note: The homepage renders an event creation form directly. This form
+     *       is different only if the user is globally authenticated.
+     */
     return (
         <>
             <Head>
@@ -212,64 +73,42 @@ const Home: NextPage = () => {
                                 />
                             </motion.span>
                         </motion.div>
-                        <motion.form
-                            onSubmit={handleEventCreation}
+                        <motion.div
                             className={styles.startForm}
-                            variants={container}
+                            variants={homepageAnimatedContainer}
                             initial={"hidden"}
                             animate="show"
                         >
-                            <motion.div variants={item}>
-                                <TextField
-                                    refHandle={eventNameInput}
-                                    id={"event-name"}
-                                    placeholder={"Dinner with Linus Torvalds"}
-                                    required
-                                    label={"Event Name"}
-                                />
-                            </motion.div>
-                            {!loggedIn && (
-                                <>
-                                    <motion.div variants={item}>
-                                        <TextField
-                                            refHandle={usernameInput}
-                                            id={"username"}
-                                            placeholder={"Linus Torvalds"}
-                                            required
-                                            label={"Username"}
-                                            infoText={
-                                                "A name that others can recognise you by."
-                                            }
-                                        />
-                                    </motion.div>
-                                    <motion.div variants={item}>
-                                        <TextField
-                                            refHandle={passwordInput}
-                                            id={"password"}
-                                            type={"password"}
-                                            label={"Password"}
-                                            infoText={
-                                                "An optional password you can set so that only you can modify the event."
-                                            }
-                                        />
-                                    </motion.div>
-                                </>
-                            )}
-                            <motion.div
-                                variants={item}
-                                style={{
-                                    textAlign: "center",
-                                    marginTop: "32px",
-                                }}
-                            >
-                                <Button isSubmit>Begin</Button>
-                            </motion.div>
-                        </motion.form>
+                            <EventCreationForm />
+                        </motion.div>
                     </main>
                 </div>
             </PageTransition>
         </>
     );
+};
+
+/* ------------------------- Framer Motion Variants ------------------------- */
+const homepageAnimatedContainer = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            delay: 0.75,
+            delayChildren: 0.75,
+            staggerChildren: 0.25,
+        },
+    },
+};
+
+export const homepageAnimatedItem = {
+    hidden: { opacity: 0, x: -40 },
+    show: { opacity: 1, x: 0, transition: { duration: 1 } },
+};
+
+const entryAnimVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 1 } },
 };
 
 export default Home;
