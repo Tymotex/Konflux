@@ -31,11 +31,6 @@ const Modal: React.FC<Props> = ({
                 <MotionOverlay
                     isOpen={isOpen}
                     onDismiss={onDismiss}
-                    style={{
-                        background: "hsl(0, 100%, 0%, 0.5)",
-                        backdropFilter: "blur(2px)",
-                        zIndex: 10000,
-                    }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}

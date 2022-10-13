@@ -65,7 +65,6 @@ export const localAuthReducer = (
                 );
             }
 
-            spawnNotification("success", "Logged in for this event.");
             return {
                 username,
                 password: localPassword,

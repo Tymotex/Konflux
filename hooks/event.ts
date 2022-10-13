@@ -4,6 +4,7 @@ import { EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
 import { Dispatch, useContext, useEffect, useMemo } from "react";
 import { useGlobalUser } from "utils/global-auth";
+import { spawnNotification } from "utils/notifications";
 
 /**
  * Returns the event member's credentials.
@@ -68,6 +69,7 @@ export const useWatchAndAddMemberToEventIfNotExist = (
         if (!user) return;
 
         if (!(user.username in eventState.members)) {
+            spawnNotification("info", "You're now a member of this event.");
             eventDispatch({ type: "ADD_MEMBER", payload: { eventId, user } });
         }
     }, [eventId, user, eventState, eventDispatch]);

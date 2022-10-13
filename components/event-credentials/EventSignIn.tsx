@@ -9,15 +9,16 @@ import { Callout } from "components/callout";
 import IdeaIcon from "components/callout/idea.svg";
 import { TextField } from "components/form";
 import { EventContext } from "contexts/event-context";
-import { LocalAuthAction, LocalAuthContext } from "contexts/local-auth-context";
+import { LocalAuthAction } from "contexts/local-auth-context";
 import { useDarkMode } from "contexts/ThemeProvider";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, {
     Dispatch,
-    FormEvent,
     useCallback,
     useContext,
+    useMemo,
     useRef,
 } from "react";
 import BackIcon from "./back.svg";
@@ -28,6 +29,8 @@ interface Props {
     onSubmitSuccess?: (username: string, password: string) => void;
     localAuthDispatch: Dispatch<LocalAuthAction>;
 }
+
+const MotionOverlay = motion(AlertDialogOverlay);
 
 const EventSignIn: React.FC<Props> = ({
     eventId,
@@ -43,7 +46,13 @@ const EventSignIn: React.FC<Props> = ({
     const usernameInputRef = useRef<HTMLInputElement>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
-    const allMembers = new Set(Object.keys(eventState?.members || {}));
+    const allLocalMembers = useMemo(() => {
+        return new Set(
+            Object.keys(eventState?.members || {}).filter(
+                (member) => eventState.members[member].scope === "local",
+            ),
+        );
+    }, [eventState]);
 
     /**
      * Submit form and dispatch either a login or register request to populate
@@ -82,77 +91,77 @@ const EventSignIn: React.FC<Props> = ({
     ]);
 
     return (
-        <AlertDialogOverlay
-            leastDestructiveRef={backBtnRef}
-            style={{
-                background: "hsl(0, 100%, 0%, 0.5)",
-                backdropFilter: "blur(2px)",
-                zIndex: 10000,
-            }}
-        >
-            <AlertDialogContent
-                className={`${styles.container} ${
-                    isDarkMode ? styles.dark : ""
-                }`}
+        <AnimatePresence mode="wait">
+            <MotionOverlay
+                leastDestructiveRef={backBtnRef}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
             >
-                <div className={styles.content}>
-                    <button
-                        ref={backBtnRef}
-                        className={styles.backBtn}
-                        onClick={() => router.push("/")}
-                    >
-                        <BackIcon className={styles.icon} />
-                        Back Home
-                    </button>
-
-                    <AlertDialogLabel className={styles.headingText}>
-                        Who are you?
-                    </AlertDialogLabel>
-
-                    <div className={styles.form}>
-                        <TextField
-                            id="event-username"
-                            refHandle={usernameInputRef}
-                            label="Event Username"
-                            autocompleteItems={allMembers}
-                            placeholder="E.g. Linus Torvalds"
-                            infoText="The username you used when you registered to this event."
-                            required
-                        />
-                        <TextField
-                            id="event-password"
-                            label="Event Password"
-                            refHandle={passwordInputRef}
-                            type="password"
-                            infoText="Leave empty if you didn't set a password when you registered to this event."
-                        />
-                        <Button
-                            onClick={() => {
-                                locallyAuthenticate();
-                            }}
+                <AlertDialogContent
+                    className={`${styles.container} ${
+                        isDarkMode ? styles.dark : ""
+                    }`}
+                >
+                    <div className={styles.content}>
+                        <button
+                            ref={backBtnRef}
+                            className={styles.backBtn}
+                            onClick={() => router.push("/")}
                         >
-                            Submit
-                        </Button>
-                    </div>
+                            <BackIcon className={styles.icon} />
+                            Back Home
+                        </button>
 
-                    <AlertDialogDescription className={styles.description}>
-                        <Callout Icon={IdeaIcon}>
-                            <strong>
-                                <Link href="/?login=true">Log in</Link>
-                            </strong>{" "}
-                            or{" "}
-                            <strong>
-                                <Link href="/?register=true">
-                                    create an account
-                                </Link>
-                            </strong>{" "}
-                            so we don&apos;t have to ask you who you are every
-                            time.
-                        </Callout>
-                    </AlertDialogDescription>
-                </div>
-            </AlertDialogContent>
-        </AlertDialogOverlay>
+                        <AlertDialogLabel className={styles.headingText}>
+                            Who are you?
+                        </AlertDialogLabel>
+
+                        <div className={styles.form}>
+                            <TextField
+                                id="event-username"
+                                refHandle={usernameInputRef}
+                                label="Event Username"
+                                autocompleteItems={allLocalMembers}
+                                placeholder="E.g. Linus Torvalds"
+                                infoText="The username you used when you registered to this event."
+                                required
+                            />
+                            <TextField
+                                id="event-password"
+                                label="Event Password"
+                                refHandle={passwordInputRef}
+                                type="password"
+                                infoText="Leave empty if you didn't set a password when you registered to this event."
+                            />
+                            <Button
+                                onClick={() => {
+                                    locallyAuthenticate();
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        </div>
+
+                        <AlertDialogDescription className={styles.description}>
+                            <Callout Icon={IdeaIcon}>
+                                <strong>
+                                    <Link href="/?login=true">Log in</Link>
+                                </strong>{" "}
+                                or{" "}
+                                <strong>
+                                    <Link href="/?register=true">
+                                        create an account
+                                    </Link>
+                                </strong>{" "}
+                                so we don&apos;t have to ask you who you are
+                                every time.
+                            </Callout>
+                        </AlertDialogDescription>
+                    </div>
+                </AlertDialogContent>
+            </MotionOverlay>
+        </AnimatePresence>
     );
 };
 

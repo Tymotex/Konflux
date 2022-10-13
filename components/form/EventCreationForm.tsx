@@ -26,7 +26,6 @@ const EventCreationForm: React.FC<Props> = () => {
 
     const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
 
-    console.log(globalUser);
     // Handle the creation of an event.
     const handleEventCreation: FormEventHandler<HTMLFormElement> = useCallback(
         async (e): Promise<void> => {
