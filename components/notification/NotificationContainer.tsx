@@ -15,6 +15,7 @@ const NotificationContainer: React.FC<Props> = () => {
                 hideProgressBar
                 pauseOnFocusLoss={false}
                 style={{ zIndex: 1000000 }}
+                autoClose={10000}
             />
         </div>
     );

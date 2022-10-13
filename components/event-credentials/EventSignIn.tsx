@@ -10,6 +10,7 @@ import IdeaIcon from "components/callout/idea.svg";
 import { TextField } from "components/form";
 import { EventContext } from "contexts/event-context";
 import { LocalAuthAction } from "contexts/local-auth-context";
+import { ModalControlContext } from "contexts/ModalControlProvider";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -39,6 +40,7 @@ const EventSignIn: React.FC<Props> = ({
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const router = useRouter();
+    const { openModal } = useContext(ModalControlContext);
 
     const isDarkMode = useDarkMode();
 
@@ -145,15 +147,11 @@ const EventSignIn: React.FC<Props> = ({
 
                         <AlertDialogDescription className={styles.description}>
                             <Callout Icon={IdeaIcon}>
-                                <strong>
-                                    <Link href="/?login=true">Log in</Link>
-                                </strong>{" "}
+                                <a onClick={() => openModal("login")}>Log in</a>{" "}
                                 or{" "}
-                                <strong>
-                                    <Link href="/?register=true">
-                                        create an account
-                                    </Link>
-                                </strong>{" "}
+                                <a onClick={() => openModal("register")}>
+                                    create an account
+                                </a>{" "}
                                 so we don&apos;t have to ask you who you are
                                 every time.
                             </Callout>

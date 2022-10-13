@@ -3,6 +3,7 @@ import { AvatarDropdown } from "components/avatar";
 import { Button } from "components/button";
 import { DarkModeToggle } from "components/dark-mode-toggle";
 import { LocalAuthContext } from "contexts/local-auth-context";
+import { ModalControlContext } from "contexts/ModalControlProvider";
 import { useDarkMode } from "contexts/ThemeProvider";
 import { useGlobalOrLocalEventMember } from "hooks/event";
 import Link from "next/link";
@@ -19,6 +20,7 @@ interface Props {}
 const TopNav: React.FC<Props> = () => {
     const router = useRouter();
     const isDarkMode = useDarkMode();
+    const { openModal, closeModal } = useContext(ModalControlContext);
 
     // Auth state.
     const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
@@ -28,66 +30,20 @@ const TopNav: React.FC<Props> = () => {
         localAuthDispatch({ type: "LOCAL_SIGN_OUT" });
     }, [localAuthDispatch]);
 
-    // Register modal state.
-    const [registerIsOpen, setRegisterIsOpen] = useState<boolean>(false);
-    const openRegisterModal = useCallback(
-        () => setRegisterIsOpen(true),
-        [setRegisterIsOpen],
-    );
-    const closeRegisterModal = useCallback(() => {
-        setRegisterIsOpen(false);
-    }, [setRegisterIsOpen]);
-
-    // Login modal state.
-    const [loginIsOpen, setLoginIsOpen] = useState<boolean>(false);
-    const openLoginModal = useCallback(
-        () => setLoginIsOpen(true),
-        [setLoginIsOpen],
-    );
-    const closeLoginModal = useCallback(() => {
-        setLoginIsOpen(false);
-    }, [setLoginIsOpen]);
-
-    // If at the homepage and either the login or register query parameter
-    // was supplied, open the corresponding modal.
-    // This lets other pages 'link to' the login/register modals.
-    useEffect(() => {
-        const { login, register } = router.query;
-        if (router.pathname === "/") {
-            if (login) {
-                setTimeout(() => {
-                    openLoginModal();
-                    closeRegisterModal();
-                }, 1000);
-            } else if (register) {
-                setTimeout(() => {
-                    openRegisterModal();
-                    closeLoginModal();
-                }, 1000);
-            }
-        }
-    }, [
-        router,
-        closeLoginModal,
-        closeRegisterModal,
-        openLoginModal,
-        openRegisterModal,
-    ]);
-
     /**
      * Signs the user out and closes all auth modals.
      */
     const handleSignOut = useCallback(() => {
         GlobalAuth.signOut()
             .then(() => {
-                setRegisterIsOpen(false);
-                setLoginIsOpen(false);
+                closeModal("register");
+                closeModal("login");
                 spawnNotification("success", "You've signed out.");
             })
             .catch((err) => {
                 spawnNotification("error", err);
             });
-    }, [setRegisterIsOpen, setLoginIsOpen]);
+    }, [closeModal]);
 
     return (
         <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
@@ -138,23 +94,15 @@ const TopNav: React.FC<Props> = () => {
                         // When user isn't signed in, render login and register
                         // buttons.
                         <>
-                            <LoginModal
-                                isOpen={loginIsOpen}
-                                onDismiss={closeLoginModal}
-                            />
                             <button
                                 className={styles.login}
-                                onClick={openLoginModal}
+                                onClick={() => openModal("login")}
                             >
                                 Login
                             </button>
-                            <RegisterModal
-                                isOpen={registerIsOpen}
-                                onDismiss={closeRegisterModal}
-                            />
                             <button
                                 className={styles.register}
-                                onClick={openRegisterModal}
+                                onClick={() => openModal("register")}
                             >
                                 Register
                             </button>
