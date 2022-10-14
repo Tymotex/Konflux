@@ -1,5 +1,5 @@
 import { Menu, MenuButton, MenuItem, MenuList } from "@reach/menu-button";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import { useRouter } from "next/router";
 import React from "react";
 import { useGlobalUser } from "utils/global-auth";

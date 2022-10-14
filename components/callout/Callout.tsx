@@ -1,4 +1,4 @@
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React from "react";
 import styles from "./Callout.module.scss";
 

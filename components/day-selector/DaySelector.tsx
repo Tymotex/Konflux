@@ -1,6 +1,6 @@
 import { Status } from "components/sync-status/SyncStatus";
 import { EventAction } from "contexts/event-context";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 import React, {

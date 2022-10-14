@@ -1,18 +1,6 @@
 import { LoginModal, RegisterModal } from "components/form";
 import React, { useCallback, useState } from "react";
-
-type ModalType = "login" | "register";
-
-interface ModalControlContextInterface {
-    openModal: (modal: ModalType) => void;
-    closeModal: (modal: ModalType) => void;
-}
-
-export const ModalControlContext =
-    React.createContext<ModalControlContextInterface>({
-        openModal: (_) => {},
-        closeModal: (_) => {},
-    });
+import { ModalControlContext, ModalType } from "./modal-control-context";
 
 interface ModalControlProviderProps {
     children: React.ReactNode;

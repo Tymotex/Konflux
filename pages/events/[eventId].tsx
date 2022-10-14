@@ -40,6 +40,7 @@ import {
     useClearAuthOnPageMount,
     useBypassEventSignInWithURL,
     useDetectAuthBypassAttempt,
+    useEventId,
 } from "hooks/event";
 
 const EventPage: NextPage = () => {
@@ -55,10 +56,7 @@ const EventPage: NextPage = () => {
     );
 
     // Get the event's ID from the route.
-    const eventId = useMemo(
-        () => (router.query.eventId ? String(router.query.eventId) : ""),
-        [router],
-    );
+    const eventId = useEventId();
 
     // User auth state.
     const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
@@ -183,17 +181,15 @@ const EventPage: NextPage = () => {
                             }}
                         >
                             <div className={styles.main}>
+                                {eventId && (
+                                    <EventSignIn
+                                        show={!eventMember && !isAuthBypassing}
+                                        eventId={eventId}
+                                        localAuthDispatch={localAuthDispatch}
+                                    />
+                                )}
                                 {!eventMember && !isAuthBypassing ? (
                                     <>
-                                        <EventSignIn
-                                            eventId={eventId}
-                                            localAuthDispatch={
-                                                localAuthDispatch
-                                            }
-                                            // onSubmitSuccess={() => {
-                                            //     setFormSubmitted(true);
-                                            // }}
-                                        />
                                         {/* TODO: Move styles to class. */}
                                         <div
                                             style={{

@@ -20,6 +20,7 @@ import {
 } from "contexts/local-auth-context";
 import { useMemo, useReducer } from "react";
 import { ModalControlProvider } from "contexts/ModalControlProvider";
+import { EventDataProvider } from "contexts/EventDataProvider";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -38,15 +39,20 @@ function MyApp({ Component, pageProps }: AppProps) {
             <ThemeProvider>
                 <ModalControlProvider>
                     <LocalAuthContext.Provider value={cachedAuthContext}>
-                        <PageLayout>
-                            <AnimatePresence
-                                mode="wait"
-                                onExitComplete={() => window.scrollTo(0, 0)}
-                            >
-                                <Component {...pageProps} key={router.route} />
-                            </AnimatePresence>
-                            <NotificationContainer />
-                        </PageLayout>
+                        <EventDataProvider>
+                            <PageLayout>
+                                <AnimatePresence
+                                    mode="wait"
+                                    onExitComplete={() => window.scrollTo(0, 0)}
+                                >
+                                    <Component
+                                        {...pageProps}
+                                        key={router.route}
+                                    />
+                                </AnimatePresence>
+                                <NotificationContainer />
+                            </PageLayout>
+                        </EventDataProvider>
                     </LocalAuthContext.Provider>
                 </ModalControlProvider>
             </ThemeProvider>

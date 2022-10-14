@@ -1,4 +1,4 @@
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React, { MouseEvent, useCallback, useState } from "react";
 import { spawnNotification } from "utils/notifications";
 import styles from "./AvailabilityLegend.module.scss";

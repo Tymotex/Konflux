@@ -1,7 +1,7 @@
 import React from "react";
 import LogoLight from "public/logo-light.svg";
 import LogoDark from "public/logo-dark.svg";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import { useRouter } from "next/router";
 import styles from "./Logo.module.scss";
 

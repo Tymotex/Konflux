@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { EventContext } from "contexts/event-context";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React, {
     MouseEvent,
     MutableRefObject,

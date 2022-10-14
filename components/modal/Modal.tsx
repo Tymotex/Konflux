@@ -1,6 +1,6 @@
 import { DialogContent, DialogOverlay } from "@reach/dialog";
 import { Logo } from "components/brand";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import CloseIcon from "./close.svg";

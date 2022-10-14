@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from "react";
 import SunIcon from "./sun.svg";
 import MoonIcon from "./moon.svg";
 import styles from "./DarkModeToggle.module.scss";
-import { ThemeContext } from "contexts/ThemeProvider";
+import { ThemeContext } from "contexts/theme-context";
 
 interface Props {}
 

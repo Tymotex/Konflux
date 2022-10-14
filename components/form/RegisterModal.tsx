@@ -3,7 +3,7 @@ import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { TextField } from "components/form";
 import Modal from "components/modal/Modal";
 import TextDivider from "components/modal/TextDivider";
-import { ModalControlContext } from "contexts/ModalControlProvider";
+import { ModalControlContext } from "contexts/modal-control-context";
 import React, { useCallback, useContext, useRef } from "react";
 import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";

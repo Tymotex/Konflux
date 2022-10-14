@@ -35,6 +35,13 @@ export type EventAction =
               eventId: string;
               user: EventMember;
           };
+      }
+    | {
+          type: "REMOVE_MEMBER";
+          payload: {
+              eventId: string;
+              username: string;
+          };
       };
 
 export const eventReducer = (
@@ -82,7 +89,9 @@ export const eventReducer = (
                     );
                     updateStatus("failure");
                 });
-            // TODO: is it the case that affecting the local state is unnecessary if the update to remote succeeds? Because it would simply be pulled.
+            // Note: it is probably the case that affecting the local state is
+            //       unnecessary given that the remote update succeeds, because
+            //       the remote state would simply be pulled.
             return {
                 ...state,
                 groupAvailabilities: action.payload.groupAvailabilities,
@@ -118,6 +127,41 @@ export const eventReducer = (
                         isOwner,
                     },
                 },
+            };
+        }
+        case "REMOVE_MEMBER": {
+            const { eventId, username } = action.payload;
+
+            const newAvailabilities = state.groupAvailabilities;
+
+            // TODO: if the user is the last user of the event, then delete the entire event.
+
+            // Remove the member.
+            if (username in state.members) delete state.members[username];
+            else
+                throw new Error(
+                    `User '${username}' is not a member of this event.`,
+                );
+
+            // Clear the member's availabilities by removing their username from
+            // all time blocks.
+            Object.keys(newAvailabilities || {}).forEach((date) => {
+                // Timeblock indices
+                Object.keys(newAvailabilities[date])
+                    .map((i) => parseInt(i))
+                    .forEach((timeBlockIndex: number) => {
+                        if (username in newAvailabilities[date][timeBlockIndex])
+                            delete newAvailabilities[date][timeBlockIndex][
+                                username
+                            ];
+                    });
+            });
+
+            updateRemoteAvailabilities(eventId, newAvailabilities);
+
+            return {
+                ...state,
+                groupAvailabilities: newAvailabilities,
             };
         }
         default:

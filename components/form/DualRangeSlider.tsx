@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import styles from "./DualRangeSlider.module.scss";
 import { TIME_LABELS } from "components/timetable/timetable-utils";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import { spawnNotification } from "utils/notifications";
 
 interface Props {

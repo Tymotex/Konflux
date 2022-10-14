@@ -1,6 +1,6 @@
 import { EventCreationForm } from "components/form";
 import { PageTransition } from "components/page-transition";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import { motion } from "framer-motion";
 import type { NextPage } from "next";
 import Head from "next/head";

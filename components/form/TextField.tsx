@@ -3,7 +3,7 @@ import styles from "./TextField.module.scss";
 import Asterisk from "./asterisk.svg";
 import Info from "./info.svg";
 import { Tooltip } from "@reach/tooltip";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import {
     Combobox,
     ComboboxInput,

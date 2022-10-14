@@ -7,6 +7,21 @@ import { useGlobalUser } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
 
 /**
+ * Determines the event ID from the current route.
+ * @returns eventId string
+ */
+export const useEventId = (): string | null => {
+    const router = useRouter();
+
+    const eventId = useMemo(
+        () => (router.query.eventId ? String(router.query.eventId) : null),
+        [router],
+    );
+
+    return eventId;
+};
+
+/**
  * Returns the event member's credentials.
  * 1. First, if the user is globally authenticated, then we use their global
  *    details.
@@ -60,7 +75,7 @@ export const useGlobalOrLocalEventMember = (
  */
 export const useWatchAndAddMemberToEventIfNotExist = (
     user: EventMember | null,
-    eventId: string,
+    eventId: string | null,
     eventState: KonfluxEvent,
     eventDispatch: Dispatch<EventAction>,
 ): void => {
@@ -132,7 +147,7 @@ export const useDetectAuthBypassAttempt = (): boolean => {
  *      make the event and get redirected to the event page.
  */
 export const useBypassEventSignInWithURL = (
-    eventId: string,
+    eventId: string | null,
     event: KonfluxEvent,
 ) => {
     const { localAuthDispatch } = useContext(LocalAuthContext);
@@ -141,7 +156,7 @@ export const useBypassEventSignInWithURL = (
     const isBypassing = useDetectAuthBypassAttempt();
 
     useEffect(() => {
-        if (isBypassing) {
+        if (isBypassing && eventId) {
             const { username, password } = router.query;
             if (username) {
                 const usernameStr = String(username);

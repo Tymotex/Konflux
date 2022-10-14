@@ -1,6 +1,6 @@
 import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import { map } from "cypress/types/bluebird";
 import { has, keys } from "cypress/types/lodash";
 import dayjs from "dayjs";

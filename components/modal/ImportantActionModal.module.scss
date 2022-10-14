@@ -1,0 +1,72 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.container {
+    position: relative;
+    width: 100%;
+    max-width: $sm;
+    background: none;
+    padding: 0;
+
+    .content {
+        position: relative;
+        margin-left: $margin-sm;
+        margin-right: $margin-sm;
+        border-radius: 12px;
+        padding: $padding-2xl;
+        background: $grey-100;
+        color: $grey-800;
+
+        .headingText {
+            text-align: center;
+            font-weight: bold;
+            font-size: $font-size-lg;
+            font-family: "Montserrat", sans-serif;
+            margin-top: $margin-md;
+        }
+
+        .backBtn {
+            @include reset-button;
+
+            padding: $padding-sm;
+
+            display: flex;
+            align-items: center;
+            column-gap: $spacing-xs;
+
+            position: absolute;
+            top: $spacing-md;
+            left: $spacing-md;
+
+            color: $grey-500;
+            font-family: "Montserrat", sans-serif;
+            font-size: small;
+
+            .icon {
+                height: 18px;
+                width: 18px;
+                fill: $grey-600;
+            }
+        }
+    }
+    &.dark {
+        .content {
+            background: $grey-800;
+            color: $grey-100;
+
+            .backBtn {
+                color: $grey-300;
+
+                * {
+                    fill: $grey-300;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .container .content {
+        padding: $padding-2xl $padding-sm $padding-sm $padding-sm;
+    }
+}

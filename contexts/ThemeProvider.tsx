@@ -1,24 +1,9 @@
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ThemeContext } from "./theme-context";
 
 interface ThemeProviderProps {
     children: React.ReactNode;
 }
-
-export interface ThemeContextProps {
-    isDarkMode: boolean;
-    toggleDarkMode: () => void;
-}
-
-export const ThemeContext = createContext<ThemeContextProps>({
-    isDarkMode: false,
-    toggleDarkMode: () => console.error("Dark mode toggler callback not set."),
-});
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -44,12 +29,4 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
             {children}
         </ThemeContext.Provider>
     );
-};
-
-/**
- * @returns Whether dark mode is active for this user.
- */
-export const useDarkMode = (): boolean => {
-    const theme = useContext(ThemeContext);
-    return theme.isDarkMode;
 };
