@@ -56,11 +56,11 @@ const DualRangeSlider: React.FC<Props> = ({
         const inBounds = leftSliderVal + minGap < rightSliderVal;
         if (
             inBounds &&
-            prevLeftVal !== leftSliderVal &&
-            prevRightVal !== rightSliderVal
+            !(prevLeftVal === leftSliderVal && prevRightVal === rightSliderVal)
         ) {
             prevLeftVal = leftSliderVal;
             prevRightVal = rightSliderVal;
+
             onChange(leftSliderVal, rightSliderVal);
         }
     }, [leftSliderVal, rightSliderVal, minGap, onChange]);
