@@ -18,10 +18,14 @@ const AvatarDropdown: React.FC<Props> = ({ signOut, profilePicUrl }) => {
     return user ? (
         <Menu>
             <MenuButton className={styles.btn}>
-                <img
-                    src={profilePicUrl}
+                <div
                     className={styles.avatarImg}
-                    alt={`${user.username} profile picture`}
+                    aria-label={`${user.username} profile picture`}
+                    style={{
+                        backgroundImage: `url(${profilePicUrl})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                    }}
                 />
             </MenuButton>
             <MenuList
