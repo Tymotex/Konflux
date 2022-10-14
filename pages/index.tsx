@@ -7,9 +7,12 @@ import Head from "next/head";
 import ArrowDownIcon from "./arrow-down.svg";
 import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
+import { useClearAuthOnPageMount, useEventId } from "hooks/event";
 
 const Home: NextPage = () => {
     const isDarkMode = useDarkMode();
+
+    useClearAuthOnPageMount();
 
     /**
      * Note: The homepage renders an event creation form directly. This form

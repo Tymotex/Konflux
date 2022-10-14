@@ -1,6 +1,6 @@
 import { EventAction } from "contexts/event-context";
 import { LocalAuthContext } from "contexts/local-auth-context";
-import { EventMember, KonfluxEvent } from "models/event";
+import { EMPTY_EVENT, EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
 import { Dispatch, useContext, useEffect, useMemo } from "react";
 import { useGlobalUser } from "utils/global-auth";
@@ -83,7 +83,10 @@ export const useWatchAndAddMemberToEventIfNotExist = (
         if (!eventId) return;
         if (!user) return;
 
-        if (!(user.username in eventState.members)) {
+        if (
+            eventState !== EMPTY_EVENT &&
+            !(user.username in eventState.members)
+        ) {
             spawnNotification("info", "You're now a member of this event.");
             eventDispatch({ type: "ADD_MEMBER", payload: { eventId, user } });
         }
@@ -111,18 +114,32 @@ export const useDetermineIsOwner = (
 /**
  * Resets the local auth state. Useful for pages other than the event page since
  * the local authentication is scoped only to that one event.
- * @param localAuthDispatch
  */
 export const useClearAuthOnPageMount = () => {
     const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
+    const eventId = useEventId();
+    const router = useRouter();
 
     useEffect(() => {
-        return () => {
-            if (localAuthState && localAuthState.username) {
-                localAuthDispatch({ type: "LOCAL_SIGN_OUT" });
-            }
-        };
-    }, [localAuthDispatch, localAuthState]);
+        router.events.on("routeChangeStart", () => {
+            // Invalidate the local auth credentials when the current page's event
+            // ID does not match the credential's.
+            // if (!eventId || localAuthState.eventId !== eventId) {
+            //     // alert("LOGGED OUT");
+            //     localAuthDispatch({ type: "LOCAL_SIGN_OUT" });
+            // }
+        });
+    }, [eventId, localAuthState, localAuthDispatch, router]);
+
+    // const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
+
+    // useEffect(() => {
+    //     return () => {
+    //         if (localAuthState && localAuthState.username) {
+    //             localAuthDispatch({ type: "LOCAL_SIGN_OUT" });
+    //         }
+    //     };
+    // }, [localAuthDispatch, localAuthState]);
 };
 
 /**
@@ -165,6 +182,7 @@ export const useBypassEventSignInWithURL = (
                     localAuthDispatch({
                         type: "LOCAL_SIGN_IN",
                         payload: {
+                            eventId: eventId,
                             event: event,
                             username: usernameStr,
                             localPassword: passwordStr,

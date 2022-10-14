@@ -1,18 +1,12 @@
-import React, {
-    FormEventHandler,
-    useCallback,
-    useContext,
-    useRef,
-} from "react";
-import { motion } from "framer-motion";
-import TextField from "./TextField";
-import { useRouter } from "next/router";
-import { spawnNotification } from "utils/notifications";
-import { homepageAnimatedItem } from "pages";
 import { Button } from "components/button";
-import { useGlobalUser } from "utils/global-auth";
+import { motion } from "framer-motion";
 import { createEventAndAddOwner, KonfluxEvent } from "models/event";
-import { LocalAuthContext } from "contexts/local-auth-context";
+import { useRouter } from "next/router";
+import { homepageAnimatedItem } from "pages";
+import React, { FormEventHandler, useCallback, useRef } from "react";
+import { useGlobalUser } from "utils/global-auth";
+import { spawnNotification } from "utils/notifications";
+import TextField from "./TextField";
 
 interface Props {}
 
@@ -23,8 +17,6 @@ const EventCreationForm: React.FC<Props> = () => {
     const passwordInput = useRef<HTMLInputElement>(null);
 
     const globalUser = useGlobalUser();
-
-    const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
 
     // Handle the creation of an event.
     const handleEventCreation: FormEventHandler<HTMLFormElement> = useCallback(
@@ -90,30 +82,24 @@ const EventCreationForm: React.FC<Props> = () => {
                     return;
                 }
 
-                // Dispatch a login.
                 try {
                     if (eventId === undefined)
                         throw new Error("Event ID undefined after creation.");
                     if (event === undefined)
                         throw new Error("Event undefined after creation");
-                    localAuthDispatch({
-                        type: "LOCAL_SIGN_IN",
-                        payload: {
-                            event: event,
-                            username: username,
-                            localPassword: password,
-                        },
-                    });
+
+                    // Provide credentials in the URL to bypass authentication
+                    // on the event page.
+                    router.push(
+                        `/events/${eventId}?username=${username}&password=${password}`,
+                    );
                 } catch (err) {
                     spawnNotification("error", (err as Error).message);
                     return;
                 }
-                router.push(
-                    `/events/${eventId}?username=${username}&password=${password}`,
-                );
             }
         },
-        [router, localAuthDispatch, globalUser],
+        [router, globalUser],
     );
 
     return (

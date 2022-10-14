@@ -80,6 +80,7 @@ const EventSignIn: React.FC<Props> = ({
                     ? "LOCAL_SIGN_IN"
                     : "LOCAL_SIGN_UP",
             payload: {
+                eventId: eventId,
                 event: eventState,
                 username,
                 localPassword: password,

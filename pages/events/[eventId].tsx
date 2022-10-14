@@ -13,9 +13,18 @@ import {
     GroupAvailabilityTimetable,
 } from "components/timetable";
 import { BASE_URL } from "constants/url";
-import { LocalAuthContext } from "contexts/local-auth-context";
 import { EventContext, eventReducer } from "contexts/event-context";
+import { LocalAuthContext } from "contexts/local-auth-context";
+import { LocalAuthProvider } from "contexts/LocalAuthProvider";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+    useBypassEventSignInWithURL,
+    useDetectAuthBypassAttempt,
+    useDetermineIsOwner,
+    useEventId,
+    useGlobalOrLocalEventMember,
+    useWatchAndAddMemberToEventIfNotExist,
+} from "hooks/event";
 import { EMPTY_EVENT, onEventChange, updateEventName } from "models/event";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -24,7 +33,6 @@ import React, {
     useCallback,
     useContext,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useReducer,
     useRef,
@@ -33,17 +41,8 @@ import React, {
 import { debounce } from "utils/debounce";
 import { spawnNotification } from "utils/notifications";
 import styles from "./[eventId].module.scss";
-import {
-    useWatchAndAddMemberToEventIfNotExist,
-    useDetermineIsOwner,
-    useGlobalOrLocalEventMember,
-    useClearAuthOnPageMount,
-    useBypassEventSignInWithURL,
-    useDetectAuthBypassAttempt,
-    useEventId,
-} from "hooks/event";
 
-const EventPage: NextPage = () => {
+const EventPage: React.FC = () => {
     const router = useRouter();
     const eventNameInput = useRef<HTMLInputElement>(null);
 
@@ -63,9 +62,8 @@ const EventPage: NextPage = () => {
     const eventMember = useGlobalOrLocalEventMember(localAuthState);
     const isOwnerOfEvent = useDetermineIsOwner(eventMember, eventState);
 
-    // On this page, we always want to locally authenticate from scratch (to
-    // enforce that the local authentication is scoped to only one event).
-    useClearAuthOnPageMount();
+    // If credentials were supplied in the URL or the user is already
+    // authenticated globally, then bypass regular event sign in.
     useBypassEventSignInWithURL(eventId, eventState);
     const isAuthBypassing = useDetectAuthBypassAttempt();
 
@@ -140,6 +138,7 @@ const EventPage: NextPage = () => {
      */
     const handleNameChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
+            if (!eventId) return;
             setUpdateEventNameStatus("pending");
             eventDispatch({
                 type: "SET_EVENT",
@@ -156,9 +155,6 @@ const EventPage: NextPage = () => {
         ],
     );
 
-    // TODO: document or try to remove.
-    const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
-
     return (
         <>
             <Head>
@@ -167,216 +163,254 @@ const EventPage: NextPage = () => {
             <PageTransition>
                 <EventContext.Provider value={cachedEventContext}>
                     <AnimatePresence mode="wait">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 1 }}
-                            // TODO: move this styling to a class?
-                            style={{
-                                padding: "24px",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                                minHeight: "calc(100vh - 56px - 38px)",
-                            }}
-                        >
-                            <div className={styles.main}>
-                                {eventId && (
-                                    <EventSignIn
-                                        show={!eventMember && !isAuthBypassing}
-                                        eventId={eventId}
-                                        localAuthDispatch={localAuthDispatch}
-                                    />
-                                )}
-                                {!eventMember && !isAuthBypassing ? (
-                                    <>
-                                        {/* TODO: Move styles to class. */}
-                                        <div
-                                            style={{
-                                                width: "300px",
-                                                margin: "0 auto",
-                                                textAlign: "center",
-                                                marginTop: "200px",
-                                            }}
-                                        >
-                                            <Button
-                                                onClick={() => router.push("/")}
-                                            >
-                                                Go Home
-                                            </Button>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        {isOwnerOfEvent && (
-                                            <div>
-                                                <div
-                                                    className={
-                                                        styles.eventNameContainer
-                                                    }
-                                                >
-                                                    <TextField
-                                                        id="event-name"
-                                                        refHandle={
-                                                            eventNameInput
-                                                        }
-                                                        required
-                                                        label="Event Name"
-                                                        placeholder="Dinner with Linus Torvalds"
-                                                        value={eventState?.name}
-                                                        onChange={
-                                                            handleNameChange
-                                                        }
-                                                        isTitle
-                                                    />
-                                                    <SyncStatus
-                                                        status={
-                                                            updateEventNameStatus
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className={styles.header}>
-                                                    <h2>
-                                                        What days could the
-                                                        event happen?
-                                                    </h2>
-                                                    <p>
-                                                        Click and drag the dates
-                                                        below to select which
-                                                        days to consider
-                                                        scheduling the event on.
-                                                    </p>
-                                                </div>
-                                                <div
-                                                    className={
-                                                        styles.calendarAndMapContainer
-                                                    }
-                                                >
-                                                    <DaySelector
-                                                        eventId={eventId}
-                                                        eventState={eventState}
-                                                        eventDispatch={
-                                                            eventDispatch
-                                                        }
-                                                        updateStatus={(
-                                                            status: Status,
-                                                        ) =>
-                                                            setUpdateDatesStatus(
-                                                                status,
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                                <SyncStatus
-                                                    status={updateDatesStatus}
-                                                />
+                        {eventId && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 1 }}
+                                    // TODO: move this styling to a class?
+                                    style={{
+                                        padding: "24px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "space-between",
+                                        minHeight: "calc(100vh - 56px - 38px)",
+                                    }}
+                                >
+                                    <div className={styles.main}>
+                                        <EventSignIn
+                                            show={
+                                                !eventMember && !isAuthBypassing
+                                            }
+                                            eventId={eventId}
+                                            localAuthDispatch={
+                                                localAuthDispatch
+                                            }
+                                        />
+                                        {!eventMember && !isAuthBypassing ? (
+                                            <>
+                                                {/* TODO: Move styles to class. */}
                                                 <div
                                                     style={{
-                                                        marginTop: "48px",
-                                                    }}
-                                                />
-                                                {!atLeastOnedateSelected && (
-                                                    <Callout Icon={InfoIcon}>
-                                                        Please select at least 1
-                                                        date to begin.
-                                                    </Callout>
-                                                )}
-                                            </div>
-                                        )}
-                                        {atLeastOnedateSelected && (
-                                            <div
-                                                className={
-                                                    styles.timetableContainer
-                                                }
-                                            >
-                                                {/* Timetable for filling availabilities. */}
-                                                <div
-                                                    style={{
-                                                        overflow: "auto",
-                                                        paddingBottom: "100px",
+                                                        width: "300px",
+                                                        margin: "0 auto",
+                                                        textAlign: "center",
+                                                        marginTop: "200px",
                                                     }}
                                                 >
-                                                    <FillingTimetable
-                                                        eventId={eventId}
-                                                        updateStatus={(
-                                                            status: Status,
-                                                        ) =>
-                                                            setUpdateTimetableStatus(
-                                                                status,
-                                                            )
+                                                    <Button
+                                                        onClick={() =>
+                                                            router.push("/")
                                                         }
-                                                    />
-                                                    <SyncStatus
-                                                        status={
-                                                            updateTimetableStatus
-                                                        }
-                                                    />
-                                                </div>
-                                                {/* Timetable for showing the group's availabilities */}
-                                                <GroupAvailabilityTimetable
-                                                    username={
-                                                        localAuthState.username
-                                                    }
-                                                    eventId={eventId}
-                                                />
-                                            </div>
-                                        )}
-                                        {!atLeastOnedateSelected &&
-                                            !isOwnerOfEvent && (
-                                                <Callout Icon={InfoIcon}>
-                                                    Hmm... the organiser
-                                                    hasn&apos;t picked any days
-                                                    yet. Try again later.
-                                                </Callout>
-                                            )}
-                                        <section className={styles.header}>
-                                            {atLeastOnedateSelected && (
-                                                <>
-                                                    <h2>
-                                                        Share this link with
-                                                        others.
-                                                    </h2>
-                                                    <p
-                                                        style={{
-                                                            marginBottom:
-                                                                "24px",
-                                                        }}
                                                     >
-                                                        Wait for them to fill in
-                                                        their availabilities and
-                                                        then pick the time that
-                                                        works best.
-                                                    </p>
+                                                        Go Home
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {isOwnerOfEvent && (
+                                                    <div>
+                                                        <div
+                                                            className={
+                                                                styles.eventNameContainer
+                                                            }
+                                                        >
+                                                            <TextField
+                                                                id="event-name"
+                                                                refHandle={
+                                                                    eventNameInput
+                                                                }
+                                                                required
+                                                                label="Event Name"
+                                                                placeholder="Dinner with Linus Torvalds"
+                                                                value={
+                                                                    eventState?.name
+                                                                }
+                                                                onChange={
+                                                                    handleNameChange
+                                                                }
+                                                                isTitle
+                                                            />
+                                                            <SyncStatus
+                                                                status={
+                                                                    updateEventNameStatus
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div
+                                                            className={
+                                                                styles.header
+                                                            }
+                                                        >
+                                                            <h2>
+                                                                What days could
+                                                                the event
+                                                                happen?
+                                                            </h2>
+                                                            <p>
+                                                                Click and drag
+                                                                the dates below
+                                                                to select which
+                                                                days to consider
+                                                                scheduling the
+                                                                event on.
+                                                            </p>
+                                                        </div>
+                                                        <div
+                                                            className={
+                                                                styles.calendarAndMapContainer
+                                                            }
+                                                        >
+                                                            <DaySelector
+                                                                eventId={
+                                                                    eventId
+                                                                }
+                                                                eventState={
+                                                                    eventState
+                                                                }
+                                                                eventDispatch={
+                                                                    eventDispatch
+                                                                }
+                                                                updateStatus={(
+                                                                    status: Status,
+                                                                ) =>
+                                                                    setUpdateDatesStatus(
+                                                                        status,
+                                                                    )
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <SyncStatus
+                                                            status={
+                                                                updateDatesStatus
+                                                            }
+                                                        />
+                                                        <div
+                                                            style={{
+                                                                marginTop:
+                                                                    "48px",
+                                                            }}
+                                                        />
+                                                        {!atLeastOnedateSelected && (
+                                                            <Callout
+                                                                Icon={InfoIcon}
+                                                            >
+                                                                Please select at
+                                                                least 1 date to
+                                                                begin.
+                                                            </Callout>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {atLeastOnedateSelected && (
+                                                    <div
+                                                        className={
+                                                            styles.timetableContainer
+                                                        }
+                                                    >
+                                                        {/* Timetable for filling availabilities. */}
+                                                        <div
+                                                            style={{
+                                                                overflow:
+                                                                    "auto",
+                                                                paddingBottom:
+                                                                    "100px",
+                                                            }}
+                                                        >
+                                                            <FillingTimetable
+                                                                eventId={
+                                                                    eventId
+                                                                }
+                                                                updateStatus={(
+                                                                    status: Status,
+                                                                ) =>
+                                                                    setUpdateTimetableStatus(
+                                                                        status,
+                                                                    )
+                                                                }
+                                                            />
+                                                            <SyncStatus
+                                                                status={
+                                                                    updateTimetableStatus
+                                                                }
+                                                            />
+                                                        </div>
+                                                        {/* Timetable for showing the group's availabilities */}
+                                                        <GroupAvailabilityTimetable
+                                                            username={
+                                                                localAuthState.username
+                                                            }
+                                                            eventId={eventId}
+                                                        />
+                                                    </div>
+                                                )}
+                                                {!atLeastOnedateSelected &&
+                                                    !isOwnerOfEvent && (
+                                                        <Callout
+                                                            Icon={InfoIcon}
+                                                        >
+                                                            Hmm... the organiser
+                                                            hasn&apos;t picked
+                                                            any days yet. Try
+                                                            again later.
+                                                        </Callout>
+                                                    )}
+                                                <section
+                                                    className={styles.header}
+                                                >
+                                                    {atLeastOnedateSelected && (
+                                                        <>
+                                                            <h2>
+                                                                Share this link
+                                                                with others.
+                                                            </h2>
+                                                            <p
+                                                                style={{
+                                                                    marginBottom:
+                                                                        "24px",
+                                                                }}
+                                                            >
+                                                                Wait for them to
+                                                                fill in their
+                                                                availabilities
+                                                                and then pick
+                                                                the time that
+                                                                works best.
+                                                            </p>
 
-                                                    <ShareableLink
-                                                        link={`${BASE_URL}/events/${eventId}`}
-                                                    />
-                                                </>
-                                            )}
+                                                            <ShareableLink
+                                                                link={`${BASE_URL}/events/${eventId}`}
+                                                            />
+                                                        </>
+                                                    )}
 
-                                            {/* <h2 style={{ marginTop: "24px" }}>
+                                                    {/* <h2 style={{ marginTop: "24px" }}>
                                 How was the planning experience?
                             </h2> */}
-                                        </section>
-                                    </>
-                                )}
-                            </div>
-                            <section
-                                className={`${styles.header} ${styles.featureRequest}`}
-                            >
-                                <h2>Want to see a new feature?</h2>
-                                <p style={{ marginBottom: "24px" }}>
-                                    Request one in less than 1 minute.
-                                </p>
-                                <Button
-                                    onClick={() =>
-                                        router.push("/feature-request")
-                                    }
-                                >
-                                    Request Feature
-                                </Button>
-                            </section>
-                        </motion.div>
+                                                </section>
+                                            </>
+                                        )}
+                                    </div>
+                                    <section
+                                        className={`${styles.header} ${styles.featureRequest}`}
+                                    >
+                                        <h2>Want to see a new feature?</h2>
+                                        <p style={{ marginBottom: "24px" }}>
+                                            Request one in less than 1 minute.
+                                        </p>
+                                        <Button
+                                            onClick={() =>
+                                                router.push("/feature-request")
+                                            }
+                                        >
+                                            Request Feature
+                                        </Button>
+                                    </section>
+                                </motion.div>
+                            </>
+                        )}
                     </AnimatePresence>
                 </EventContext.Provider>
             </PageTransition>
@@ -384,4 +418,13 @@ const EventPage: NextPage = () => {
     );
 };
 
-export default EventPage;
+// A wrapper component used to provide context to the event page.
+const EventPageWrapper: NextPage = () => {
+    return (
+        <LocalAuthProvider>
+            <EventPage />
+        </LocalAuthProvider>
+    );
+};
+
+export default EventPageWrapper;

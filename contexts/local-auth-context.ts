@@ -19,6 +19,7 @@ export type LocalAuthAction =
     | {
           type: "LOCAL_SIGN_IN";
           payload: {
+              eventId: string;
               event: KonfluxEvent;
               username: string;
               localPassword?: string;
@@ -27,6 +28,7 @@ export type LocalAuthAction =
     | {
           type: "LOCAL_SIGN_UP";
           payload: {
+              eventId: string;
               event: KonfluxEvent;
               username: string;
               localPassword?: string;
@@ -34,13 +36,18 @@ export type LocalAuthAction =
       }
     | { type: "LOCAL_SIGN_OUT" };
 
+interface LocalAuthMember extends EventMember {
+    // The ID of the event that this local authentication is scoped to.
+    eventId?: string;
+}
+
 export const localAuthReducer = (
-    state: EventMember,
+    state: LocalAuthMember,
     action: LocalAuthAction,
-): EventMember => {
+): LocalAuthMember => {
     switch (action.type) {
         case "LOCAL_SIGN_IN": {
-            const { event, username, localPassword } = action.payload;
+            const { eventId, event, username, localPassword } = action.payload;
 
             // Check the supplied username and password pair match the local
             // authentication.
@@ -66,6 +73,7 @@ export const localAuthReducer = (
             }
 
             return {
+                eventId,
                 username,
                 password: localPassword,
                 scope: "local",
@@ -99,7 +107,7 @@ export const localAuthReducer = (
 
 /* --------------------------------- Context -------------------------------- */
 export interface LocalAuthContextInterface {
-    localAuthState: EventMember;
+    localAuthState: LocalAuthMember;
     localAuthDispatch: Dispatch<LocalAuthAction>;
 }
 
