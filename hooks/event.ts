@@ -178,7 +178,7 @@ export const useBypassEventSignInWithURL = (
             if (username) {
                 const usernameStr = String(username);
                 const passwordStr = String(password);
-                if (usernameStr in event.members)
+                if (usernameStr in event.members) {
                     localAuthDispatch({
                         type: "LOCAL_SIGN_IN",
                         payload: {
@@ -188,7 +188,8 @@ export const useBypassEventSignInWithURL = (
                             localPassword: passwordStr,
                         },
                     });
-                router.replace(`/events/${eventId}`);
+                    router.replace(`/events/${eventId}`);
+                }
             }
         }
     }, [isBypassing, event, eventId]);

@@ -9,6 +9,7 @@
     color: $grey-100;
     font-weight: bold;
     font-family: "Montserrat", sans-serif;
+    box-sizing: border-box;
     cursor: pointer;
 
     display: inline-flex;
@@ -36,6 +37,10 @@
     &.secondary {
         background: rgba($color: $grey-300, $alpha: 0.1);
         border: 2px solid $primary-400;
+
+        padding: calc($padding-sm - 2px) $padding-lg calc($padding-sm - 2px)
+            $padding-lg;
+
         color: $grey-600;
 
         &:hover {

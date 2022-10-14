@@ -51,122 +51,64 @@ const TopNav: React.FC<Props> = () => {
             });
     }, [closeModal]);
 
-    /**
-     * Leaves the current event. Must be either locally or globally
-     * authenticated.
-     * @param forceDeletion deletes user from event without confirmation.
-     */
-    const [showDeletionDialog, setShowDeletionDialog] = useState(false);
-    const leaveEvent = useCallback(
-        (forceDeletion: boolean = false) => {
-            if (!user) {
-                spawnNotification(
-                    "error",
-                    "Can't leave event when not authenticated.",
-                );
-                return;
-            }
-            if (!eventId) {
-                spawnNotification("error", "Event ID not defined.");
-                return;
-            }
-            if (!eventState) {
-                spawnNotification("error", "Event undefined.");
-                return;
-            }
-
-            // If the current user is the last owner of the event, then warn the
-            // user that this will cause the event to be deleted.
-            // Note: there is currently only 1 owner per event.
-            if (eventState.members[user.username].isOwner && !forceDeletion) {
-                // TODO: Open alert dialog.
-                setShowDeletionDialog(true);
-                return;
-            }
-
-            eventDispatch({
-                type: "REMOVE_MEMBER",
-                payload: { eventId, username: user?.username },
-            });
-        },
-        [eventId, user, eventDispatch, eventState, setShowDeletionDialog],
-    );
-
     return (
-        <>
-            <nav
-                className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}
-            >
-                <div className={styles.navContentsContainer}>
-                    <h1 className={styles.brand}>
-                        <Logo />
-                        <Link href="/">
-                            <a
-                                aria-label="Application name"
-                                className={styles.brandName}
+        <nav className={`${styles.topnav} ${isDarkMode ? styles.dark : ""}`}>
+            <div className={styles.navContentsContainer}>
+                <h1 className={styles.brand}>
+                    <Logo />
+                    <Link href="/">
+                        <a
+                            aria-label="Application name"
+                            className={styles.brandName}
+                        >
+                            Konflux.
+                        </a>
+                    </Link>
+                </h1>
+                <div
+                    className={`${styles.utilitiesContainer} ${
+                        isDarkMode ? styles.dark : ""
+                    }`}
+                >
+                    <DarkModeToggle />
+                    {user ? (
+                        <>
+                            {user.scope === "local" ? (
+                                <>
+                                    <Button onClick={localSignOut}>
+                                        Sign Out ({user.username})
+                                    </Button>
+                                </>
+                            ) : user.scope === "global" ? (
+                                <AvatarDropdown
+                                    profilePicUrl={user.profilePicUrl || ""}
+                                    signOut={handleSignOut}
+                                />
+                            ) : (
+                                <></>
+                            )}
+                        </>
+                    ) : (
+                        // When user isn't signed in, render login and register
+                        // buttons.
+                        <>
+                            <button
+                                className={styles.login}
+                                onClick={() => openModal("login")}
                             >
-                                Konflux.
-                            </a>
-                        </Link>
-                    </h1>
-                    <div
-                        className={`${styles.utilitiesContainer} ${
-                            isDarkMode ? styles.dark : ""
-                        }`}
-                    >
-                        <DarkModeToggle />
-                        {user ? (
-                            <>
-                                {user.scope === "local" ? (
-                                    <>
-                                        <Button onClick={localSignOut}>
-                                            Sign Out ({user.username})
-                                        </Button>
-                                    </>
-                                ) : user.scope === "global" ? (
-                                    <AvatarDropdown
-                                        profilePicUrl={user.profilePicUrl || ""}
-                                        signOut={handleSignOut}
-                                    />
-                                ) : (
-                                    <></>
-                                )}
-                            </>
-                        ) : (
-                            // When user isn't signed in, render login and register
-                            // buttons.
-                            <>
-                                <button
-                                    className={styles.login}
-                                    onClick={() => openModal("login")}
-                                >
-                                    Login
-                                </button>
-                                <button
-                                    className={styles.register}
-                                    onClick={() => openModal("register")}
-                                >
-                                    Register
-                                </button>
-                            </>
-                        )}
-                    </div>
+                                Login
+                            </button>
+                            <button
+                                className={styles.register}
+                                onClick={() => openModal("register")}
+                            >
+                                Register
+                            </button>
+                        </>
+                    )}
                 </div>
-            </nav>
-            <ImportantActionModal
-                show={showDeletionDialog}
-                headingText="Event will be deleted"
-                onBack={() => setShowDeletionDialog(false)}
-            >
-                <p>
-                    Since you are the last owner of the event, this event will
-                    be deleted when you leave.
-                </p>
-                <p>Are you sure you want to leave?</p>
-                <Button>Go back</Button>
-                <Button>Delete</Button>
-            </ImportantActionModal>
-        </>
+            </div>
+        </nav>
     );
 };
 

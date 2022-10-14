@@ -25,6 +25,7 @@ interface Props {
     headingText: string;
     onBack: () => void;
     backText?: string;
+    className?: string;
 }
 
 const MotionOverlay = motion(AlertDialogOverlay);
@@ -35,6 +36,7 @@ const ImportantActionModal: React.FC<Props> = ({
     headingText,
     backText,
     onBack,
+    className,
 }) => {
     const backBtnRef = useRef<HTMLButtonElement>(null);
     const isDarkMode = useDarkMode();
@@ -52,7 +54,7 @@ const ImportantActionModal: React.FC<Props> = ({
                     <AlertDialogContent
                         className={`${styles.container} ${
                             isDarkMode ? styles.dark : ""
-                        }`}
+                        } ${className ? className : ""}`}
                     >
                         <div className={styles.content}>
                             <button

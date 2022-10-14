@@ -248,13 +248,23 @@ export const signUpMember = async (eventId: string, user: EventMember) => {
     }
 };
 
-// /**
-//  * Checks the given user's supplied details against their details in the remote
-//  * event data.
-//  * @param eventId
-//  * @param user
-//  */
-// export const signInMember = async (eventId: string, username: string) => {
-//     if (!eventId) throw new Error("Event ID mustn't be empty.");
-//     // TODO: this would be where we need to check passwords.
-// };
+/**
+ * Remove member from the event. This only removes it from the member list, not
+ * from the availabilities, which must be done separately.
+ * @param eventId
+ * @param username
+ */
+export const removeMember = async (eventId: string, username: string) => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+
+    try {
+        // Set to null to delete record in Firebase realtime db.
+        // See: https://firebase.google.com/docs/database/web/read-and-write#delete_data.
+        await set(
+            ref(getDatabase(), `events/${eventId}/members/${username}`),
+            null,
+        );
+    } catch (err) {
+        throw new Error(`Failed to update the event's members. Reason: ${err}`);
+    }
+};

@@ -44,6 +44,7 @@ const EventSignIn: React.FC<Props> = ({
     const usernameInputRef = useRef<HTMLInputElement>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
+    console.log(eventState);
     const allLocalMembers = useMemo(() => {
         return new Set(
             Object.keys(eventState?.members || {}).filter(
@@ -82,6 +83,7 @@ const EventSignIn: React.FC<Props> = ({
 
         onSubmitSuccess(username, password);
     }, [
+        eventId,
         eventState,
         usernameInputRef,
         passwordInputRef,

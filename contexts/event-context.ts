@@ -5,6 +5,7 @@ import {
     signUpMember,
     updateEventTimeRange,
     updateRemoteAvailabilities,
+    removeMember,
 } from "models/event";
 import { createContext, Dispatch } from "react";
 import { spawnNotification } from "utils/notifications";
@@ -132,37 +133,49 @@ export const eventReducer = (
         case "REMOVE_MEMBER": {
             const { eventId, username } = action.payload;
 
-            const newAvailabilities = state.groupAvailabilities;
+            const newEvent = { ...state };
 
             // TODO: if the user is the last user of the event, then delete the entire event.
 
             // Remove the member.
-            if (username in state.members) delete state.members[username];
-            else
-                throw new Error(
-                    `User '${username}' is not a member of this event.`,
-                );
+            if (username in state.members) delete newEvent.members[username];
+            else return state;
 
             // Clear the member's availabilities by removing their username from
             // all time blocks.
-            Object.keys(newAvailabilities || {}).forEach((date) => {
+            Object.keys(newEvent.groupAvailabilities || {}).forEach((date) => {
                 // Timeblock indices
-                Object.keys(newAvailabilities[date])
+                Object.keys(newEvent.groupAvailabilities[date])
                     .map((i) => parseInt(i))
+                    .filter((i) => !isNaN(i))
                     .forEach((timeBlockIndex: number) => {
-                        if (username in newAvailabilities[date][timeBlockIndex])
-                            delete newAvailabilities[date][timeBlockIndex][
-                                username
-                            ];
+                        if (
+                            username in
+                            newEvent.groupAvailabilities[date][timeBlockIndex]
+                        )
+                            delete newEvent.groupAvailabilities[date][
+                                timeBlockIndex
+                            ][username];
                     });
             });
 
-            updateRemoteAvailabilities(eventId, newAvailabilities);
+            updateRemoteAvailabilities(
+                eventId,
+                newEvent.groupAvailabilities,
+            ).catch((err) => {
+                spawnNotification(
+                    "error",
+                    `Failed to remove availabilities. ${err.message}`,
+                );
+            });
+            removeMember(eventId, username).catch((err) => {
+                spawnNotification(
+                    "error",
+                    `Failed to remove membership. ${err.message}`,
+                );
+            });
 
-            return {
-                ...state,
-                groupAvailabilities: newAvailabilities,
-            };
+            return newEvent;
         }
         default:
             throw new Error(
