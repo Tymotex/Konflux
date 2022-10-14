@@ -1,20 +1,14 @@
-import {
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogLabel,
-    AlertDialogOverlay,
-} from "@reach/alert-dialog";
+import { AlertDialogOverlay } from "@reach/alert-dialog";
+import IdeaIcon from "assets/icons/idea.svg";
 import { Button } from "components/button";
 import { Callout } from "components/callout";
-import IdeaIcon from "components/callout/idea.svg";
 import { TextField } from "components/form";
 import ImportantActionModal from "components/modal/ImportantActionModal";
 import { EventContext } from "contexts/event-context";
 import { LocalAuthAction } from "contexts/local-auth-context";
 import { ModalControlContext } from "contexts/modal-control-context";
+import { motion } from "framer-motion";
 import { useDarkMode } from "hooks/theme";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import React, {
     Dispatch,
@@ -23,7 +17,6 @@ import React, {
     useMemo,
     useRef,
 } from "react";
-import BackIcon from "./back.svg";
 import styles from "./EventSignIn.module.scss";
 
 interface Props {

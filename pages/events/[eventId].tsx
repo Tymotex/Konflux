@@ -3,7 +3,7 @@ import { Callout } from "components/callout";
 import { DaySelector } from "components/day-selector";
 import { EventSignIn } from "components/event-credentials";
 import { TextField } from "components/form";
-import InfoIcon from "components/form/info.svg";
+import InfoIcon from "assets/icons/info.svg";
 import { PageTransition } from "components/page-transition";
 import { ShareableLink } from "components/shareable-link";
 import { SyncStatus } from "components/sync-status";
@@ -41,6 +41,8 @@ import React, {
 import { debounce } from "utils/debounce";
 import { spawnNotification } from "utils/notifications";
 import styles from "./[eventId].module.scss";
+import IconButton from "components/button/IconButton";
+import LeaveIcon from "assets/icons/leave.svg";
 
 const EventPage: React.FC = () => {
     const router = useRouter();
@@ -316,7 +318,7 @@ const EventPage: React.FC = () => {
                                                                 overflow:
                                                                     "auto",
                                                                 paddingBottom:
-                                                                    "100px",
+                                                                    "32px",
                                                             }}
                                                         >
                                                             <FillingTimetable
@@ -346,6 +348,16 @@ const EventPage: React.FC = () => {
                                                         />
                                                     </div>
                                                 )}
+                                                <div
+                                                    className={styles.btnGroup}
+                                                >
+                                                    <Button
+                                                        colour="secondary"
+                                                        Icon={LeaveIcon}
+                                                    >
+                                                        Leave Event
+                                                    </Button>
+                                                </div>
                                                 {!atLeastOnedateSelected &&
                                                     !isOwnerOfEvent && (
                                                         <Callout

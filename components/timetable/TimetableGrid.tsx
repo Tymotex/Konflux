@@ -24,6 +24,7 @@ import {
     TIME_LABELS,
 } from "./timetable-utils";
 import styles from "./Timetable.module.scss";
+import AvailabilityTooltip from "./AvailabilityTooltip";
 
 interface Props {
     disabled?: boolean;
@@ -63,15 +64,9 @@ const TimetableGrid: React.FC<Props> = ({
     // State variables to display the availability tooltip.
     const [isMouseInGrid, setIsMouseInGrid] = useState(false);
     const [displayTimeStartIndex, setDisplayTime] = useState<number>(-1);
-    const [whoIsAvailable, setWhoIsAvailable] = useState<Set<string>>();
-    const whoIsntAvailable = useMemo(() => {
-        if (!whoIsAvailable) return new Set<string>();
-        return new Set<string>(
-            Object.keys(eventState.members || {}).filter(
-                (person) => !whoIsAvailable.has(person),
-            ),
-        );
-    }, [whoIsAvailable, eventState]);
+    const [whoIsAvailable, setWhoIsAvailable] = useState<Set<string>>(
+        new Set<string>(),
+    );
 
     // A list of lists of dates and group availability at those dates.
     // Used to render contiguous dates together and in chronological order.
@@ -413,6 +408,16 @@ const TimetableGrid: React.FC<Props> = ({
         [isDarkMode, getTimeBlockColour, startRow, endRow],
     );
 
+    const setTooltipDetails = useCallback(
+        (date: string, timeBlockIndex: number) => {
+            setWhoIsAvailable(
+                getPeopleAvailable(eventState, date, timeBlockIndex),
+            );
+            setDisplayTime(timeBlockIndex);
+        },
+        [eventState],
+    );
+
     return (
         <div
             className={`${styles.grid} ${
@@ -553,18 +558,12 @@ const TimetableGrid: React.FC<Props> = ({
                                                   displayTimeLabels,
                                                   "group",
                                               )}
-                                              onMouseEnter={(e) => {
-                                                  setWhoIsAvailable(
-                                                      getPeopleAvailable(
-                                                          eventState,
-                                                          date,
-                                                          timeBlockIndex,
-                                                      ),
-                                                  );
-                                                  setDisplayTime(
+                                              onMouseEnter={() =>
+                                                  setTooltipDetails(
+                                                      date,
                                                       timeBlockIndex,
-                                                  );
-                                              }}
+                                                  )
+                                              }
                                           />
                                       ))}
                             </React.Fragment>
@@ -573,56 +572,10 @@ const TimetableGrid: React.FC<Props> = ({
                 );
             })}
             {showGroupAvailability && isMouseInGrid && (
-                <ReactTooltip
-                    id="timetable-tooltip"
-                    effect="solid"
-                    type={isDarkMode ? "light" : "dark"}
-                >
-                    <div className={styles.tooltipContainer}>
-                        <h3>
-                            Available from{" "}
-                            {getDisplayTime(eventState, displayTimeStartIndex)}
-                        </h3>
-                        {whoIsAvailable && whoIsAvailable.size > 0 ? (
-                            <ul className={styles.peopleList}>
-                                {Array.from(whoIsAvailable).map((person) => (
-                                    <li key={person} className={styles.item}>
-                                        {/* <img
-                                            className={styles.avatar}
-                                            alt={person}
-                                            src={}
-                                        />{" "} */}
-                                        {person}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <>No one 😥</>
-                        )}
-                        <h3>Unavailable</h3>
-                        {eventState &&
-                        whoIsntAvailable &&
-                        whoIsntAvailable.size > 0 ? (
-                            <ul className={styles.peopleList}>
-                                {Array.from(whoIsntAvailable).map((person) => (
-                                    <li key={person} className={styles.item}>
-                                        {/* TODO: need a way to grab the user's profile picture that's not hacky... */}
-                                        {/* <img
-                                            className={styles.avatar}
-                                            alt={person}
-                                            src={
-                                                "https://st.depositphotos.com/1269204/1219/i/950/depositphotos_12196477-stock-photo-smiling-men-isolated-on-the.jpg"
-                                            }
-                                        />{" "} */}
-                                        {person}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <>No one 🥳</>
-                        )}
-                    </div>
-                </ReactTooltip>
+                <AvailabilityTooltip
+                    peopleAvailable={whoIsAvailable}
+                    timeIndex={displayTimeStartIndex}
+                />
             )}
         </div>
     );

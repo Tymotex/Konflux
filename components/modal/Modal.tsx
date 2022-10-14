@@ -3,7 +3,7 @@ import { Logo } from "components/brand";
 import { useDarkMode } from "hooks/theme";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
-import CloseIcon from "./close.svg";
+import CloseIcon from "assets/icons/close.svg";
 import styles from "./Modal.module.scss";
 
 interface Props {

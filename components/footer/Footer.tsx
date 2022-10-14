@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import styles from "./Footer.module.scss";
-import DividerIcon from "./divider.svg";
+import DividerIcon from "assets/icons/divider.svg";
 
 interface Props {}
 

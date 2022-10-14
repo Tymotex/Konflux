@@ -1,3 +1,4 @@
+import { useDarkMode } from "hooks/theme";
 import React from "react";
 import styles from "./Button.module.scss";
 
@@ -7,6 +8,8 @@ interface Props {
     style?: React.CSSProperties;
     className?: string;
     isSubmit?: boolean;
+    colour?: "primary" | "secondary";
+    Icon?: React.ElementType;
 }
 
 const Button: React.FC<Props> = ({
@@ -15,14 +18,25 @@ const Button: React.FC<Props> = ({
     style,
     className,
     isSubmit = false,
+    colour = "primary",
+    Icon,
 }) => {
+    const isDarkMode = useDarkMode();
+
     return (
         <button
-            className={`${styles.btn} ${className ? className : ""}`}
+            className={`${styles.btn} ${
+                colour === "primary"
+                    ? styles.primary
+                    : colour === "secondary"
+                    ? styles.secondary
+                    : ""
+            } ${className ? className : ""} ${isDarkMode ? styles.dark : ""}`}
             onClick={onClick}
             style={style}
             type={isSubmit ? "submit" : "button"}
         >
+            {Icon && <Icon className={styles.icon} />}
             {children}
         </button>
     );

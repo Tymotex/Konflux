@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import SuccessIcon from "./success.svg";
-import FailureIcon from "./failure.svg";
-import PendingIcon from "./pending.svg";
+import SuccessIcon from "assets/icons/success.svg";
+import FailureIcon from "assets/icons/failure.svg";
+import PendingIcon from "assets/icons/pending.svg";
 import styles from "./SyncStatus.module.scss";
 import { debounce } from "utils/debounce";
 import { motion, AnimatePresence } from "framer-motion";

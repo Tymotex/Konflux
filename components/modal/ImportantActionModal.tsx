@@ -7,7 +7,7 @@ import {
 } from "@reach/alert-dialog";
 import { Button } from "components/button";
 import { Callout } from "components/callout";
-import IdeaIcon from "components/callout/idea.svg";
+import IdeaIcon from "assets/icons/idea.svg";
 import { TextField } from "components/form";
 import { EventContext } from "contexts/event-context";
 import { LocalAuthAction } from "contexts/local-auth-context";
@@ -16,7 +16,7 @@ import { useDarkMode } from "hooks/theme";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import BackIcon from "./back.svg";
+import BackIcon from "assets/icons/back.svg";
 import styles from "./ImportantActionModal.module.scss";
 
 interface Props {

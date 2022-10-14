@@ -1,7 +1,7 @@
 import React, { RefObject, useCallback, useMemo, useState } from "react";
 import styles from "./TextField.module.scss";
-import Asterisk from "./asterisk.svg";
-import Info from "./info.svg";
+import Asterisk from "assets/icons/asterisk.svg";
+import Info from "assets/icons/info.svg";
 import { Tooltip } from "@reach/tooltip";
 import { useDarkMode } from "hooks/theme";
 import {

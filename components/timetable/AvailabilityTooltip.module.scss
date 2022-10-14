@@ -1,0 +1,37 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.tooltipContainer {
+    font-size: $font-size-sm;
+
+    .peopleList {
+        @include reset-list;
+
+        list-style: none;
+
+        .item {
+            display: flex;
+            align-items: center;
+            column-gap: $spacing-xs;
+
+            .icon {
+                height: $font-size-sm;
+                width: $font-size-sm;
+
+                * {
+                    fill: $grey-300;
+                }
+                fill: $grey-300;
+            }
+        }
+    }
+
+    &.dark {
+        .peopleList .item .icon {
+            * {
+                fill: $grey-800;
+            }
+            fill: $grey-800;
+        }
+    }
+}

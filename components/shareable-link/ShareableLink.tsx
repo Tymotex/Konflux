@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import styles from "./ShareableLink.module.scss";
-import ClipboardIcon from "./clipboard.svg";
+import ClipboardIcon from "assets/icons/clipboard.svg";
 import { useDarkMode } from "hooks/theme";
 import { spawnNotification } from "utils/notifications";
 

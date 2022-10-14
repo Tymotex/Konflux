@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import styles from "./GoogleSignInButton.module.scss";
-import GoogleIcon from "./google.svg";
+import GoogleIcon from "assets/icons/google.svg";
 import { useDarkMode } from "hooks/theme";
 import { GlobalAuth } from "utils/global-auth";
 

@@ -1,3 +1,7 @@
+@import "../../styles/variables.scss";
+
 .brandIcon {
     cursor: pointer;
+    width: $font-size-md;
+    height: $font-size-md;
 }

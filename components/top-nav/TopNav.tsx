@@ -8,14 +8,13 @@ import { useDarkMode } from "hooks/theme";
 import { useEventId, useGlobalOrLocalEventMember } from "hooks/event";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import LogoDark from "public/logo-dark.svg";
-import LogoLight from "public/logo-light.svg";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
 import styles from "./TopNav.module.scss";
 import { EventContext } from "contexts/event-context";
 import ImportantActionModal from "components/modal/ImportantActionModal";
+import { Logo } from "components/brand";
 
 interface Props {}
 
@@ -100,17 +99,7 @@ const TopNav: React.FC<Props> = () => {
             >
                 <div className={styles.navContentsContainer}>
                     <h1 className={styles.brand}>
-                        {isDarkMode ? (
-                            <LogoDark
-                                className={styles.brandIcon}
-                                onClick={() => router.push("/")}
-                            />
-                        ) : (
-                            <LogoLight
-                                className={styles.brandIcon}
-                                onClick={() => router.push("/")}
-                            />
-                        )}
+                        <Logo />
                         <Link href="/">
                             <a
                                 aria-label="Application name"
@@ -142,9 +131,6 @@ const TopNav: React.FC<Props> = () => {
                                 ) : (
                                     <></>
                                 )}
-                                <Button onClick={() => leaveEvent()}>
-                                    Leave Event
-                                </Button>
                             </>
                         ) : (
                             // When user isn't signed in, render login and register

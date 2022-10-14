@@ -1,13 +1,13 @@
+import ArrowDownIcon from "assets/icons/arrow-down.svg";
+import CheckIcon from "assets/icons/check.svg";
 import { EventCreationForm } from "components/form";
 import { PageTransition } from "components/page-transition";
-import { useDarkMode } from "hooks/theme";
 import { motion } from "framer-motion";
+import { useClearAuthOnPageMount } from "hooks/event";
+import { useDarkMode } from "hooks/theme";
 import type { NextPage } from "next";
 import Head from "next/head";
-import ArrowDownIcon from "./arrow-down.svg";
-import CheckIcon from "./check.svg";
 import styles from "./index.module.scss";
-import { useClearAuthOnPageMount, useEventId } from "hooks/event";
 
 const Home: NextPage = () => {
     const isDarkMode = useDarkMode();
