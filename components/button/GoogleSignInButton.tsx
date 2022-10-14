@@ -20,7 +20,8 @@ const GoogleSignInButton: React.FC<Props> = () => {
             className={`${styles.button} ${isDarkMode ? styles.dark : ""}`}
             onClick={googleSignIn}
         >
-            <GoogleIcon className={styles.googleIcon} /> Sign in with Google
+            <GoogleIcon className={styles.googleIcon} />
+            <div className={styles.text}>Sign in with Google</div>
         </button>
     );
 };

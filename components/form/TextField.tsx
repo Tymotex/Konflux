@@ -24,6 +24,7 @@ interface Props {
     onChange?: React.ChangeEventHandler<HTMLInputElement>;
     isTitle?: boolean;
     autocompleteItems?: Set<string>;
+    hideRequiredIndicator?: boolean;
 }
 
 const TextField: React.FC<Props> = ({
@@ -38,6 +39,7 @@ const TextField: React.FC<Props> = ({
     onChange,
     isTitle,
     autocompleteItems,
+    hideRequiredIndicator = false,
 }) => {
     const isDarkMode = useDarkMode();
 
@@ -55,7 +57,9 @@ const TextField: React.FC<Props> = ({
                     isDarkMode ? styles.dark : ""
                 }`}
             >
-                {required && <Asterisk className={styles.asterisk} />}
+                {required && !hideRequiredIndicator && (
+                    <Asterisk className={styles.asterisk} />
+                )}
                 <label htmlFor={id}>{label}</label>
             </div>
             <div className={styles.textFieldContainer}>
@@ -88,7 +92,9 @@ const TextField: React.FC<Props> = ({
     ) : (
         <div className={styles.inputContainer}>
             <div className={`${styles.label} ${isDarkMode ? styles.dark : ""}`}>
-                {required && <Asterisk className={styles.asterisk} />}
+                {required && !hideRequiredIndicator && (
+                    <Asterisk className={styles.asterisk} />
+                )}
                 <label id={id}>{label}</label>
             </div>
             <Combobox

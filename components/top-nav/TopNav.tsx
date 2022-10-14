@@ -1,4 +1,4 @@
-import { LoginModal, RegisterModal } from "components/authentication";
+import { LoginModal, RegisterModal } from "components/form";
 import { AvatarDropdown } from "components/avatar";
 import { Button } from "components/button";
 import { DarkModeToggle } from "components/dark-mode-toggle";

@@ -29,3 +29,9 @@
     padding: 0;
     margin: 0;
 }
+
+@mixin link-styles {
+    color: $blue-500;
+    font-weight: bold;
+    cursor: pointer;
+}

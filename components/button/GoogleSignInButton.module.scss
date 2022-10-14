@@ -4,8 +4,8 @@
 .button {
     @include reset-button;
 
-    border-radius: 5px;
-    background: $grey-50;
+    border-radius: 2px;
+    background: white;
     color: $grey-600;
     padding: 0 $padding-lg 0 0;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
@@ -17,18 +17,29 @@
     justify-content: center;
     column-gap: $spacing-sm;
 
+    width: 100%;
+    max-width: fit-content;
+
     transition: 0.2s all ease-in-out;
 
     &:hover {
-        transform: scale(1.05);
+        transform: scale(1.02);
     }
 
     .googleIcon {
         background: white;
-        height: 40px;
-        width: auto;
+        min-height: 40px;
+        min-width: 40px;
         padding: $padding-xs;
-        border-radius: 5px 0 0 5px;
+        margin: 1px;
+        border-radius: 1px;
+    }
+
+    .text {
+        max-height: 40px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
     }
 
     &.dark {

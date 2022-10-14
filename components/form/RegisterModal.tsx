@@ -2,8 +2,9 @@ import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { TextField } from "components/form";
 import Modal from "components/modal/Modal";
-import { useRouter } from "next/router";
-import React, { useCallback, useRef } from "react";
+import TextDivider from "components/modal/TextDivider";
+import { ModalControlContext } from "contexts/ModalControlProvider";
+import React, { useCallback, useContext, useRef } from "react";
 import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
 import styles from "./Auth.module.scss";
@@ -14,10 +15,10 @@ interface Props {
 }
 
 const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
-    const router = useRouter();
     const nameInputRef = useRef<HTMLInputElement>(null);
     const emailInputRef = useRef<HTMLInputElement>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
+    const { openModal } = useContext(ModalControlContext);
 
     const registerUser: React.FormEventHandler<HTMLFormElement> = useCallback(
         (e) => {
@@ -55,12 +56,22 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
         >
             <div className={styles.content}>
                 <form className={styles.form} onSubmit={registerUser}>
+                    <p className={styles.description}>
+                        Sign up to skip registering for events and see your
+                        events from all your devices.
+                    </p>
+                    <p className={styles.description}>
+                        Already registered?{" "}
+                        <a onClick={() => openModal("login")}>Sign in</a>{" "}
+                        instead.
+                    </p>
                     <TextField
                         id="login-name"
                         refHandle={nameInputRef}
                         label="Your name"
                         placeholder="E.g. Linus Torvalds"
                         required
+                        hideRequiredIndicator
                     />
                     <TextField
                         id="login-email"
@@ -68,6 +79,7 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                         label="Email"
                         placeholder="E.g. linus@torvalds.com"
                         required
+                        hideRequiredIndicator
                     />
                     <TextField
                         id="login-password"
@@ -75,12 +87,13 @@ const RegisterModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                         label="Password"
                         type="password"
                         required
+                        hideRequiredIndicator
                     />
                     <Button className={styles.formButton} isSubmit>
                         Create
                     </Button>
                 </form>
-                <p className={styles.authProviderDivider}>Or continue with</p>
+                <TextDivider text="Or" />
                 <form className={styles.authProviderForm}>
                     <GoogleSignInButton />
                 </form>

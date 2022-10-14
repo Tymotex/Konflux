@@ -1,4 +1,4 @@
-import { LoginModal, RegisterModal } from "components/authentication";
+import { LoginModal, RegisterModal } from "components/form";
 import React, { useCallback, useState } from "react";
 
 type ModalType = "login" | "register";
@@ -29,9 +29,11 @@ export const ModalControlProvider: React.FC<ModalControlProviderProps> = ({
             switch (modal) {
                 case "login":
                     setLoginModalOpen(open);
+                    setRegisterModalOpen(false);
                     break;
                 case "register":
                     setRegisterModalOpen(open);
+                    setLoginModalOpen(false);
                     break;
                 default:
                     throw new Error("Unknown modal type.");

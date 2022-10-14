@@ -23,7 +23,7 @@
             padding: $spacing-md;
             border: 1px solid rgba(128, 128, 128, 0.3);
             border-radius: 12px;
-            max-width: 220px;
+            max-width: 300px;
             width: 100%;
             background: white;
 
@@ -108,6 +108,18 @@
             height: $font-size-sm;
             width: $font-size-sm;
             fill: $grey-400;
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .inputContainer {
+        max-width: 220px;
+        .textFieldContainer {
+            max-width: 220px;
+            .textField {
+                max-width: 220px;
+            }
         }
     }
 }

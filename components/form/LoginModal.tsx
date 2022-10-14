@@ -2,8 +2,10 @@ import { Button } from "components/button";
 import GoogleSignInButton from "components/button/GoogleSignInButton";
 import { TextField } from "components/form";
 import Modal from "components/modal/Modal";
+import TextDivider from "components/modal/TextDivider";
+import { ModalControlContext } from "contexts/ModalControlProvider";
 import { useDarkMode } from "contexts/ThemeProvider";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import { GlobalAuth } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
 import styles from "./Auth.module.scss";
@@ -16,7 +18,7 @@ interface Props {
 const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
     const emailInputRef = useRef<HTMLInputElement>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
-    const isDarkMode = useDarkMode();
+    const { openModal, closeModal } = useContext(ModalControlContext);
 
     const logInUser: React.FormEventHandler<HTMLFormElement> = useCallback(
         (e) => {
@@ -51,12 +53,18 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
         >
             <div className={styles.content}>
                 <form className={styles.form} onSubmit={logInUser}>
+                    <p className={styles.description}>
+                        Not registered yet?{" "}
+                        <a onClick={() => openModal("register")}>Sign up</a>{" "}
+                        instead.
+                    </p>
                     <TextField
                         id="login-email"
                         refHandle={emailInputRef}
                         label="Email"
                         placeholder="E.g. linus@torvalds.com"
                         required
+                        hideRequiredIndicator
                     />
                     <TextField
                         id="login-password"
@@ -64,12 +72,13 @@ const LoginModal: React.FC<Props> = ({ isOpen, onDismiss }) => {
                         label="Password"
                         type="password"
                         required
+                        hideRequiredIndicator
                     />
                     <Button className={styles.formButton} isSubmit>
                         Log in
                     </Button>
                 </form>
-                <p className={styles.authProviderDivider}>Or continue with</p>
+                <TextDivider text="Or" />
                 <form className={styles.authProviderForm}>
                     <GoogleSignInButton />
                 </form>

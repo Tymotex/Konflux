@@ -1,0 +1,24 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.form {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto $spacing-xl auto;
+    text-align: center;
+
+    .description {
+        color: $grey-500;
+        text-align: left;
+        margin-bottom: $spacing-xl;
+
+        a {
+            @include link-styles;
+        }
+    }
+}
+
+.authProviderForm {
+    margin-top: $spacing-lg;
+    text-align: center;
+}

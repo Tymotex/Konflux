@@ -30,45 +30,9 @@
         color: $grey-800;
 
         .header {
-            margin-bottom: 150px;
+            margin-bottom: $margin-sm;
+            text-align: center;
 
-            .headingText {
-                position: absolute;
-                top: $spacing-lg;
-                left: $spacing-lg;
-                z-index: 100000000;
-                margin: $margin-xl 0 $margin-3xl 0;
-            }
-
-            .headingCurvedDivider {
-                position: absolute;
-                border-radius: 12px;
-                top: 0;
-                left: 0;
-                width: 100%;
-                overflow: hidden;
-                line-height: 0;
-                transform: rotate(180deg);
-                z-index: 0;
-
-                svg {
-                    position: relative;
-                    display: block;
-                    width: calc(174% + 1.3px);
-                    height: 185px;
-                }
-
-                .fill {
-                    fill: $grey-700;
-                }
-            }
-
-            .logo {
-                position: absolute;
-                top: $spacing-lg;
-                left: $spacing-lg;
-                z-index: 100000000;
-            }
             .closeButton {
                 @include reset-button;
                 position: absolute;
@@ -117,7 +81,16 @@
 }
 
 @media screen and (max-width: $sm) {
-    .modalContainer .content {
-        padding: $padding-lg;
+    .modalContainer {
+        width: 100%;
+        max-width: $xs;
+        padding: $padding-xs;
+
+        .content {
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            padding: $padding-lg;
+        }
     }
 }
