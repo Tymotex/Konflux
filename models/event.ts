@@ -1,3 +1,4 @@
+import { LocalEventMember } from "contexts/local-auth-context";
 import { getDatabase, onValue, push, ref, set } from "firebase/database";
 import { NextRouter } from "next/router";
 import { spawnNotification } from "utils/notifications";
@@ -6,6 +7,7 @@ import { spawnNotification } from "utils/notifications";
  * Recorded details of a member that has signed up to the event.
  */
 export interface EventMember {
+    id: string;
     username: string;
     scope: AuthScope;
     password?: string;
@@ -53,7 +55,7 @@ export interface KonfluxEvent {
     };
     /** The people in this event. */
     members: {
-        [username: string]: Omit<EventMember, "username">;
+        [username: string]: Omit<EventMember, "username" | "id">;
     };
 }
 
@@ -235,7 +237,10 @@ export const updateEventTimeRange = async (
  * @param eventId
  * @param user
  */
-export const signUpMember = async (eventId: string, user: EventMember) => {
+export const signUpMember = async (
+    eventId: string,
+    user: EventMember | LocalEventMember,
+) => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
     try {
         const { username, ...userDetails } = user;

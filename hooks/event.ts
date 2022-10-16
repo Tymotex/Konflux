@@ -1,5 +1,8 @@
 import { EventAction } from "contexts/event-context";
-import { LocalAuthContext } from "contexts/local-auth-context";
+import {
+    LocalAuthContext,
+    LocalEventMember,
+} from "contexts/local-auth-context";
 import { EMPTY_EVENT, EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
 import { Dispatch, useContext, useEffect, useMemo } from "react";
@@ -38,8 +41,8 @@ export const useEventId = (): string | null => {
  * @param localAuthDispatch
  */
 export const useGlobalOrLocalEventMember = (
-    localAuthState: EventMember,
-): EventMember | null => {
+    localAuthState: EventMember | LocalEventMember,
+): EventMember | LocalEventMember | null => {
     const globalUser = useGlobalUser();
 
     // It's invalid for both global and local auth to exist.
@@ -74,7 +77,7 @@ export const useGlobalOrLocalEventMember = (
  * @param eventDispatch
  */
 export const useWatchAndAddMemberToEventIfNotExist = (
-    user: EventMember | null,
+    user: EventMember | LocalEventMember | null,
     eventId: string | null,
     eventState: KonfluxEvent,
     eventDispatch: Dispatch<EventAction>,
@@ -100,7 +103,7 @@ export const useWatchAndAddMemberToEventIfNotExist = (
  * @returns
  */
 export const useDetermineIsOwner = (
-    user: EventMember | null,
+    user: EventMember | LocalEventMember | null,
     eventState: KonfluxEvent,
 ): boolean => {
     return user &&

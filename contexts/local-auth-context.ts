@@ -36,15 +36,17 @@ export type LocalAuthAction =
       }
     | { type: "LOCAL_SIGN_OUT" };
 
-interface LocalAuthMember extends EventMember {
+// Note: A local auth member does not have an ID because it is not stored
+// independently of the event in the database.
+export interface LocalEventMember extends Omit<EventMember, "id"> {
     // The ID of the event that this local authentication is scoped to.
     eventId?: string;
 }
 
 export const localAuthReducer = (
-    state: LocalAuthMember,
+    state: LocalEventMember,
     action: LocalAuthAction,
-): LocalAuthMember => {
+): LocalEventMember => {
     switch (action.type) {
         case "LOCAL_SIGN_IN": {
             const { eventId, event, username, localPassword } = action.payload;
@@ -107,7 +109,7 @@ export const localAuthReducer = (
 
 /* --------------------------------- Context -------------------------------- */
 export interface LocalAuthContextInterface {
-    localAuthState: LocalAuthMember;
+    localAuthState: LocalEventMember;
     localAuthDispatch: Dispatch<LocalAuthAction>;
 }
 

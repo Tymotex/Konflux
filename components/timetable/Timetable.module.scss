@@ -67,6 +67,8 @@ $default-bg-colour-dark: $grey-700;
 
             &:nth-child(2n) {
                 font-size: small;
+                visibility: hidden;
+
                 .text {
                     color: $grey-400;
                     font-weight: lighter;

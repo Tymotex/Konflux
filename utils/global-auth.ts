@@ -10,6 +10,7 @@ import {
     User,
 } from "firebase/auth";
 import { EventMember } from "models/event";
+import { createGlobalUserIfNotExist } from "models/global-user";
 import { useEffect, useState } from "react";
 import { spawnNotification } from "./notifications";
 
@@ -30,39 +31,59 @@ export class GlobalAuth {
             throw new Error("Cannot instantiate GlobalAuth.");
     }
 
-    static signIn(
+    static async signIn(
         signInData: GlobalAuthSignInRequest,
     ): Promise<EventMember | null> {
+        let user: EventMember | null;
         switch (signInData.provider) {
             case "native": {
                 const { email, password } = signInData;
-                return GlobalAuth.nativeSignIn(email, password);
+                user = await GlobalAuth.nativeSignIn(email, password);
+                break;
             }
             case "google":
-                return GlobalAuth.googleSignIn();
+                user = await GlobalAuth.googleSignIn();
+                break;
             default:
                 throw new Error(`Unknown provider.`);
         }
+
+        // Note: it should be the case that the global user already exists in
+        //       the database, however we'll insert them again just in case.
+        createGlobalUserIfNotExist(user?.id);
+
+        return user;
     }
 
-    static signUp(
+    static async signUp(
         signUpData: GlobalAuthSignUpRequest,
     ): Promise<EventMember | null> {
+        let user: EventMember | null;
+        let userId: string;
         switch (signUpData.provider) {
             case "native": {
-                return GlobalAuth.nativeSignUp(
+                user = await GlobalAuth.nativeSignUp(
                     signUpData.username,
                     signUpData.email,
                     signUpData.password,
                 );
+                break;
             }
             case "google":
                 // Note: there is no `googleSignUp`, it's only `googleSignIn`.
                 // Same applies to other external auth providers.
-                return GlobalAuth.googleSignIn();
+                user = await GlobalAuth.googleSignIn();
+                break;
             default:
                 throw new Error(`Unknown provider.`);
         }
+
+        // Although Firebase is managing and storing user details, we still need
+        // to track some data per user, such as the events they're members of.
+        // The following has nothing to do with Firebase Auth.
+        createGlobalUserIfNotExist(user?.id);
+
+        return user;
     }
 
     /**
@@ -98,11 +119,11 @@ export class GlobalAuth {
     }
 
     private static firebaseUserToEventUser(firebaseUser: User): EventMember {
-        // if (!firebaseUser.displayName)
-        //     throw new Error("Expected user model to have a display name.");
         if (!firebaseUser.email)
             throw new Error("Expected user model to have an email.");
+
         return {
+            id: firebaseUser.uid,
             scope: "global",
             username: firebaseUser.displayName || "",
             email: firebaseUser.email,
@@ -134,6 +155,7 @@ export class GlobalAuth {
 
     /**
      * Initiate an Google's OAuth flow.
+     * @returns the user object and the user ID.
      */
     private static async googleSignIn(): Promise<EventMember | null> {
         const provider = new GoogleAuthProvider();

@@ -9,6 +9,7 @@ import {
 } from "models/event";
 import { createContext, Dispatch } from "react";
 import { spawnNotification } from "utils/notifications";
+import { LocalEventMember } from "./local-auth-context";
 
 /* --------------------------- Reducer and actions -------------------------- */
 export type EventAction =
@@ -34,7 +35,7 @@ export type EventAction =
           type: "ADD_MEMBER";
           payload: {
               eventId: string;
-              user: EventMember;
+              user: EventMember | LocalEventMember;
           };
       }
     | {
