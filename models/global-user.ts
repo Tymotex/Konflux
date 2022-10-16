@@ -1,4 +1,12 @@
-import { DataSnapshot, get, getDatabase, ref, set } from "firebase/database";
+import {
+    DataSnapshot,
+    get,
+    getDatabase,
+    push,
+    ref,
+    set,
+    update,
+} from "firebase/database";
 import { KonfluxEvent } from "./event";
 
 // Note that the user details such as email, username, profile picture URL, etc.
@@ -73,4 +81,18 @@ export const createGlobalUserIfNotExist = async (
     await set(userRef, userData);
 
     return true;
+};
+
+export const addEventToGlobalUser = async (
+    userId: string | null | undefined,
+    eventId: string | null | undefined,
+): Promise<void> => {
+    if (!userId) throw new Error("User ID is empty.");
+    if (!eventId) throw new Error("Event ID is empty.");
+
+    const userEventsListEntryRef = ref(
+        getDatabase(),
+        `users/${userId}/eventIds/${eventId}`,
+    );
+    await set(userEventsListEntryRef, true);
 };

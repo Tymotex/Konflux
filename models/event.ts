@@ -2,6 +2,7 @@ import { LocalEventMember } from "contexts/local-auth-context";
 import { getDatabase, onValue, push, ref, set } from "firebase/database";
 import { NextRouter } from "next/router";
 import { spawnNotification } from "utils/notifications";
+import { addEventToGlobalUser } from "./global-user";
 
 /**
  * Recorded details of a member that has signed up to the event.
@@ -115,17 +116,17 @@ export const onEventChange = async (
  */
 export const createEventAndAddOwner = async (
     eventName: string,
-    creatorUsername: string,
+    user: EventMember | LocalEventMember,
     password: string,
-    scope: AuthScope,
 ): Promise<[string, KonfluxEvent]> => {
-    if (!scope) throw new Error("Auth scope must be specified");
+    if (!user.scope) throw new Error("Auth scope must be specified");
 
     if (eventName.length === 0)
         throw new Error("Event name must not be empty.");
     else if (eventName.length >= 255)
         throw new Error("Event name must be fewer than 255 characters.");
 
+    const creatorUsername = user.username;
     if (creatorUsername.length === 0) throw new Error("Username is required.");
     else if (creatorUsername.length >= 255)
         throw new Error("Username must be fewer than 255 characters.");
@@ -141,19 +142,25 @@ export const createEventAndAddOwner = async (
         members: {
             [creatorUsername]: {
                 isOwner: true,
-                scope: scope,
+                scope: user.scope,
                 password: password,
             },
         },
     };
 
-    try {
-        const reference = await push(ref(getDatabase(), `events`), event);
-        if (!reference.key) throw Error("Firebase did not assign an ID.");
-        return [reference.key, event];
-    } catch (err) {
-        throw new Error(`Failed to create event. Reason: ${err}`);
+    // Push the event object to the database.
+    const reference = await push(ref(getDatabase(), `events`), event);
+    const eventId = reference.key;
+    if (!eventId) throw Error("Firebase did not assign an ID.");
+
+    // Add the event ID to the global user's event list, if they exist.
+    if (user.scope === "global" && "id" in user) {
+        addEventToGlobalUser(user.id, eventId);
+    } else {
+        // TODO: push to localstorage. Maybe put this in a util file.
     }
+
+    return [eventId, event];
 };
 
 /**

@@ -41,9 +41,8 @@ const EventCreationForm: React.FC<Props> = () => {
                 try {
                     const [eventId, event] = await createEventAndAddOwner(
                         eventName,
-                        globalUser.username,
+                        globalUser,
                         "TODO:wtfToDoWhenGloballyAuthed",
-                        "global",
                     );
                     router.push(`/events/${eventId}`);
                 } catch (err) {
@@ -71,9 +70,11 @@ const EventCreationForm: React.FC<Props> = () => {
                     // and assigns them as the owner of the event.
                     [eventId, event] = await createEventAndAddOwner(
                         eventName,
-                        username,
+                        {
+                            username,
+                            scope: "local",
+                        },
                         password,
-                        "local",
                     );
                 } catch (err) {
                     if (err instanceof Error)
