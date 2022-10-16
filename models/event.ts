@@ -247,7 +247,7 @@ export const updateEventTimeRange = async (
 export const signUpMember = async (
     eventId: string,
     user: EventMember | LocalEventMember,
-) => {
+): Promise<void> => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
     try {
         const { username, ...userDetails } = user;

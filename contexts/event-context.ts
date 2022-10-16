@@ -7,6 +7,7 @@ import {
     updateRemoteAvailabilities,
     removeMember,
 } from "models/event";
+import { addEventToGlobalUser } from "models/global-user";
 import { createContext, Dispatch } from "react";
 import { spawnNotification } from "utils/notifications";
 import { LocalEventMember } from "./local-auth-context";
@@ -110,12 +111,26 @@ export const eventReducer = (
             const isOwner = Object.keys(state.members).length === 0;
             user.isOwner = isOwner;
 
-            signUpMember(eventId, user).catch((err) =>
-                spawnNotification(
-                    "error",
-                    `Couldn't sync to remote. Reason: ${err}`,
-                ),
-            );
+            signUpMember(eventId, user)
+                .then(() => {
+                    // Add the event to the global user's list of events.
+                    if (user.scope === "global" && "id" in user) {
+                        addEventToGlobalUser(user.id, eventId).catch((err) => {
+                            spawnNotification(
+                                "error",
+                                `Couldn't add this event to your list of events. ${err}`,
+                            );
+                        });
+                    } else {
+                        // TODO:
+                    }
+                })
+                .catch((err) =>
+                    spawnNotification(
+                        "error",
+                        `Couldn't sign up to event. ${err}`,
+                    ),
+                );
 
             return {
                 ...state,
