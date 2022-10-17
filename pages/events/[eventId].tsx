@@ -334,7 +334,9 @@ const EventPage: React.FC = () => {
                                                 </div>
                                             )}
                                             <div className={styles.btnGroup}>
-                                                <LeaveEventButton />
+                                                <LeaveEventButton
+                                                    eventId={eventId}
+                                                />
                                             </div>
                                             {!atLeastOnedateSelected &&
                                                 !isOwnerOfEvent && (

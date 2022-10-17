@@ -1,12 +1,4 @@
-import {
-    DataSnapshot,
-    get,
-    getDatabase,
-    push,
-    ref,
-    set,
-    update,
-} from "firebase/database";
+import { DataSnapshot, get, getDatabase, ref, set } from "firebase/database";
 import { KonfluxEvent } from "./event";
 
 // Note that the user details such as email, username, profile picture URL, etc.
@@ -43,16 +35,23 @@ export const getGlobalUserEvents = async (
     if (!user) {
         throw new Error("Malformed user model.");
     }
+    if (!user.eventIds) {
+        return [];
+    }
 
     // Retrieve the event db objects corresponding to each of the event IDs
     // stored in the user.
-    const eventQueries: Promise<DataSnapshot>[] = user.eventIds.map((id) => {
+    const eventIds = Object.keys(user.eventIds || {});
+    const eventQueries: Promise<DataSnapshot>[] = eventIds.map((id) => {
         return get(ref(getDatabase(), `events/${id}`));
     });
 
     const events: KonfluxEvent[] = (await Promise.all(eventQueries))
         .filter((snapshot) => snapshot.exists())
-        .map((snapshot) => snapshot.val() as KonfluxEvent)
+        .map(
+            (snapshot) =>
+                ({ ...snapshot.val(), id: snapshot.key } as KonfluxEvent),
+        )
         .filter((event) => !!event);
 
     return events;

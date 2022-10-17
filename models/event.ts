@@ -1,5 +1,13 @@
 import { LocalEventMember } from "contexts/local-auth-context";
-import { getDatabase, onValue, push, ref, set } from "firebase/database";
+import {
+    getDatabase,
+    onValue,
+    push,
+    ref,
+    remove,
+    set,
+    update,
+} from "firebase/database";
 import { NextRouter } from "next/router";
 import { spawnNotification } from "utils/notifications";
 import { addEventToGlobalUser } from "./global-user";
@@ -43,6 +51,8 @@ export type AvailabilityInfo = {
  * Data model representing an event's details and members' availabilities.
  */
 export interface KonfluxEvent {
+    /** Database identifier. */
+    id?: string | null;
     /** The human-readable name of the event. Not a unique identifier. */
     name: string;
     /** The index of the earliest time block. */
@@ -56,7 +66,7 @@ export interface KonfluxEvent {
     };
     /** The people in this event. */
     members: {
-        [username: string]: Omit<EventMember, "username" | "id">;
+        [username: string]: Omit<EventMember, "username">;
     };
 }
 
@@ -93,9 +103,8 @@ export const onEventChange = async (
 
         onValue(eventRef, (snapshot) => {
             if (!snapshot.exists()) {
-                router.push("/404");
-                spawnNotification("error", "That event doesn't exist.");
-                // throw new Error("Event does not exist.");
+                router.push("/");
+                spawnNotification("warning", "Event no longer exists.");
             }
             const currEvent = snapshot.val() as KonfluxEvent;
             handleChange(currEvent);
@@ -134,17 +143,20 @@ export const createEventAndAddOwner = async (
     if (password.length >= 64)
         throw new Error("Password must be fewer than 64 characters.");
 
+    const memberData: any = {
+        isOwner: true,
+        scope: user.scope,
+        password: password,
+    };
+    if (user.scope === "global" && "id" in user) memberData.id = user.id;
+
     const event: KonfluxEvent = {
         name: eventName,
         earliest: 18,
         latest: 34,
         groupAvailabilities: {},
         members: {
-            [creatorUsername]: {
-                isOwner: true,
-                scope: user.scope,
-                password: password,
-            },
+            [creatorUsername]: memberData,
         },
     };
 
@@ -272,11 +284,32 @@ export const removeMember = async (eventId: string, username: string) => {
     try {
         // Set to null to delete record in Firebase realtime db.
         // See: https://firebase.google.com/docs/database/web/read-and-write#delete_data.
-        await set(
-            ref(getDatabase(), `events/${eventId}/members/${username}`),
-            null,
+        const memberRef = ref(
+            getDatabase(),
+            `events/${eventId}/members/${username}`,
         );
+        await set(memberRef, null);
     } catch (err) {
         throw new Error(`Failed to update the event's members. Reason: ${err}`);
     }
+};
+
+export const deleteEvent = async (eventId: string, event: KonfluxEvent) => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+
+    const eventRef = ref(getDatabase(), `events/${eventId}`);
+
+    // TODO: wrap in transaction.
+    await remove(eventRef);
+    const updates: any = {};
+    Object.keys(event.members || {}).forEach((username) => {
+        const member = event.members[username];
+        if (member.scope === "global" && "id" in member) {
+            updates["users/" + (member as any).id + "/eventIds/" + eventId] =
+                null;
+        }
+    });
+
+    console.log(updates);
+    update(ref(getDatabase()), updates);
 };

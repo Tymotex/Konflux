@@ -1,8 +1,9 @@
-import React, { useCallback } from "react";
-import styles from "./ShareableLink.module.scss";
 import ClipboardIcon from "assets/icons/clipboard.svg";
+import { useCopyTextToClipboard } from "hooks/clipboard";
 import { useDarkMode } from "hooks/theme";
+import React, { useCallback } from "react";
 import { spawnNotification } from "utils/notifications";
+import styles from "./ShareableLink.module.scss";
 
 interface Props {
     link: string;
@@ -10,22 +11,7 @@ interface Props {
 
 const ShareableLink: React.FC<Props> = ({ link }) => {
     const isDarkMode = useDarkMode();
-
-    const copyToClipboard = useCallback(
-        () =>
-            window.navigator.clipboard
-                .writeText(link)
-                .then(() => {
-                    spawnNotification("success", "Copied to clipboard");
-                })
-                .catch((err) => {
-                    spawnNotification(
-                        "error",
-                        `Couldn't copy to clipboard. Reason: ${err}`,
-                    );
-                }),
-        [link],
-    );
+    const copyToClipboard = useCopyTextToClipboard(link);
 
     return (
         <div

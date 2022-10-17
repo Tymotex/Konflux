@@ -6,6 +6,8 @@ import {
     updateEventTimeRange,
     updateRemoteAvailabilities,
     removeMember,
+    deleteEvent,
+    EMPTY_EVENT,
 } from "models/event";
 import { addEventToGlobalUser } from "models/global-user";
 import { createContext, Dispatch } from "react";
@@ -108,8 +110,11 @@ export const eventReducer = (
 
             // By default, new members other than the original creators are not
             // owners.
-            const isOwner = Object.keys(state.members).length === 0;
-            user.isOwner = isOwner;
+            if (!user.isOwner && Object.keys(state.members).length === 0) {
+                user.isOwner = true;
+            } else {
+                user.isOwner = false;
+            }
 
             signUpMember(eventId, user)
                 .then(() => {
@@ -132,66 +137,83 @@ export const eventReducer = (
                     ),
                 );
 
+            const memberData: any = {
+                scope: user.scope,
+                password: user.password,
+                email: user.email,
+                profilePicUrl: user.profilePicUrl,
+                isOwner: user.isOwner,
+            };
+            if (user.scope === "global" && "id" in user)
+                memberData.id = user.id;
+
             return {
                 ...state,
                 members: {
                     ...state.members,
-                    [user.username]: {
-                        scope: user.scope,
-                        password: user.password,
-                        email: user.email,
-                        profilePicUrl: user.profilePicUrl,
-                        isOwner,
-                    },
+                    [user.username]: memberData,
                 },
             };
         }
         case "REMOVE_MEMBER": {
             const { eventId, username } = action.payload;
-
             const newEvent = { ...state };
 
-            // TODO: if the user is the last user of the event, then delete the entire event.
+            // Do nothing if the given user is not a member.
+            if (!(username in state.members)) return state;
 
-            // Remove the member.
-            if (username in state.members) delete newEvent.members[username];
-            else return state;
+            const isLastOwner = newEvent.members[username].isOwner;
 
-            // Clear the member's availabilities by removing their username from
-            // all time blocks.
-            Object.keys(newEvent.groupAvailabilities || {}).forEach((date) => {
-                // Timeblock indices
-                Object.keys(newEvent.groupAvailabilities[date])
-                    .map((i) => parseInt(i))
-                    .filter((i) => !isNaN(i))
-                    .forEach((timeBlockIndex: number) => {
-                        if (
-                            username in
-                            newEvent.groupAvailabilities[date][timeBlockIndex]
-                        )
-                            delete newEvent.groupAvailabilities[date][
-                                timeBlockIndex
-                            ][username];
-                    });
-            });
+            // If the current user is the last owner of the event, then delete
+            // the entire event.
+            // Note: there is currently only 1 owner per event.
+            if (isLastOwner) {
+                deleteEvent(eventId, newEvent);
+                return EMPTY_EVENT;
+            } else {
+                // Remove the member.
+                delete newEvent.members[username];
 
-            updateRemoteAvailabilities(
-                eventId,
-                newEvent.groupAvailabilities,
-            ).catch((err) => {
-                spawnNotification(
-                    "error",
-                    `Failed to remove availabilities. ${err.message}`,
+                // Clear the member's availabilities by removing their username from
+                // all time blocks.
+                Object.keys(newEvent.groupAvailabilities || {}).forEach(
+                    (date) => {
+                        // Timeblock indices
+                        Object.keys(newEvent.groupAvailabilities[date])
+                            .map((i) => parseInt(i))
+                            .filter((i) => !isNaN(i))
+                            .forEach((timeBlockIndex: number) => {
+                                if (
+                                    username in
+                                    newEvent.groupAvailabilities[date][
+                                        timeBlockIndex
+                                    ]
+                                )
+                                    delete newEvent.groupAvailabilities[date][
+                                        timeBlockIndex
+                                    ][username];
+                            });
+                    },
                 );
-            });
-            removeMember(eventId, username).catch((err) => {
-                spawnNotification(
-                    "error",
-                    `Failed to remove membership. ${err.message}`,
-                );
-            });
 
-            return newEvent;
+                updateRemoteAvailabilities(
+                    eventId,
+                    newEvent.groupAvailabilities,
+                ).catch((err) => {
+                    spawnNotification(
+                        "error",
+                        `Failed to remove availabilities. ${err.message}`,
+                    );
+                });
+                removeMember(eventId, username).catch((err) => {
+                    spawnNotification(
+                        "error",
+                        `Failed to remove membership. ${err.message}`,
+                    );
+                });
+
+                return newEvent;
+            }
         }
         default:
             throw new Error(

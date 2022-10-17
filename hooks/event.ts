@@ -3,9 +3,10 @@ import {
     LocalAuthContext,
     LocalEventMember,
 } from "contexts/local-auth-context";
+import dayjs from "dayjs";
 import { EMPTY_EVENT, EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
-import { Dispatch, useContext, useEffect, useMemo } from "react";
+import { Dispatch, useCallback, useContext, useEffect, useMemo } from "react";
 import { useGlobalUser } from "utils/global-auth";
 import { spawnNotification } from "utils/notifications";
 
@@ -85,6 +86,7 @@ export const useWatchAndAddMemberToEventIfNotExist = (
     useEffect(() => {
         if (!eventId) return;
         if (!user) return;
+        if (!eventState || !eventState.members) return;
 
         if (
             eventState !== EMPTY_EVENT &&
@@ -106,6 +108,8 @@ export const useDetermineIsOwner = (
     user: EventMember | LocalEventMember | null,
     eventState: KonfluxEvent,
 ): boolean => {
+    if (!eventState || !eventState.members) return false;
+
     return user &&
         user.username &&
         user.username in eventState.members &&
@@ -196,4 +200,88 @@ export const useBypassEventSignInWithURL = (
             }
         }
     }, [isBypassing, event, eventId]);
+};
+
+/**
+ * Determines the earliest possible date and latest possible date being
+ * considered for this event.
+ * @param event
+ * @param member
+ */
+export const useDetermineMinMaxDates = (event: KonfluxEvent) => {
+    const dateStrs = Object.keys(event.groupAvailabilities || {});
+    dateStrs.sort();
+
+    if (dateStrs.length === 0) return ["", ""];
+
+    const earliestDate = dateStrs[0];
+    const latestDate = dateStrs[dateStrs.length - 1];
+
+    return [
+        dayjs(earliestDate, "YYYY-MM-DD").format("D MMM"),
+        dayjs(latestDate, "YYYY-MM-DD").format("D MMM"),
+    ];
+};
+
+/**
+ * Leaves the current event. Must be either locally or globally
+ * authenticated.
+ * @param confirmLeave deletes user from event assuming confirmation has been
+ * obtained.
+ */
+export const useAttemptLeaveEvent = (
+    user: EventMember | LocalEventMember | null,
+    eventId: string | null | undefined,
+    event: KonfluxEvent,
+    eventDispatch: Dispatch<EventAction>,
+    showModal: (
+        modal: "deletion-warning" | "leave-warning",
+        state: boolean,
+    ) => void,
+) => {
+    const router = useRouter();
+
+    const leaveEvent = useCallback(
+        (confirmLeave: boolean = false) => {
+            if (!user) {
+                spawnNotification(
+                    "error",
+                    "Can't leave event when not authenticated.",
+                );
+                return;
+            }
+            if (!eventId) {
+                spawnNotification("error", "Event ID not defined.");
+                return;
+            }
+            if (!event || event === EMPTY_EVENT) {
+                spawnNotification("error", "Event undefined.");
+                return;
+            }
+
+            // If the current user is the last owner of the event, then warn the
+            // user that this will cause the event to be deleted.
+            // Note: there is currently only 1 owner per event.
+            if (event.members[user.username].isOwner && !confirmLeave) {
+                showModal("deletion-warning", true);
+                return;
+            }
+
+            // Provide a leaving warning.
+            if (!confirmLeave) {
+                showModal("leave-warning", true);
+                return;
+            }
+
+            eventDispatch({
+                type: "REMOVE_MEMBER",
+                payload: { eventId, username: user?.username },
+            });
+
+            router.push("/");
+        },
+        [user, eventId, event, eventDispatch, showModal],
+    );
+
+    return leaveEvent;
 };

@@ -19,8 +19,6 @@
 
     &:hover {
         transform: scale(1.05);
-        color: $primary-700;
-        background: $primary-200;
     }
 
     .icon {
@@ -33,6 +31,11 @@
 
     &.primary {
         background: $primary-500;
+
+        &:hover {
+            color: $primary-700;
+            background: $primary-200 !important;
+        }
     }
 
     &.secondary {
