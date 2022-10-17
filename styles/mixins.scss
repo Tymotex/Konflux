@@ -35,3 +35,11 @@
     font-weight: bold;
     cursor: pointer;
 }
+
+@mixin color-icon($color) {
+    fill: $color !important;
+    stroke: $color !important;
+    * {
+        fill: $color !important;
+    }
+}

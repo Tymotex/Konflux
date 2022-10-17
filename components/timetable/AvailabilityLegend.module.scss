@@ -45,9 +45,9 @@
                     transform: translate(-50%, -50%);
                     height: $font-size-sm;
                     width: $font-size-sm;
-                    fill: $grey-200;
                     stroke: $grey-700;
                     stroke-width: 5px;
+                    @include color-icon($grey-200);
                 }
             }
 

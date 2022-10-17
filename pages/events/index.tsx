@@ -1,6 +1,8 @@
+import EventList from "components/event/EventList";
 import { PageTransition } from "components/page-transition";
 import type { NextPage } from "next";
 import Head from "next/head";
+import styles from "./events.module.scss";
 
 const EventsHome: NextPage = () => {
     return (
@@ -9,7 +11,8 @@ const EventsHome: NextPage = () => {
                 <title>Events</title>
             </Head>
             <PageTransition>
-                <h1>Events</h1>
+                <h1 className={styles.heading}>Your Events.</h1>
+                <EventList />
             </PageTransition>
         </>
     );

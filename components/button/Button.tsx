@@ -10,6 +10,7 @@ interface Props {
     isSubmit?: boolean;
     colour?: "primary" | "secondary";
     Icon?: React.ElementType;
+    size?: "sm" | "md";
 }
 
 const Button: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const Button: React.FC<Props> = ({
     isSubmit = false,
     colour = "primary",
     Icon,
+    size = "md",
 }) => {
     const isDarkMode = useDarkMode();
 
@@ -31,7 +33,9 @@ const Button: React.FC<Props> = ({
                     : colour === "secondary"
                     ? styles.secondary
                     : ""
-            } ${className ? className : ""} ${isDarkMode ? styles.dark : ""}`}
+            } ${className ? className : ""} ${isDarkMode ? styles.dark : ""} ${
+                size === "sm" ? styles.sm : size === "md" ? styles.md : ""
+            }`}
             onClick={onClick}
             style={style}
             type={isSubmit ? "submit" : "button"}

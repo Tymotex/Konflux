@@ -4,7 +4,6 @@
 .btn {
     @include reset-button;
 
-    padding: $padding-sm $padding-lg;
     border-radius: 100px;
     color: $grey-100;
     font-weight: bold;
@@ -25,9 +24,11 @@
     }
 
     .icon {
-        width: $font-size-sm;
-        height: $font-size-sm;
-        fill: $grey-600;
+        min-width: $font-size-sm;
+        min-height: $font-size-sm;
+        max-width: $font-size-sm;
+        max-height: $font-size-sm;
+        @include color-icon($grey-600);
     }
 
     &.primary {
@@ -48,16 +49,24 @@
         }
     }
 
+    // Sizing.
+    &.sm {
+        padding: $padding-xs $padding-md;
+        font-size: small;
+    }
+
+    &.md {
+        padding: $padding-sm $padding-lg;
+    }
+
+    // Dark mode styles.
     &.dark {
         &.secondary {
             color: $grey-200;
         }
 
         .icon {
-            fill: $grey-300;
-            * {
-                fill: $grey-300;
-            }
+            @include color-icon($grey-300);
         }
     }
 }

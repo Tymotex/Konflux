@@ -18,20 +18,14 @@
                 height: $font-size-sm;
                 width: $font-size-sm;
 
-                * {
-                    fill: $grey-300;
-                }
-                fill: $grey-300;
+                @include color-icon($grey-300);
             }
         }
     }
 
     &.dark {
         .peopleList .item .icon {
-            * {
-                fill: $grey-800;
-            }
-            fill: $grey-800;
+            @include color-icon($grey-800);
         }
     }
 }

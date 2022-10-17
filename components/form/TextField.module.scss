@@ -53,7 +53,7 @@
             svg {
                 height: $font-size-sm;
                 width: $font-size-sm;
-                fill: $primary-500;
+                @include color-icon($primary-500);
 
                 margin-left: auto;
                 cursor: pointer;
@@ -107,7 +107,7 @@
         .asterisk {
             height: $font-size-sm;
             width: $font-size-sm;
-            fill: $grey-400;
+            @include color-icon($grey-400);
         }
     }
 }

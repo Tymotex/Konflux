@@ -26,10 +26,7 @@
         background: $grey-700;
 
         .icon {
-            * {
-                fill: $grey-100;
-            }
-            fill: $grey-100;
+            @include color-icon($grey-100);
         }
     }
 }

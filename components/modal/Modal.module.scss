@@ -13,9 +13,7 @@
             color: $grey-100;
 
             .closeButton {
-                * {
-                    fill: $grey-100;
-                }
+                @include color-icon($grey-100);
             }
         }
     }
@@ -71,9 +69,7 @@
                 color: $grey-100;
 
                 .closeButton {
-                    * {
-                        fill: $grey-100;
-                    }
+                    @include color-icon($grey-100);
                 }
             }
         }

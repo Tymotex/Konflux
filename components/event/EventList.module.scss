@@ -1,0 +1,126 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+$max-card-width: 36rem;
+
+.eventCardList {
+    @include reset-list;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: $margin-md;
+
+    .card {
+        padding: $padding-xl;
+        border-radius: 8px;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        width: 100%;
+        max-width: $max-card-width;
+
+        background: $grey-50;
+
+        position: relative;
+
+        .heading {
+            color: $grey-700;
+            font-size: $font-size-md;
+            margin: 0 0 $margin-md 0;
+
+            margin-right: $margin-2xl;
+        }
+
+        .ellipsisMenu {
+            position: absolute;
+            right: $padding-xl;
+            background: $primary-50;
+            height: $font-size-xl;
+            width: $font-size-xl;
+            border-radius: 50%;
+            box-shadow: rgba(0, 0, 0, 0.01) 0px 2px 6px 0px,
+                rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+
+            .icon {
+                @include color-icon($grey-500);
+
+                height: $font-size-sm;
+                width: $font-size-sm;
+
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .propertiesList {
+            @include reset-list;
+
+            .item {
+                display: flex;
+                align-items: center;
+                column-gap: $spacing-sm;
+
+                margin-bottom: $margin-sm;
+
+                color: $grey-500;
+
+                .icon {
+                    min-height: $font-size-xl;
+                    min-width: $font-size-xl;
+                    max-height: $font-size-xl;
+                    max-width: $font-size-xl;
+                    position: relative;
+
+                    background: $grey-200;
+                    border-radius: 50%;
+
+                    svg {
+                        height: $font-size-sm;
+                        width: $font-size-sm;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+
+                        @include color-icon($primary-500);
+                    }
+                }
+            }
+        }
+
+        .buttonGroup {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            column-gap: $spacing-xs;
+            row-gap: $spacing-xs;
+        }
+
+        &.dark {
+            background: $grey-700;
+            .heading {
+                color: $grey-50;
+            }
+            .ellipsisMenu {
+                background: rgba($grey-600, 0.5);
+                .icon {
+                    @include color-icon($grey-300);
+                }
+            }
+            .propertiesList .item {
+                color: $grey-300;
+                .icon {
+                    background: $grey-800;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .eventCardList {
+        font-size: small;
+    }
+}
