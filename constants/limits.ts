@@ -1,0 +1,2 @@
+export const MAX_ATTENDEES_PER_EVENT = 20;
+export const MAX_DATES_SELECTABLE = 31;

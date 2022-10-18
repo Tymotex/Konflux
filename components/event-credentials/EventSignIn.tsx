@@ -4,6 +4,7 @@ import { Button } from "components/button";
 import { Callout } from "components/callout";
 import { TextField } from "components/form";
 import ImportantActionModal from "components/modal/ImportantActionModal";
+import { MAX_ATTENDEES_PER_EVENT } from "constants/limits";
 import { EventContext } from "contexts/event-context";
 import { LocalAuthAction } from "contexts/local-auth-context";
 import { ModalControlContext } from "contexts/modal-control-context";
@@ -17,6 +18,7 @@ import React, {
     useMemo,
     useRef,
 } from "react";
+import { spawnNotification } from "utils/notifications";
 import styles from "./EventSignIn.module.scss";
 
 interface Props {
@@ -25,8 +27,6 @@ interface Props {
     localAuthDispatch: Dispatch<LocalAuthAction>;
     show: boolean;
 }
-
-const MotionOverlay = motion(AlertDialogOverlay);
 
 const EventSignIn: React.FC<Props> = ({
     eventId,
@@ -62,6 +62,17 @@ const EventSignIn: React.FC<Props> = ({
             throw new Error("Username input ref detached");
         if (!passwordInputRef.current)
             throw new Error("Password input ref detached");
+
+        if (
+            Object.keys(eventState.members || {}).length >=
+            MAX_ATTENDEES_PER_EVENT
+        ) {
+            spawnNotification(
+                "error",
+                `Cannot have more than ${MAX_ATTENDEES_PER_EVENT} attendees. Please make a feature request if you'd like this to change.`,
+            );
+            return;
+        }
 
         const username = usernameInputRef.current.value;
         const password = passwordInputRef.current.value;

@@ -1,3 +1,4 @@
+import { MAX_ATTENDEES_PER_EVENT } from "constants/limits";
 import { EventAction } from "contexts/event-context";
 import {
     LocalAuthContext,
@@ -6,7 +7,14 @@ import {
 import dayjs from "dayjs";
 import { EMPTY_EVENT, EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
-import { Dispatch, useCallback, useContext, useEffect, useMemo } from "react";
+import {
+    Dispatch,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useGlobalUser } from "utils/global-auth";
 import { removeEventFromLocalStorage } from "utils/local-events-list";
 import { spawnNotification } from "utils/notifications";
@@ -90,11 +98,33 @@ export const useWatchAndAddMemberToEventIfNotExist = (
         if (!eventState || !eventState.members) return;
 
         if (
+            Object.keys(eventState.members || {}).length >=
+            MAX_ATTENDEES_PER_EVENT
+        ) {
+            spawnNotification(
+                "error",
+                `Cannot have more than ${MAX_ATTENDEES_PER_EVENT} attendees. Please make a feature request if you'd like this to change.`,
+            );
+            return;
+        }
+
+        if (
             eventState !== EMPTY_EVENT &&
             !(user.username in eventState.members)
         ) {
-            spawnNotification("info", "You're now a member of this event.");
-            eventDispatch({ type: "ADD_MEMBER", payload: { eventId, user } });
+            eventDispatch({
+                type: "ADD_MEMBER",
+                payload: {
+                    eventId,
+                    user,
+                    onSuccess: () => {
+                        spawnNotification(
+                            "info",
+                            "You're now a member of this event.",
+                        );
+                    },
+                },
+            });
         }
     }, [eventId, user, eventState, eventDispatch]);
 };

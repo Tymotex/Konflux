@@ -1,5 +1,9 @@
 import { Status } from "components/sync-status/SyncStatus";
 import {
+    MAX_ATTENDEES_PER_EVENT,
+    MAX_DATES_SELECTABLE,
+} from "constants/limits";
+import {
     KonfluxEvent,
     EventMember,
     signUpMember,
@@ -43,6 +47,7 @@ export type EventAction =
           payload: {
               eventId: string;
               user: EventMember | LocalEventMember;
+              onSuccess: () => void;
           };
       }
     | {
@@ -87,6 +92,19 @@ export const eventReducer = (
         case "SET_AVAILABILITIES": {
             const { eventId, groupAvailabilities, updateStatus } =
                 action.payload;
+
+            // Check that not too many days have been selected.
+            if (
+                Object.keys(groupAvailabilities || {}).length >
+                MAX_DATES_SELECTABLE
+            ) {
+                spawnNotification(
+                    "error",
+                    `You cannot select more than ${MAX_DATES_SELECTABLE} days. Please make a feature request if you'd like this to change.`,
+                );
+                return state;
+            }
+
             updateRemoteAvailabilities(eventId, groupAvailabilities)
                 .then(() => {
                     updateStatus("success");
@@ -107,10 +125,20 @@ export const eventReducer = (
             };
         }
         case "ADD_MEMBER": {
-            const { eventId, user } = action.payload;
+            const { eventId, user, onSuccess } = action.payload;
 
             // If the member already exists, do nothing.
             if (user.username in state.members) return state;
+
+            // If there are too many attendees, then reject the attempt.
+            if (
+                Object.keys(state.members || {}).length >=
+                MAX_ATTENDEES_PER_EVENT
+            ) {
+                throw new Error(
+                    `Cannot have more than ${MAX_ATTENDEES_PER_EVENT} attendees`,
+                );
+            }
 
             // By default, new members other than the original creators are not
             // owners.
@@ -133,6 +161,8 @@ export const eventReducer = (
                     } else {
                         upsertEventToLocalStorage(eventId, state.name);
                     }
+
+                    onSuccess();
                 })
                 .catch((err) =>
                     spawnNotification(
