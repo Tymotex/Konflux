@@ -33,6 +33,7 @@ const AvailabilityTooltip: React.FC<Props> = ({
             id="timetable-tooltip"
             effect="solid"
             type={isDarkMode ? "light" : "dark"}
+            className={styles.tooltipWrapper}
         >
             <div
                 className={`${styles.tooltipContainer} ${

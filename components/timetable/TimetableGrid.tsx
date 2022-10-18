@@ -387,7 +387,10 @@ const TimetableGrid: React.FC<Props> = ({
                 gridColumnStart: columnIndex + (displayTimeLabels ? 2 : 1),
                 gridColumnEnd: "span 1",
                 borderTop:
-                    timeBlockIndex % 2 === 0 ? hourBorder : halfHourBorder,
+                    (timeBlockIndex + startRow) % 2 === 0 ||
+                    timeBlockIndex === 0
+                        ? hourBorder
+                        : halfHourBorder,
                 borderLeft: hourBorder,
                 borderBottom:
                     timeBlockIndex === endRow - startRow - 1 ? hourBorder : "",
@@ -453,6 +456,13 @@ const TimetableGrid: React.FC<Props> = ({
                                         style={{
                                             gridColumnStart: 1,
                                             gridRowStart: i + 2,
+                                            visibility:
+                                                (i + startRow) % 2 === 0 ||
+                                                i === 0 ||
+                                                i ===
+                                                    Math.abs(endRow - startRow)
+                                                    ? "visible"
+                                                    : "hidden",
                                         }}
                                     >
                                         <span className={styles.text}>

@@ -1,31 +1,36 @@
 @import "../../styles/variables.scss";
 @import "../../styles/mixins.scss";
 
-.tooltipContainer {
-    font-size: $font-size-sm;
+.tooltipWrapper {
+    position: absolute;
+    z-index: 1000000000;
 
-    .peopleList {
-        @include reset-list;
+    .tooltipContainer {
+        font-size: $font-size-sm;
 
-        list-style: none;
+        .peopleList {
+            @include reset-list;
 
-        .item {
-            display: flex;
-            align-items: center;
-            column-gap: $spacing-xs;
+            list-style: none;
 
-            .icon {
-                height: $font-size-sm;
-                width: $font-size-sm;
+            .item {
+                display: flex;
+                align-items: center;
+                column-gap: $spacing-xs;
 
-                @include color-icon($grey-300);
+                .icon {
+                    height: $font-size-sm;
+                    width: $font-size-sm;
+
+                    @include color-icon($grey-300);
+                }
             }
         }
-    }
 
-    &.dark {
-        .peopleList .item .icon {
-            @include color-icon($grey-800);
+        &.dark {
+            .peopleList .item .icon {
+                @include color-icon($grey-800);
+            }
         }
     }
 }

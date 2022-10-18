@@ -1,14 +1,7 @@
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import styles from "./DualRangeSlider.module.scss";
 import { TIME_LABELS } from "components/timetable/timetable-utils";
 import { useDarkMode } from "hooks/theme";
-import { spawnNotification } from "utils/notifications";
+import React, { useCallback, useEffect, useState } from "react";
+import styles from "./DualRangeSlider.module.scss";
 
 interface Props {
     defaultMinVal: number;

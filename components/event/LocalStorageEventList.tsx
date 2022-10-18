@@ -45,7 +45,10 @@ const LocalStorageEventList: React.FC<Props> = () => {
                     </Callout>
                     <ul className={styles.list}>
                         {events.map((event) => (
-                            <LocalStorageEventCard event={event} />
+                            <LocalStorageEventCard
+                                key={event.id}
+                                event={event}
+                            />
                         ))}
                     </ul>
                 </>

@@ -2,6 +2,9 @@
 @import "../../styles/mixins.scss";
 
 .container {
+    overflow: auto;
+    max-width: 25rem;
+
     .availabilityLegend {
         list-style: none;
         padding: 0;

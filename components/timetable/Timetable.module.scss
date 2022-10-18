@@ -65,15 +65,14 @@ $default-bg-colour-dark: $grey-700;
                 right: 10px;
             }
 
-            &:nth-child(2n) {
-                font-size: small;
-                visibility: hidden;
+            // &:nth-child(2n) {
+            //     font-size: small;
 
-                .text {
-                    color: $grey-400;
-                    font-weight: lighter;
-                }
-            }
+            //     .text {
+            //         color: $grey-400;
+            //         font-weight: lighter;
+            //     }
+            // }
         }
 
         .interval {
