@@ -1,7 +1,7 @@
 import { EventContext } from "contexts/event-context";
 import { useDarkMode } from "hooks/theme";
 import React, { useContext, useMemo } from "react";
-import ReactTooltip from "react-tooltip";
+import Tooltip from "react-tooltip";
 import { getDisplayTime } from "utils/timetable";
 import styles from "./AvailabilityTooltip.module.scss";
 import CheckIcon from "assets/icons/check.svg";
@@ -29,7 +29,7 @@ const AvailabilityTooltip: React.FC<Props> = ({
     }, [peopleAvailable, eventState]);
 
     return (
-        <ReactTooltip
+        <Tooltip
             id="timetable-tooltip"
             effect="solid"
             type={isDarkMode ? "light" : "dark"}
@@ -66,7 +66,7 @@ const AvailabilityTooltip: React.FC<Props> = ({
                     <>No one 🥳</>
                 )}
             </div>
-        </ReactTooltip>
+        </Tooltip>
     );
 };
 

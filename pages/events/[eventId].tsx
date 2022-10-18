@@ -42,7 +42,7 @@ import { debounce } from "utils/debounce";
 import { spawnNotification } from "utils/notifications";
 import styles from "./[eventId].module.scss";
 import IconButton from "components/button/IconButton";
-import LeaveEventButton from "components/event/LeaveEventButton";
+import LeaveEvent from "components/event/LeaveEvent";
 import { EventDataProvider } from "contexts/EventDataProvider";
 
 const EventPage: React.FC = () => {
@@ -334,9 +334,7 @@ const EventPage: React.FC = () => {
                                                 </div>
                                             )}
                                             <div className={styles.btnGroup}>
-                                                <LeaveEventButton
-                                                    eventId={eventId}
-                                                />
+                                                <LeaveEvent eventId={eventId} />
                                             </div>
                                             {!atLeastOnedateSelected &&
                                                 !isOwnerOfEvent && (

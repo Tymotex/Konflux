@@ -1,0 +1,52 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.list {
+    @include reset-list;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    row-gap: $spacing-md;
+    align-items: center;
+
+    margin: $margin-md;
+
+    .item {
+        padding: $padding-sm;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 16rem;
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+            rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+
+        .eventName {
+            color: $primary-500;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .buttonGroup {
+            display: flex;
+            column-gap: $spacing-xs;
+            flex-wrap: wrap;
+        }
+    }
+}
+
+.emptyEventList {
+    margin: 0 auto;
+    width: fit-content;
+    text-align: center;
+
+    .description {
+        color: $grey-500;
+    }
+}

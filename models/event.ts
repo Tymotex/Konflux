@@ -9,6 +9,7 @@ import {
     update,
 } from "firebase/database";
 import { NextRouter } from "next/router";
+import { upsertEventToLocalStorage } from "utils/local-events-list";
 import { spawnNotification } from "utils/notifications";
 import { addEventToGlobalUser } from "./global-user";
 
@@ -169,7 +170,7 @@ export const createEventAndAddOwner = async (
     if (user.scope === "global" && "id" in user) {
         addEventToGlobalUser(user.id, eventId);
     } else {
-        // TODO: push to localstorage. Maybe put this in a util file.
+        upsertEventToLocalStorage(eventId, eventName);
     }
 
     return [eventId, event];

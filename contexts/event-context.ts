@@ -11,6 +11,10 @@ import {
 } from "models/event";
 import { addEventToGlobalUser } from "models/global-user";
 import { createContext, Dispatch } from "react";
+import {
+    removeEventFromLocalStorage,
+    upsertEventToLocalStorage,
+} from "utils/local-events-list";
 import { spawnNotification } from "utils/notifications";
 import { LocalEventMember } from "./local-auth-context";
 
@@ -127,7 +131,7 @@ export const eventReducer = (
                             );
                         });
                     } else {
-                        // TODO:
+                        upsertEventToLocalStorage(eventId, state.name);
                     }
                 })
                 .catch((err) =>

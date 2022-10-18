@@ -1,4 +1,5 @@
 import EventList from "components/event/EventList";
+import LocalStorageEventList from "components/event/LocalStorageEventList";
 import { PageTransition } from "components/page-transition";
 import { KonfluxEvent } from "models/event";
 import { getGlobalUserEvents } from "models/global-user";
@@ -28,7 +29,11 @@ const EventsHome: NextPage = () => {
             </Head>
             <PageTransition>
                 <h1 className={styles.heading}>Your Events.</h1>
-                <EventList events={events} />
+                {globalUser ? (
+                    <EventList events={events} />
+                ) : (
+                    <LocalStorageEventList />
+                )}
             </PageTransition>
         </>
     );

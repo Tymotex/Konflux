@@ -8,6 +8,7 @@ import { EMPTY_EVENT, EventMember, KonfluxEvent } from "models/event";
 import { useRouter } from "next/router";
 import { Dispatch, useCallback, useContext, useEffect, useMemo } from "react";
 import { useGlobalUser } from "utils/global-auth";
+import { removeEventFromLocalStorage } from "utils/local-events-list";
 import { spawnNotification } from "utils/notifications";
 
 /**
@@ -273,9 +274,20 @@ export const useAttemptLeaveEvent = (
                 return;
             }
 
+            // For locally authenticated users, get rid of the event from their
+            // localStorage.
+            //
+            // NOTE POTENTIAL BUG: If the current user is removing someone else,
+            //                     then this would remove the event from the
+            //                     current user's localStorage. Currently, it's
+            //                     not possible to remove others.
+            const isLocallyAuthenticated =
+                event.members[user.username].scope === "local";
+            if (isLocallyAuthenticated) removeEventFromLocalStorage(eventId);
+
             eventDispatch({
                 type: "REMOVE_MEMBER",
-                payload: { eventId, username: user?.username },
+                payload: { eventId, username: user.username },
             });
 
             router.push("/");

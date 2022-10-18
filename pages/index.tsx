@@ -1,16 +1,23 @@
 import ArrowDownIcon from "assets/icons/arrow-down.svg";
 import CheckIcon from "assets/icons/check.svg";
+import { Button } from "components/button";
 import { EventCreationForm } from "components/form";
 import { PageTransition } from "components/page-transition";
 import { motion } from "framer-motion";
 import { useClearAuthOnPageMount } from "hooks/event";
+import { useLocalStorageEvents } from "hooks/local-event";
 import { useDarkMode } from "hooks/theme";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useGlobalUser } from "utils/global-auth";
 import styles from "./index.module.scss";
 
 const Home: NextPage = () => {
     const isDarkMode = useDarkMode();
+    const globalUser = useGlobalUser();
+    const router = useRouter();
+    const localStorageEvents = useLocalStorageEvents();
 
     useClearAuthOnPageMount();
 
@@ -36,20 +43,34 @@ const Home: NextPage = () => {
                         <h2 className={styles.tagline}>
                             A minimal web app for planning meetups.
                         </h2>
-                        <ul className={styles.features}>
-                            <li>
-                                <CheckIcon className={styles.check} /> Plan
-                                meetups in 1 minute.
-                            </li>
-                            <li>
-                                <CheckIcon className={styles.check} />
-                                100% free service.
-                            </li>
-                            <li>
-                                <CheckIcon className={styles.check} />
-                                <strong>No registration required</strong>
-                            </li>
-                        </ul>
+                        {globalUser ||
+                        (localStorageEvents &&
+                            localStorageEvents.length > 0) ? (
+                            <>
+                                <Button
+                                    colour="secondary"
+                                    size="sm"
+                                    onClick={() => router.push("/events")}
+                                >
+                                    View Events
+                                </Button>
+                            </>
+                        ) : (
+                            <ul className={styles.features}>
+                                <li>
+                                    <CheckIcon className={styles.check} /> Plan
+                                    meetups in 1 minute.
+                                </li>
+                                <li>
+                                    <CheckIcon className={styles.check} />
+                                    100% free service.
+                                </li>
+                                <li>
+                                    <CheckIcon className={styles.check} />
+                                    <strong>No registration required</strong>
+                                </li>
+                            </ul>
+                        )}
                     </motion.header>
                     <main className={styles.main}>
                         <motion.div

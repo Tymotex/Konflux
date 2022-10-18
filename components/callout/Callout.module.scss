@@ -26,6 +26,11 @@
         @include color-icon($primary-600);
     }
 
+    a {
+        color: $primary-500;
+        cursor: pointer;
+    }
+
     &.dark {
         background: $grey-700;
         color: $grey-200;
