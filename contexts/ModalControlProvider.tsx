@@ -1,5 +1,7 @@
 import { LoginModal, RegisterModal } from "components/form";
-import React, { useCallback, useState } from "react";
+import { useGlobalOrLocalEventMember } from "hooks/event";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { LocalAuthContext } from "./local-auth-context";
 import { ModalControlContext, ModalType } from "./modal-control-context";
 
 interface ModalControlProviderProps {
@@ -11,6 +13,9 @@ export const ModalControlProvider: React.FC<ModalControlProviderProps> = ({
 }) => {
     const [loginModalOpen, setLoginModalOpen] = useState(false);
     const [registerModalOpen, setRegisterModalOpen] = useState(false);
+
+    const { localAuthState, localAuthDispatch } = useContext(LocalAuthContext);
+    const isUserAuthenticated = useGlobalOrLocalEventMember(localAuthState);
 
     const setModal = useCallback(
         (modal: ModalType, open: boolean) => {
@@ -29,6 +34,13 @@ export const ModalControlProvider: React.FC<ModalControlProviderProps> = ({
         },
         [setLoginModalOpen, setRegisterModalOpen],
     );
+
+    useEffect(() => {
+        if (isUserAuthenticated) {
+            setLoginModalOpen(false);
+            setRegisterModalOpen(false);
+        }
+    }, [isUserAuthenticated]);
 
     return (
         <ModalControlContext.Provider
