@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev\" \"firebase emulators:start\"",
-    "build": "yarn test && next build",
+    "build": "next build",
     "start": "next start",
     "test": "jest",
     "lint": "next lint",
