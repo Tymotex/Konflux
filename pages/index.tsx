@@ -43,16 +43,14 @@ const Home: NextPage = () => {
                         <h2 className={styles.tagline}>
                             A minimal web app for planning meetups.
                         </h2>
-                        {globalUser ||
-                        (localStorageEvents &&
-                            localStorageEvents.length > 0) ? (
+                        {globalUser ? (
                             <>
                                 <Button
                                     colour="secondary"
                                     size="sm"
                                     onClick={() => router.push("/events")}
                                 >
-                                    View Events
+                                    View My Events
                                 </Button>
                             </>
                         ) : (

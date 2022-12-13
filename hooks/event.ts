@@ -55,11 +55,10 @@ export const useGlobalOrLocalEventMember = (
 ): EventMember | LocalEventMember | null => {
     const globalUser = useGlobalUser();
 
-    // It's invalid for both global and local auth to exist.
+    // Sometimes, both global and local auth may exist at the same time (see
+    // issue #65). In that situation, prefer the global auth over local auth.
     if (globalUser && localAuthState && localAuthState.username) {
-        throw new Error(
-            "Expected user to only be authenticated either globally xor locally, but both were true.",
-        );
+        return globalUser;
     }
 
     // Prefer using global auth details, if they exist.

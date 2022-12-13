@@ -80,7 +80,7 @@ const EventCard: React.FC<Props> = ({ event }) => {
                                 </>
                             )
                         ) : (
-                            <>No dates being considered yet</>
+                            <>No dates considered yet.</>
                         )}
                     </span>
                 </li>

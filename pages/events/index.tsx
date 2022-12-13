@@ -32,7 +32,8 @@ const EventsHome: NextPage = () => {
                 {globalUser ? (
                     <EventList events={events} />
                 ) : (
-                    <LocalStorageEventList />
+                    <></>
+                    // <LocalStorageEventList />
                 )}
             </PageTransition>
         </>
