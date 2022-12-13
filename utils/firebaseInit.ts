@@ -17,15 +17,21 @@ function createFirebaseApp(config: FirebaseOptions) {
     } catch {
         const app = initializeApp(config);
 
-        const db = getDatabase(app);
-        connectDatabaseEmulator(db, "localhost", 9000);
+        if (process.env.NODE_ENV === "production") {
+            // Don't set up emulators.
+        } else {
+            // Set up emulators so that network requests hit a local copy of
+            // Firebase services instead of the real thing.
+            const db = getDatabase(app);
+            connectDatabaseEmulator(db, "localhost", 9000);
 
-        // See: https://firebase.google.com/docs/emulator-suite/connect_auth.
-        const auth = getAuth();
-        connectAuthEmulator(auth, "http://localhost:9099");
+            // See: https://firebase.google.com/docs/emulator-suite/connect_auth.
+            const auth = getAuth();
+            connectAuthEmulator(auth, "http://localhost:9099");
+        }
 
         return app;
     }
 }
 
-const firebaseApp = createFirebaseApp(firebaseInitConfig);
+export const firebaseApp = createFirebaseApp(firebaseInitConfig);

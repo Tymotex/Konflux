@@ -19,12 +19,13 @@ const AvatarStack: React.FC<Props> = ({ users }) => {
             (userInfo) => userInfo.profilePicUrl || AVATAR_PLACEHOLDER_URL,
         );
         return [...allProfilePics.slice(0, MAX_AVATARS)];
-    }, [users, numMembers]);
+    }, [users]);
 
     return (
         <ul className={styles.stack}>
             {profilePicUrls?.map((picUrl) => (
                 <li
+                    key={picUrl}
                     className={styles.avatar}
                     style={{ backgroundImage: `url(${picUrl})` }}
                 ></li>
