@@ -37,7 +37,7 @@
             .check {
                 width: $font-size-sm;
                 height: $font-size-sm;
-                fill: $primary-500;
+                @include color-icon($primary-500);
             }
         }
     }
@@ -67,10 +67,7 @@
             position: relative;
 
             &.dark {
-                stroke: white;
-                path {
-                    fill: white;
-                }
+                @include color-icon(white);
             }
         }
     }

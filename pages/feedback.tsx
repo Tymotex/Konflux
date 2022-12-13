@@ -1,14 +1,15 @@
 import { Container } from "components/container";
 import { PageTransition } from "components/page-transition";
 import type { NextPage } from "next";
+import styles from "./feedback.module.scss";
 
 const FeatureRequestPage: NextPage = () => {
     return (
         <PageTransition>
             <Container>
-                <div style={{ textAlign: "center" }}>
-                    <h1>Feature Request</h1>
-                    <p>Fill out the form below 😃.</p>
+                <div className={styles.header}>
+                    <h1>Feedback or Feature Request</h1>
+                    <p>Please fill out the form below 😃.</p>
                 </div>
                 <iframe
                     style={{

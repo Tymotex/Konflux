@@ -9,7 +9,7 @@
 
     p {
         max-width: 24em;
-        margin: 0 auto;
+        margin: 0 auto $spacing-lg auto;
     }
 }
 
@@ -36,6 +36,10 @@
     column-gap: $spacing-xl;
     row-gap: $spacing-3xl;
     align-items: flex-start;
+}
+
+.btnGroup {
+    margin: 0 auto;
 }
 
 .featureRequest {

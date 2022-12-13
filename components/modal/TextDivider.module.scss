@@ -1,0 +1,30 @@
+@import "../../styles/variables.scss";
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: $grey-400;
+
+    &::before,
+    &::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid $grey-300;
+    }
+
+    &:not(:empty)::before {
+        margin-right: $spacing-sm;
+    }
+
+    &:not(:empty)::after {
+        margin-left: $spacing-sm;
+    }
+
+    &.dark {
+        &::before,
+        &::after {
+            border-bottom: 1px solid $grey-600;
+        }
+    }
+}

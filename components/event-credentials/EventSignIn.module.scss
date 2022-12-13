@@ -1,0 +1,26 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.form {
+    margin: $spacing-xl auto 0 auto;
+    width: fit-content;
+    text-align: center;
+    width: 220px;
+}
+
+.description {
+    max-width: 24rem;
+    margin: $margin-xl auto 0 auto;
+
+    a {
+        color: $blue-500;
+        font-weight: bold;
+        cursor: pointer;
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .container .content {
+        padding: $padding-2xl $padding-sm $padding-sm $padding-sm;
+    }
+}

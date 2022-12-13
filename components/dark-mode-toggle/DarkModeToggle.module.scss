@@ -15,9 +15,7 @@
         transition: 0.2 all ease-in-out;
 
         &.dark {
-            * {
-                fill: white !important;
-            }
+            @include color-icon(white);
         }
     }
 }

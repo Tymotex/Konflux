@@ -16,7 +16,10 @@
   },
   "dependencies": {
     "@reach/alert": "^0.17.0",
+    "@reach/alert-dialog": "^0.17.0",
+    "@reach/combobox": "^0.17.0",
     "@reach/dialog": "^0.17.0",
+    "@reach/menu-button": "^0.17.0",
     "@reach/tooltip": "^0.17.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/chroma-js": "^2.1.4",
@@ -32,6 +35,8 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
     "react-toastify": "^9.0.8",
+    "react-tooltip": "^4.2.21",
+    "react-use": "^17.4.0",
     "sass": "^1.54.4",
     "ts-node": "^10.9.1"
   },

@@ -20,10 +20,31 @@
 
     /* Corrects inability to style clickable `input` types in iOS */
     -webkit-appearance: none;
+
+    cursor: pointer;
 }
 
 @mixin reset-list {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+@mixin link-styles {
+    color: $blue-500;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@mixin color-icon($color) {
+    fill: $color !important;
+    stroke: $color !important;
+    * {
+        fill: $color !important;
+    }
+}
+
+@mixin apply-tooltip-position {
+    position: absolute;
+    z-index: 1000000000;
 }

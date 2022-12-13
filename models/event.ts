@@ -1,17 +1,33 @@
-import { getDatabase, onValue, push, ref, set } from "firebase/database";
+import { LocalEventMember } from "contexts/local-auth-context";
+import {
+    getDatabase,
+    onValue,
+    push,
+    ref,
+    remove,
+    set,
+    update,
+} from "firebase/database";
+import { NextRouter } from "next/router";
+import { upsertEventToLocalStorage } from "utils/local-events-list";
+import { spawnNotification } from "utils/notifications";
+import { addEventToGlobalUser } from "./global-user";
 
 /**
- * Member details, but localised entirely to the event data object it is
- * associated with.
+ * Recorded details of a member that has signed up to the event.
  */
-export interface LocalEventMember {
+export interface EventMember {
+    id: string;
     username: string;
+    scope: AuthScope;
     password?: string;
     email?: string;
     profilePicUrl?: string;
     isOwner?: boolean;
     placeholder?: boolean;
 }
+
+export type AuthScope = "local" | "global" | "";
 
 /**
  * A map of time block indices to the people available at them.
@@ -32,10 +48,16 @@ export type AvailabilityInfo = {
     placeholder?: true;
 };
 
+export type EventMembers = {
+    [username: string]: Omit<EventMember, "username">;
+};
+
 /**
  * Data model representing an event's details and members' availabilities.
  */
 export interface KonfluxEvent {
+    /** Database identifier. */
+    id?: string | null;
     /** The human-readable name of the event. Not a unique identifier. */
     name: string;
     /** The index of the earliest time block. */
@@ -48,9 +70,7 @@ export interface KonfluxEvent {
         [date: string]: AvailabilityInfo;
     };
     /** The people in this event. */
-    members: {
-        [username: string]: Omit<LocalEventMember, "username">;
-    };
+    members: EventMembers;
 }
 
 // An empty event object intended to be used for initialising state variables
@@ -75,12 +95,20 @@ export const EMPTY_EVENT: KonfluxEvent = {
 export const onEventChange = async (
     eventId: string,
     handleChange: (newEvent: KonfluxEvent) => void,
+    // This function is awkwardly coupled to the router as a workaround to
+    // trying to catch exceptions in `onValue`.
+    router: NextRouter,
 ) => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
 
     try {
         const eventRef = ref(getDatabase(), `events/${eventId}`);
+
         onValue(eventRef, (snapshot) => {
+            if (!snapshot.exists()) {
+                router.push("/");
+                spawnNotification("warning", "Event no longer exists.");
+            }
             const currEvent = snapshot.val() as KonfluxEvent;
             handleChange(currEvent);
         });
@@ -98,28 +126,56 @@ export const onEventChange = async (
  * @param creatorUsername
  * @returns
  */
-export const createEvent = async (
+export const createEventAndAddOwner = async (
     eventName: string,
-    creatorUsername: string,
-): Promise<string> => {
+    user: EventMember | LocalEventMember,
+    password: string,
+): Promise<[string, KonfluxEvent]> => {
+    if (!user.scope) throw new Error("Auth scope must be specified");
+
+    if (eventName.length === 0)
+        throw new Error("Event name must not be empty.");
+    else if (eventName.length >= 255)
+        throw new Error("Event name must be fewer than 255 characters.");
+
+    const creatorUsername = user.username;
+    if (creatorUsername.length === 0) throw new Error("Username is required.");
+    else if (creatorUsername.length >= 255)
+        throw new Error("Username must be fewer than 255 characters.");
+
+    if (password.length >= 64)
+        throw new Error("Password must be fewer than 64 characters.");
+
+    const memberData: any = {
+        isOwner: true,
+        scope: user.scope,
+        password: password,
+    };
+    if (user.scope === "global" && "id" in user) memberData.id = user.id;
+
     const event: KonfluxEvent = {
         name: eventName,
         earliest: 18,
         latest: 34,
         groupAvailabilities: {},
         members: {
-            [creatorUsername]: {
-                isOwner: true,
-            },
+            [creatorUsername]: memberData,
         },
     };
-    try {
-        const reference = await push(ref(getDatabase(), `events`), event);
-        if (!reference.key) throw Error("Firebase did not assign an ID.");
-        return reference.key;
-    } catch (err) {
-        throw new Error(`Failed to create event. Reason: ${err}`);
+
+    // Push the event object to the database.
+    const reference = await push(ref(getDatabase(), `events`), event);
+    const eventId = reference.key;
+    if (!eventId) throw Error("Firebase did not assign an ID.");
+
+    // Add the event ID to the global user's event list, if they exist.
+    if (user.scope === "global" && "id" in user) {
+        addEventToGlobalUser(user.id, eventId);
+    } else {
+        upsertEventToLocalStorage(eventId, eventName);
     }
+
+    return [eventId, event];
 };
 
 /**
@@ -190,7 +246,11 @@ export const updateEventTimeRange = async (
         );
         await Promise.all([writeEarliest, writeLatest]);
     } catch (err) {
-        throw new Error(`Failed to update the event's name. Reason: ${err}`);
+        console.log("earliest:", earliestTimeIndex);
+        console.log("latest:", latestTimeIndex);
+        throw new Error(
+            `Failed to update the event's time range. Reason: ${err}`,
+        );
     }
 };
 
@@ -199,7 +259,10 @@ export const updateEventTimeRange = async (
  * @param eventId
  * @param user
  */
-export const signUpMember = async (eventId: string, user: LocalEventMember) => {
+export const signUpMember = async (
+    eventId: string,
+    user: EventMember | LocalEventMember,
+): Promise<void> => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
     try {
         const { username, ...userDetails } = user;
@@ -213,12 +276,43 @@ export const signUpMember = async (eventId: string, user: LocalEventMember) => {
 };
 
 /**
- * Checks the given user's supplied details against their details in the remote
- * event data.
+ * Remove member from the event. This only removes it from the member list, not
+ * from the availabilities, which must be done separately.
  * @param eventId
- * @param user
+ * @param username
  */
-export const signInMember = async (eventId: string, username: string) => {
+export const removeMember = async (eventId: string, username: string) => {
     if (!eventId) throw new Error("Event ID mustn't be empty.");
-    // TODO: this would be where we need to check passwords.
+
+    try {
+        // Set to null to delete record in Firebase realtime db.
+        // See: https://firebase.google.com/docs/database/web/read-and-write#delete_data.
+        const memberRef = ref(
+            getDatabase(),
+            `events/${eventId}/members/${username}`,
+        );
+        await set(memberRef, null);
+    } catch (err) {
+        throw new Error(`Failed to update the event's members. Reason: ${err}`);
+    }
+};
+
+export const deleteEvent = async (eventId: string, event: KonfluxEvent) => {
+    if (!eventId) throw new Error("Event ID mustn't be empty.");
+
+    const eventRef = ref(getDatabase(), `events/${eventId}`);
+
+    // TODO: wrap in transaction.
+    await remove(eventRef);
+    const updates: any = {};
+    Object.keys(event.members || {}).forEach((username) => {
+        const member = event.members[username];
+        if (member.scope === "global" && "id" in member) {
+            updates["users/" + (member as any).id + "/eventIds/" + eventId] =
+                null;
+        }
+    });
+
+    console.log(updates);
+    update(ref(getDatabase()), updates);
 };

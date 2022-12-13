@@ -1,13 +1,7 @@
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import styles from "./DualRangeSlider.module.scss";
 import { TIME_LABELS } from "components/timetable/timetable-utils";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
+import React, { useCallback, useEffect, useState } from "react";
+import styles from "./DualRangeSlider.module.scss";
 
 interface Props {
     defaultMinVal: number;
@@ -16,6 +10,11 @@ interface Props {
     minGap?: number;
     onChange: (minVal: number, maxVal: number) => void;
 }
+
+// These global variables are used to prevent infinite looping in issue #60.
+// See: https://github.com/Tymotex/Konflux/issues/60.
+let prevLeftVal: number | undefined;
+let prevRightVal: number | undefined;
 
 const DualRangeSlider: React.FC<Props> = ({
     defaultMinVal,
@@ -33,22 +32,31 @@ const DualRangeSlider: React.FC<Props> = ({
         if (rightSliderVal < leftSliderVal + minGap) {
             setLeftSliderVal(Math.max(leftSliderVal - minGap, 0));
         }
-    }, [leftSliderVal, rightSliderVal, setLeftSliderVal]);
+    }, [leftSliderVal, rightSliderVal, setLeftSliderVal, minGap]);
 
     const pushMaxIfPast = useCallback(() => {
         if (leftSliderVal > rightSliderVal - minGap) {
             setRightSliderVal(Math.min(rightSliderVal + minGap, totalVals));
         }
-    }, [leftSliderVal, rightSliderVal, setRightSliderVal]);
+    }, [leftSliderVal, rightSliderVal, setRightSliderVal, minGap, totalVals]);
 
     useEffect(() => {
         pushMinIfPast();
         pushMaxIfPast();
-    }, [pushMinIfPast, pushMaxIfPast]);
+    }, [leftSliderVal, rightSliderVal, pushMinIfPast, pushMaxIfPast]);
 
     useEffect(() => {
-        onChange(leftSliderVal, rightSliderVal);
-    }, [leftSliderVal, rightSliderVal]);
+        const inBounds = leftSliderVal + minGap < rightSliderVal;
+        if (
+            inBounds &&
+            !(prevLeftVal === leftSliderVal && prevRightVal === rightSliderVal)
+        ) {
+            prevLeftVal = leftSliderVal;
+            prevRightVal = rightSliderVal;
+
+            onChange(leftSliderVal, rightSliderVal);
+        }
+    }, [leftSliderVal, rightSliderVal, minGap, onChange]);
 
     return (
         <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>

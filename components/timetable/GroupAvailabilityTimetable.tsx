@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { EventContext } from "contexts/event-context";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React, {
     MouseEvent,
     MutableRefObject,
@@ -10,6 +10,7 @@ import React, {
     useMemo,
     useState,
 } from "react";
+import ReactTooltip from "react-tooltip";
 import { getHeaderHeight, syncHorizontalScroll } from "utils/timetable";
 import AvailabilityLegend from "./AvailabilityLegend";
 import styles from "./Timetable.module.scss";
@@ -149,6 +150,7 @@ const GroupAvailabilityTimetable: React.FC<Props> = ({ username, eventId }) => {
                 maxRows={48}
                 id="group-timetable"
                 onScroll={syncScroll}
+                updateStatus={(_) => {}}
             />
         </div>
     );

@@ -1,0 +1,92 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.modalContainer {
+    width: 100%;
+    max-width: $sm;
+    background: none;
+    padding: 0;
+
+    &.dark {
+        .content {
+            background: $grey-800;
+            color: $grey-100;
+
+            .closeButton {
+                @include color-icon($grey-100);
+            }
+        }
+    }
+
+    .content {
+        position: relative;
+        margin-left: $margin-sm;
+        margin-right: $margin-sm;
+        border-radius: 12px;
+        padding: $padding-2xl;
+        background: $grey-100;
+        color: $grey-800;
+
+        .header {
+            margin-bottom: $margin-sm;
+            text-align: center;
+
+            .closeButton {
+                @include reset-button;
+                position: absolute;
+                top: $spacing-sm;
+                right: $spacing-sm;
+                z-index: 100000000;
+
+                height: 30px;
+                width: 30px;
+                background: rgba($grey-400, 0.15);
+                border-radius: 100px;
+
+                transition: 100ms transform ease-in-out;
+
+                &:hover {
+                    transform: scale(1.1);
+                }
+
+                svg {
+                    position: absolute;
+
+                    top: 50%;
+                    left: 50%;
+
+                    height: 14px;
+                    width: 14px;
+
+                    transform: translateY(-50%) translateX(-50%);
+                }
+            }
+        }
+
+        &.dark {
+            .content {
+                background: $grey-800;
+                color: $grey-100;
+
+                .closeButton {
+                    @include color-icon($grey-100);
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .modalContainer {
+        width: 100%;
+        max-width: $xs;
+        padding: $padding-xs;
+
+        .content {
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            padding: $padding-lg;
+        }
+    }
+}

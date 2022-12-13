@@ -1,8 +1,8 @@
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React, { MouseEvent, useCallback, useState } from "react";
 import { spawnNotification } from "utils/notifications";
 import styles from "./AvailabilityLegend.module.scss";
-import PinIcon from "./pin.svg";
+import PinIcon from "assets/icons/pin.svg";
 
 interface Props {
     colour: string;

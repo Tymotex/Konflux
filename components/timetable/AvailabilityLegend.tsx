@@ -1,4 +1,4 @@
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React, { MouseEvent } from "react";
 import AvailabilityItem from "./AvailabilityItem";
 import styles from "./AvailabilityLegend.module.scss";

@@ -1,11 +1,13 @@
+import { Status } from "components/sync-status/SyncStatus";
 import { EventAction } from "contexts/event-context";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import dayjs from "dayjs";
 import { KonfluxEvent } from "models/event";
 import React, {
     Dispatch,
     useCallback,
     useEffect,
+    useMemo,
     useReducer,
     useState,
 } from "react";
@@ -13,6 +15,7 @@ import {
     FaChevronLeft as LeftIcon,
     FaChevronRight as RightIcon,
 } from "react-icons/fa";
+import { debounce } from "utils/debounce";
 import { spawnNotification } from "utils/notifications";
 import {
     Day,
@@ -31,6 +34,7 @@ interface Props {
     // Optionally override the initial display years and months.
     initYear?: string;
     initMonth?: string;
+    updateStatus: (status: Status) => void;
 }
 
 const DaySelector: React.FC<Props> = ({
@@ -39,6 +43,7 @@ const DaySelector: React.FC<Props> = ({
     initMonth = INITIAL_MONTH,
     eventState,
     eventDispatch,
+    updateStatus,
 }) => {
     // The days to be displayed on the calendar. By default, we start by showing
     // the days of the current month.
@@ -50,7 +55,7 @@ const DaySelector: React.FC<Props> = ({
 
     const isDarkMode = useDarkMode();
 
-    const dateToday = dayjs().format("YYYY-MM-DD");
+    const dateToday = useMemo(() => dayjs().format("YYYY-MM-DD"), []);
 
     /**
      * The user can select a range of days by pressing down on a starting day
@@ -62,6 +67,43 @@ const DaySelector: React.FC<Props> = ({
         NO_SELECTION,
     );
 
+    // Commits the selected days in the range into the `selectedDays` set.
+    const commitRangeSelection = useCallback(() => {
+        if (
+            !selectionState.isSelectingRange &&
+            !selectionState.isDeselectingRange
+        )
+            return;
+        if (updateStatus) updateStatus("pending");
+
+        selectionDispatch({
+            type: "COMMIT_SELECTION",
+            payload: {
+                availabilities: eventState.groupAvailabilities,
+                onCommit: (newAvailabilities) => {
+                    // NOTE: this causes 'Warning: Cannot update a component
+                    //       while rendering a different component.
+                    eventDispatch({
+                        type: "SET_AVAILABILITIES",
+                        payload: {
+                            eventId: eventId,
+                            groupAvailabilities: newAvailabilities,
+                            updateStatus: updateStatus,
+                        },
+                    });
+                },
+            },
+        });
+        selectionDispatch({ type: "RESET" });
+    }, [
+        eventId,
+        selectionState,
+        selectionDispatch,
+        updateStatus,
+        eventDispatch,
+        eventState,
+    ]);
+
     /**
      * When the user is selecting a range and lifts up their finger anywhere on
      * the <body>, add the selected ranges to the `selectedDays`.
@@ -70,38 +112,6 @@ const DaySelector: React.FC<Props> = ({
      * days from the `selectedDays` set instead of adding.
      */
     useEffect(() => {
-        // Commits the selected days in the range into the `selectedDays` set.
-        const commitRangeSelection = () => {
-            if (
-                !selectionState.isSelectingRange &&
-                !selectionState.isDeselectingRange
-            )
-                return;
-            try {
-                selectionDispatch({
-                    type: "COMMIT_SELECTION",
-                    payload: {
-                        availabilities: eventState.groupAvailabilities,
-                        onCommit: (newAvailabilities) => {
-                            eventDispatch({
-                                type: "SET_AVAILABILITIES",
-                                payload: {
-                                    eventId: eventId,
-                                    groupAvailabilities: newAvailabilities,
-                                },
-                            });
-                        },
-                    },
-                });
-            } catch (err) {
-                if (err instanceof Error)
-                    spawnNotification("error", err.message);
-                throw err;
-            } finally {
-                selectionDispatch({ type: "RESET" });
-            }
-        };
-
         // Cancel the range selection/deselection by doing nothing and resetting
         // the range-tracking state.
         const abortRangeSelection = () => {
@@ -124,7 +134,15 @@ const DaySelector: React.FC<Props> = ({
             body.removeEventListener("mouseup", commitRangeSelection);
             body.removeEventListener("mouseleave", abortRangeSelection);
         };
-    }, [eventDispatch, eventState, eventId, selectionState, selectionDispatch]);
+    }, [
+        eventDispatch,
+        eventState,
+        eventId,
+        selectionState,
+        selectionDispatch,
+        updateStatus,
+        commitRangeSelection,
+    ]);
 
     /**
      * When the user sets a different month in the calendar, rerender the day
@@ -168,6 +186,7 @@ const DaySelector: React.FC<Props> = ({
      */
     const toggleDaySelection = useCallback(
         (date: string) => {
+            updateStatus("pending");
             const newAvailabilities = { ...eventState.groupAvailabilities };
             if (date in newAvailabilities) {
                 delete newAvailabilities[date];
@@ -179,10 +198,11 @@ const DaySelector: React.FC<Props> = ({
                 payload: {
                     eventId: eventId,
                     groupAvailabilities: newAvailabilities,
+                    updateStatus: updateStatus,
                 },
             });
         },
-        [eventState, eventDispatch, eventId],
+        [eventState, eventDispatch, eventId, updateStatus],
     );
 
     /**
@@ -293,6 +313,8 @@ const DaySelector: React.FC<Props> = ({
             <ol className={styles.dayGrid}>
                 {days?.map((day) => {
                     const dateStr = day.date.format("YYYY-MM-DD");
+                    const isBeforeToday = dateStr < dateToday;
+
                     return (
                         <li
                             data-testid={`date-${dateStr}`}
@@ -310,7 +332,7 @@ const DaySelector: React.FC<Props> = ({
                                         ? styles.inDeselectionRange
                                         : styles.inSelectionRange
                                     : ""
-                            }`}
+                            } ${isBeforeToday ? styles.previousDate : ""}`}
                             key={dateStr}
                             onClick={() => toggleDaySelection(dateStr)}
                             onMouseLeave={(e) => handleMouseLeave(e, dateStr)}

@@ -1,0 +1,6 @@
+[data-reach-dialog-overlay],
+[data-reach-alert-dialog-overlay] {
+    background: hsl(0, 100%, 0%, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 10000;
+}

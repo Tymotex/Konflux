@@ -13,6 +13,7 @@
     width: 100vw;
     z-index: 100;
     top: 0;
+    z-index: 1000;
 
     transition: 0.2s background ease-in-out, 0.2s color ease-in-out;
     &.dark {
@@ -33,9 +34,6 @@
             align-items: center;
             margin: 0;
 
-            .brandIcon {
-                cursor: pointer;
-            }
             .brandName {
                 cursor: pointer;
             }

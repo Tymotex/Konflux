@@ -3,11 +3,12 @@
 
 .footer {
     margin-top: auto;
-    padding: $spacing-xs;
+    margin-bottom: 13px;
 
     .footerItems {
         @include reset-list;
 
+        margin-top: $spacing-lg;
         display: flex;
         flex-direction: row;
         column-gap: $spacing-xs;
@@ -25,6 +26,28 @@
 
         .divider {
             filter: brightness(250%);
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .footer {
+        .footerItems {
+            font-size: smaller !important;
+        }
+    }
+}
+
+@media screen and (max-width: $xs) {
+    .footer {
+        .footerItems {
+            flex-direction: column;
+            row-gap: $spacing-xs;
+            align-items: center;
+
+            .divider {
+                display: none;
+            }
         }
     }
 }

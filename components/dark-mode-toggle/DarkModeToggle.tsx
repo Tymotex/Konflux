@@ -1,8 +1,8 @@
 import React, { useContext, useMemo } from "react";
-import SunIcon from "./sun.svg";
-import MoonIcon from "./moon.svg";
+import SunIcon from "assets/icons/sun.svg";
+import MoonIcon from "assets/icons/moon.svg";
 import styles from "./DarkModeToggle.module.scss";
-import { ThemeContext } from "contexts/ThemeProvider";
+import { ThemeContext } from "contexts/theme-context";
 
 interface Props {}
 
