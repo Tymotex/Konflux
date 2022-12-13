@@ -1,0 +1,41 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+$avatar-size: 36px;
+
+.stack {
+    @include reset-list;
+
+    display: flex;
+    flex-direction: row;
+
+    .avatar {
+        height: $avatar-size;
+        width: $avatar-size;
+
+        border-radius: 50%;
+        border: 1.5px solid $grey-400;
+
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center center;
+
+        &:not(:last-child) {
+            margin-right: -$avatar-size / 4;
+        }
+
+        &.overflow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background-color: $grey-300;
+            color: $grey-700;
+
+            &.dark {
+                background-color: $grey-700;
+                color: $grey-50;
+            }
+        }
+    }
+}

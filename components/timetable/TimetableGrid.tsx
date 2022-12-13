@@ -1,6 +1,8 @@
 import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
+import { map } from "cypress/types/bluebird";
+import { has, keys } from "cypress/types/lodash";
 import dayjs from "dayjs";
 import React, {
     useCallback,
@@ -22,6 +24,7 @@ import {
     TIME_LABELS,
 } from "./timetable-utils";
 import styles from "./Timetable.module.scss";
+import AvailabilityTooltip from "./AvailabilityTooltip";
 
 interface Props {
     disabled?: boolean;
@@ -61,7 +64,9 @@ const TimetableGrid: React.FC<Props> = ({
     // State variables to display the availability tooltip.
     const [isMouseInGrid, setIsMouseInGrid] = useState(false);
     const [displayTimeStartIndex, setDisplayTime] = useState<number>(-1);
-    const [whoIsAvailable, setWhoIsAvailable] = useState<string[]>([]);
+    const [whoIsAvailable, setWhoIsAvailable] = useState<Set<string>>(
+        new Set<string>(),
+    );
 
     // A list of lists of dates and group availability at those dates.
     // Used to render contiguous dates together and in chronological order.
@@ -382,7 +387,10 @@ const TimetableGrid: React.FC<Props> = ({
                 gridColumnStart: columnIndex + (displayTimeLabels ? 2 : 1),
                 gridColumnEnd: "span 1",
                 borderTop:
-                    timeBlockIndex % 2 === 0 ? hourBorder : halfHourBorder,
+                    (timeBlockIndex + startRow) % 2 === 0 ||
+                    timeBlockIndex === 0
+                        ? hourBorder
+                        : halfHourBorder,
                 borderLeft: hourBorder,
                 borderBottom:
                     timeBlockIndex === endRow - startRow - 1 ? hourBorder : "",
@@ -401,6 +409,16 @@ const TimetableGrid: React.FC<Props> = ({
             return styles;
         },
         [isDarkMode, getTimeBlockColour, startRow, endRow],
+    );
+
+    const setTooltipDetails = useCallback(
+        (date: string, timeBlockIndex: number) => {
+            setWhoIsAvailable(
+                getPeopleAvailable(eventState, date, timeBlockIndex),
+            );
+            setDisplayTime(timeBlockIndex);
+        },
+        [eventState],
     );
 
     return (
@@ -438,6 +456,13 @@ const TimetableGrid: React.FC<Props> = ({
                                         style={{
                                             gridColumnStart: 1,
                                             gridRowStart: i + 2,
+                                            visibility:
+                                                (i + startRow) % 2 === 0 ||
+                                                i === 0 ||
+                                                i ===
+                                                    Math.abs(endRow - startRow)
+                                                    ? "visible"
+                                                    : "hidden",
                                         }}
                                     >
                                         <span className={styles.text}>
@@ -543,18 +568,12 @@ const TimetableGrid: React.FC<Props> = ({
                                                   displayTimeLabels,
                                                   "group",
                                               )}
-                                              onMouseEnter={(e) => {
-                                                  setWhoIsAvailable(
-                                                      getPeopleAvailable(
-                                                          eventState,
-                                                          date,
-                                                          timeBlockIndex,
-                                                      ),
-                                                  );
-                                                  setDisplayTime(
+                                              onMouseEnter={() =>
+                                                  setTooltipDetails(
+                                                      date,
                                                       timeBlockIndex,
-                                                  );
-                                              }}
+                                                  )
+                                              }
                                           />
                                       ))}
                             </React.Fragment>
@@ -563,27 +582,10 @@ const TimetableGrid: React.FC<Props> = ({
                 );
             })}
             {showGroupAvailability && isMouseInGrid && (
-                <ReactTooltip
-                    id="timetable-tooltip"
-                    effect="solid"
-                    type={isDarkMode ? "light" : "dark"}
-                >
-                    <div className={styles.tooltipContainer}>
-                        <h3>
-                            Available from{" "}
-                            {getDisplayTime(eventState, displayTimeStartIndex)}
-                        </h3>
-                        {whoIsAvailable?.length > 0 ? (
-                            <ul className={styles.peopleList}>
-                                {whoIsAvailable.map((person) => (
-                                    <li key={person}>{person}</li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <>No one 😥</>
-                        )}
-                    </div>
-                </ReactTooltip>
+                <AvailabilityTooltip
+                    peopleAvailable={whoIsAvailable}
+                    timeIndex={displayTimeStartIndex}
+                />
             )}
         </div>
     );

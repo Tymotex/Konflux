@@ -1,4 +1,5 @@
 @import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
 
 .callout {
     border-left: 8px solid $primary-400;
@@ -22,7 +23,12 @@
         min-width: $font-size-sm;
         max-height: $font-size-sm;
         max-width: $font-size-sm;
-        fill: $primary-600;
+        @include color-icon($primary-600);
+    }
+
+    a {
+        color: $primary-500;
+        cursor: pointer;
     }
 
     &.dark {
@@ -30,7 +36,7 @@
         color: $grey-200;
 
         .icon {
-            fill: $blue-200;
+            @include color-icon($blue-200);
         }
     }
 }

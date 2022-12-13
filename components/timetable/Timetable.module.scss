@@ -65,13 +65,14 @@ $default-bg-colour-dark: $grey-700;
                 right: 10px;
             }
 
-            &:nth-child(2n) {
-                font-size: small;
-                .text {
-                    color: $grey-400;
-                    font-weight: lighter;
-                }
-            }
+            // &:nth-child(2n) {
+            //     font-size: small;
+
+            //     .text {
+            //         color: $grey-400;
+            //         font-weight: lighter;
+            //     }
+            // }
         }
 
         .interval {
@@ -162,15 +163,6 @@ $default-bg-colour-dark: $grey-700;
                 }
             }
         }
-    }
-}
-
-.tooltipContainer {
-    font-size: $font-size-sm;
-
-    .peopleList {
-        padding-left: $spacing-md;
-        font-size: 16px;
     }
 }
 

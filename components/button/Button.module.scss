@@ -4,19 +4,72 @@
 .btn {
     @include reset-button;
 
-    background: $primary-500;
-    padding: $padding-sm $padding-lg;
     border-radius: 100px;
     color: $grey-100;
     font-weight: bold;
     font-family: "Montserrat", sans-serif;
+    box-sizing: border-box;
     cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    column-gap: $spacing-xs;
 
     transition: 0.2s all ease-in-out;
 
     &:hover {
         transform: scale(1.05);
-        color: $primary-700;
-        background: $primary-200;
+    }
+
+    .icon {
+        min-width: $font-size-sm;
+        min-height: $font-size-sm;
+        max-width: $font-size-sm;
+        max-height: $font-size-sm;
+        @include color-icon($grey-600);
+    }
+
+    &.primary {
+        background: $primary-500;
+
+        &:hover {
+            color: $primary-700;
+            background: $primary-200 !important;
+        }
+    }
+
+    &.secondary {
+        background: rgba($color: $grey-300, $alpha: 0.1);
+        border: 2px solid $primary-400;
+
+        padding: calc($padding-sm - 2px) $padding-lg calc($padding-sm - 2px)
+            $padding-lg;
+
+        color: $grey-600;
+
+        &:hover {
+            background: rgba($color: $grey-300, $alpha: 0.2);
+        }
+    }
+
+    // Sizing.
+    &.sm {
+        padding: $padding-xs $padding-md;
+        font-size: small;
+    }
+
+    &.md {
+        padding: $padding-sm $padding-lg;
+    }
+
+    // Dark mode styles.
+    &.dark {
+        &.secondary {
+            color: $grey-200;
+        }
+
+        .icon {
+            @include color-icon($grey-300);
+        }
     }
 }

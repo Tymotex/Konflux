@@ -1,0 +1,49 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.button {
+    @include reset-button;
+
+    border-radius: 2px;
+    background: white;
+    color: $grey-600;
+    padding: 0 $padding-lg 0 0;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+        rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    column-gap: $spacing-sm;
+
+    width: 100%;
+    max-width: fit-content;
+
+    transition: 0.2s all ease-in-out;
+
+    &:hover {
+        transform: scale(1.02);
+    }
+
+    .googleIcon {
+        background: white;
+        min-height: 40px;
+        min-width: 40px;
+        padding: $padding-xs;
+        margin: 1px;
+        border-radius: 1px;
+    }
+
+    .text {
+        max-height: 40px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    &.dark {
+        background: #4c8bf5;
+        color: $grey-50;
+    }
+}

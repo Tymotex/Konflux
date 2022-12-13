@@ -19,8 +19,6 @@ const TimeBlock: React.FC<Props> = ({
     onMouseUp,
     onClick,
 }) => {
-    const [hovered, setHovered] = useState(false);
-
     return (
         <>
             <div
@@ -30,11 +28,9 @@ const TimeBlock: React.FC<Props> = ({
                 data-for="timetable-tooltip"
                 onMouseEnter={(e) => {
                     if (onMouseEnter) onMouseEnter(e);
-                    setHovered(true);
                 }}
                 onMouseLeave={(e) => {
                     if (onMouseLeave) onMouseLeave(e);
-                    setHovered(false);
                 }}
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}

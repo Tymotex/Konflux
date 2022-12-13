@@ -1,0 +1,35 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.tooltipWrapper {
+    @include apply-tooltip-position;
+
+    .tooltipContainer {
+        font-size: $font-size-sm;
+
+        .peopleList {
+            @include reset-list;
+
+            list-style: none;
+
+            .item {
+                display: flex;
+                align-items: center;
+                column-gap: $spacing-xs;
+
+                .icon {
+                    height: $font-size-sm;
+                    width: $font-size-sm;
+
+                    @include color-icon($grey-300);
+                }
+            }
+        }
+
+        &.dark {
+            .peopleList .item .icon {
+                @include color-icon($grey-800);
+            }
+        }
+    }
+}

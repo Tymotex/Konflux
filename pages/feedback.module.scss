@@ -1,0 +1,7 @@
+@import "../styles/variables.scss";
+@import "../styles/mixins.scss";
+
+.header {
+    text-align: center;
+    margin-top: $margin-2xl;
+}

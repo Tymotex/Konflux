@@ -1,4 +1,4 @@
-import { useDarkMode } from "contexts/ThemeProvider";
+import { useDarkMode } from "hooks/theme";
 import React from "react";
 import { ToastContainer } from "react-toastify";
 
@@ -14,6 +14,8 @@ const NotificationContainer: React.FC<Props> = () => {
                 position="top-center"
                 hideProgressBar
                 pauseOnFocusLoss={false}
+                style={{ zIndex: 1000000 }}
+                autoClose={7000}
             />
         </div>
     );

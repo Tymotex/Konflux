@@ -1,0 +1,12 @@
+@import "../../styles/variables.scss";
+
+.leaveEventModal {
+    text-align: center;
+
+    .buttonGroup {
+        display: flex;
+        justify-content: center;
+        column-gap: $spacing-lg;
+        margin-top: $margin-lg;
+    }
+}

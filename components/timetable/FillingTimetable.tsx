@@ -1,6 +1,8 @@
 import DualRangeSlider from "components/form/DualRangeSlider";
 import { Status } from "components/sync-status/SyncStatus";
 import { EventContext } from "contexts/event-context";
+import { LocalAuthContext } from "contexts/local-auth-context";
+import { useGlobalOrLocalEventMember } from "hooks/event";
 import { useBreakpointTrigger } from "hooks/window";
 import React, { useCallback, useContext, useLayoutEffect, useRef } from "react";
 import styleVariables from "styles/breakpoints.module.scss";
@@ -9,7 +11,6 @@ import styles from "./Timetable.module.scss";
 import TimetableGrid from "./TimetableGrid";
 
 interface Props {
-    username: string;
     eventId: string;
     showGroupAvailability?: boolean;
     updateStatus: (status: Status) => void;
@@ -17,12 +18,13 @@ interface Props {
 
 const FillingTimetable: React.FC<Props> = ({
     showGroupAvailability = false,
-    username,
     eventId,
     updateStatus,
 }) => {
     const { eventState, eventDispatch } = useContext(EventContext);
     const widthLessThanXs = useBreakpointTrigger(parseInt(styleVariables.xs));
+    const { localAuthState } = useContext(LocalAuthContext);
+    const eventMember = useGlobalOrLocalEventMember(localAuthState);
 
     // Synchronise the height of this timetable's header with the other
     // timetable's header.
@@ -32,20 +34,24 @@ const FillingTimetable: React.FC<Props> = ({
             if (!elem) return;
             elem.style.height = getHeaderHeight();
         }
-    }, [widthLessThanXs]);
+    }, [widthLessThanXs, eventMember]);
 
     const handleTimeRangeChange = useCallback(
         (minVal: number, maxVal: number) => {
-            updateStatus("pending");
-            eventDispatch({
-                type: "SET_TIME_RANGE",
-                payload: {
-                    eventId: eventId,
-                    earliestTimeIndex: minVal,
-                    latestTimeIndex: maxVal,
-                    updateStatus,
-                },
-            });
+            // Need to check for eventID to solve issue #51.
+            // See: https://github.com/Tymotex/Konflux/issues/51
+            if (eventId) {
+                updateStatus("pending");
+                eventDispatch({
+                    type: "SET_TIME_RANGE",
+                    payload: {
+                        eventId: eventId,
+                        earliestTimeIndex: minVal,
+                        latestTimeIndex: maxVal,
+                        updateStatus,
+                    },
+                });
+            }
         },
         [eventDispatch, eventId, updateStatus],
     );
@@ -78,19 +84,21 @@ const FillingTimetable: React.FC<Props> = ({
                     onChange={handleTimeRangeChange}
                 />
             </div>
-            <TimetableGrid
-                username={username}
-                eventId={eventId}
-                disabled={!username && !showGroupAvailability}
-                showGroupAvailability={showGroupAvailability}
-                gridClassName="individual"
-                startRow={eventState.earliest}
-                endRow={eventState.latest}
-                maxRows={48}
-                id="individual-timetable"
-                onScroll={syncScroll}
-                updateStatus={updateStatus}
-            />
+
+            {eventMember && (
+                <TimetableGrid
+                    username={eventMember.username}
+                    eventId={eventId}
+                    showGroupAvailability={showGroupAvailability}
+                    gridClassName="individual"
+                    startRow={eventState.earliest}
+                    endRow={eventState.latest}
+                    maxRows={48}
+                    id="individual-timetable"
+                    onScroll={syncScroll}
+                    updateStatus={updateStatus}
+                />
+            )}
         </div>
     );
 };

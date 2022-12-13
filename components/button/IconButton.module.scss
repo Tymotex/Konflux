@@ -1,0 +1,35 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.btn {
+    @include reset-button;
+    background: $grey-200;
+    width: $font-size-xl;
+    height: $font-size-xl;
+    padding: $padding-sm;
+    border-radius: 50%;
+    transition: all 100ms ease-in-out;
+    position: relative;
+
+    &:hover {
+        transform: scale(1.025);
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px;
+    }
+
+    .icon {
+        width: $font-size-sm;
+        height: $font-size-sm;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    &.dark {
+        background: $grey-700;
+
+        .icon {
+            @include color-icon($grey-100);
+        }
+    }
+}

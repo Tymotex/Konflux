@@ -23,7 +23,7 @@
             padding: $spacing-md;
             border: 1px solid rgba(128, 128, 128, 0.3);
             border-radius: 12px;
-            max-width: 220px;
+            max-width: 300px;
             width: 100%;
             background: white;
 
@@ -53,10 +53,21 @@
             svg {
                 height: $font-size-sm;
                 width: $font-size-sm;
-                fill: $primary-500;
+                @include color-icon($primary-500);
 
                 margin-left: auto;
                 cursor: pointer;
+            }
+        }
+    }
+
+    .combobox {
+        .textField {
+            &.matchesItem {
+                border: 2px solid $green-300;
+            }
+            &:not(.matchesItem) {
+                border: 2px solid $primary-500;
             }
         }
     }
@@ -89,10 +100,26 @@
             }
         }
 
+        &.dark {
+            color: $grey-100;
+        }
+
         .asterisk {
             height: $font-size-sm;
             width: $font-size-sm;
-            fill: $grey-400;
+            @include color-icon($grey-400);
+        }
+    }
+}
+
+@media screen and (max-width: $sm) {
+    .inputContainer {
+        max-width: 220px;
+        .textFieldContainer {
+            max-width: 220px;
+            .textField {
+                max-width: 220px;
+            }
         }
     }
 }

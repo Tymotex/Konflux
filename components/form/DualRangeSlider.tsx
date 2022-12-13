@@ -1,14 +1,7 @@
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import styles from "./DualRangeSlider.module.scss";
 import { TIME_LABELS } from "components/timetable/timetable-utils";
-import { useDarkMode } from "contexts/ThemeProvider";
-import { spawnNotification } from "utils/notifications";
+import { useDarkMode } from "hooks/theme";
+import React, { useCallback, useEffect, useState } from "react";
+import styles from "./DualRangeSlider.module.scss";
 
 interface Props {
     defaultMinVal: number;
@@ -17,6 +10,11 @@ interface Props {
     minGap?: number;
     onChange: (minVal: number, maxVal: number) => void;
 }
+
+// These global variables are used to prevent infinite looping in issue #60.
+// See: https://github.com/Tymotex/Konflux/issues/60.
+let prevLeftVal: number | undefined;
+let prevRightVal: number | undefined;
 
 const DualRangeSlider: React.FC<Props> = ({
     defaultMinVal,
@@ -48,8 +46,16 @@ const DualRangeSlider: React.FC<Props> = ({
     }, [leftSliderVal, rightSliderVal, pushMinIfPast, pushMaxIfPast]);
 
     useEffect(() => {
-        if (leftSliderVal + minGap < rightSliderVal)
+        const inBounds = leftSliderVal + minGap < rightSliderVal;
+        if (
+            inBounds &&
+            !(prevLeftVal === leftSliderVal && prevRightVal === rightSliderVal)
+        ) {
+            prevLeftVal = leftSliderVal;
+            prevRightVal = rightSliderVal;
+
             onChange(leftSliderVal, rightSliderVal);
+        }
     }, [leftSliderVal, rightSliderVal, minGap, onChange]);
 
     return (
