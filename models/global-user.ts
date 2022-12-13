@@ -28,7 +28,8 @@ export const getGlobalUserEvents = async (
     const userRef = ref(getDatabase(), `users/${userId}`);
     const snapshot = await get(userRef);
     if (!snapshot.exists()) {
-        throw new Error(`The user with ID '${userId}' does not exist`);
+        // throw new Error(`The user with ID '${userId}' does not exist`);
+        return [];
     }
 
     const user = snapshot.val() as GlobalUser;

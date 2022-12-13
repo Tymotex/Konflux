@@ -93,6 +93,12 @@ $max-card-width: 36rem;
             }
         }
 
+        .userList {
+            position: absolute;
+            bottom: $padding-xl;
+            right: $padding-xl;
+        }
+
         .buttonGroup {
             display: flex;
             flex-direction: row;

@@ -5,6 +5,7 @@ import MemberIcon from "assets/icons/member.svg";
 import OpenInNewTabIcon from "assets/icons/open-in-new.svg";
 import StarIcon from "assets/icons/star.svg";
 import TimeIcon from "assets/icons/time.svg";
+import AvatarStack from "components/avatar/AvatarStack";
 import { Button } from "components/button";
 import { BASE_URL } from "constants/url";
 import { EventDataProvider } from "contexts/EventDataProvider";
@@ -85,6 +86,9 @@ const EventCard: React.FC<Props> = ({ event }) => {
                     </span>
                 </li>
             </ul>
+            <div className={styles.userList}>
+                <AvatarStack users={event.members} />
+            </div>
             <div className={styles.buttonGroup}>
                 <Button
                     colour="secondary"

@@ -48,6 +48,10 @@ export type AvailabilityInfo = {
     placeholder?: true;
 };
 
+export type EventMembers = {
+    [username: string]: Omit<EventMember, "username">;
+};
+
 /**
  * Data model representing an event's details and members' availabilities.
  */
@@ -66,9 +70,7 @@ export interface KonfluxEvent {
         [date: string]: AvailabilityInfo;
     };
     /** The people in this event. */
-    members: {
-        [username: string]: Omit<EventMember, "username">;
-    };
+    members: EventMembers;
 }
 
 // An empty event object intended to be used for initialising state variables
