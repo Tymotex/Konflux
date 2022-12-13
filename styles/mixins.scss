@@ -43,3 +43,8 @@
         fill: $color !important;
     }
 }
+
+@mixin apply-tooltip-position {
+    position: absolute;
+    z-index: 1000000000;
+}

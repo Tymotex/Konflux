@@ -1,6 +1,7 @@
+import { Tooltip } from "@reach/tooltip";
 import { useDarkMode } from "hooks/theme";
 import { EventMembers } from "models/event";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { AVATAR_PLACEHOLDER_URL } from "utils/global-auth";
 import styles from "./AvatarStack.module.scss";
 
@@ -12,36 +13,51 @@ const MAX_AVATARS = 3;
 
 const AvatarStack: React.FC<Props> = ({ users }) => {
     const isDarkMode = useDarkMode();
+    const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
 
     const numMembers = useMemo(() => Object.keys(users || {})?.length, [users]);
-    const profilePicUrls = useMemo(() => {
-        const allProfilePics = Object.values(users || {}).map(
-            (userInfo) => userInfo.profilePicUrl || AVATAR_PLACEHOLDER_URL,
+    const avatarList = useMemo(() => {
+        const usernamesAndProfilePics = Object.keys(users || {})?.map(
+            (username) => [
+                username,
+                users[username].profilePicUrl || AVATAR_PLACEHOLDER_URL,
+            ],
         );
-        return [...allProfilePics.slice(0, MAX_AVATARS)];
+        return [...usernamesAndProfilePics.slice(0, MAX_AVATARS)];
     }, [users]);
 
     return (
-        <ul className={styles.stack}>
-            {profilePicUrls?.map((picUrl) => (
-                <li
-                    key={picUrl}
-                    className={styles.avatar}
-                    style={{ backgroundImage: `url(${picUrl})` }}
-                ></li>
-            ))}
-            {numMembers > MAX_AVATARS && (
-                <li
-                    className={`${styles.avatar} ${styles.overflow} ${
-                        isDarkMode ? styles.dark : ""
-                    }`}
-                >
-                    <span className={styles.numMembers}>
-                        +{numMembers - MAX_AVATARS}
-                    </span>
-                </li>
-            )}
-        </ul>
+        <>
+            <ul className={styles.stack}>
+                {avatarList?.map(([username, picUrl]) => (
+                    <Tooltip label={username} key={username}>
+                        <li
+                            className={styles.avatar}
+                            style={{ backgroundImage: `url(${picUrl})` }}
+                            data-tip
+                            data-for="avatar-tooltip"
+                            onMouseEnter={() => setIsHoveringAvatar(true)}
+                            onMouseLeave={() => setIsHoveringAvatar(false)}
+                        ></li>
+                    </Tooltip>
+                ))}
+                {numMembers > MAX_AVATARS && (
+                    <li
+                        className={`${styles.avatar} ${styles.overflow} ${
+                            isDarkMode ? styles.dark : ""
+                        }`}
+                        data-tip
+                        data-for="avatar-tooltip"
+                        onMouseEnter={() => setIsHoveringAvatar(true)}
+                        onMouseLeave={() => setIsHoveringAvatar(false)}
+                    >
+                        <span className={styles.numMembers}>
+                            +{numMembers - MAX_AVATARS}
+                        </span>
+                    </li>
+                )}
+            </ul>
+        </>
     );
 };
 

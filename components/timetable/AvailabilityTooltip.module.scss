@@ -2,8 +2,7 @@
 @import "../../styles/mixins.scss";
 
 .tooltipWrapper {
-    position: absolute;
-    z-index: 1000000000;
+    @include apply-tooltip-position;
 
     .tooltipContainer {
         font-size: $font-size-sm;
